@@ -1,8 +1,21 @@
 import React, { FC, useState } from "react";
 import { BsPerson } from "react-icons/bs";
+import { IoFilterOutline, IoJournal } from "react-icons/io5";
 import { IoChevronDown } from "react-icons/io5";
 
-import { Box, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  MenuItem,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import Search from "../components/dashboard/Search";
 import {
   Area,
@@ -13,6 +26,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { GoFoldDown } from "react-icons/go";
 
 const dataForSquareChart = [
   { name: "A1", value: 25 },
@@ -215,7 +229,7 @@ const Dashboard: React.FC = () => {
         sx={{
           width: "100%",
           display: "flex",
-          gap: "1rem",
+          gap: "1.5rem",
         }}
       >
         {/* Right side. Charts*/}
@@ -228,7 +242,13 @@ const Dashboard: React.FC = () => {
             gap: "1rem",
           }}
         >
-          <Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+            }}
+          >
             <Typography
               component="h2"
               sx={{
@@ -308,12 +328,227 @@ const Dashboard: React.FC = () => {
         <Box
           sx={{
             width: "50%",
-            height: "100px",
             display: "flex",
-            flexDirection: "column",
             gap: "1rem",
           }}
-        ></Box>
+        >
+          {/* Services Table*/}
+          <Box
+            sx={{
+              width: "50%",
+              height: "100%",
+            }}
+          >
+            <Stack direction="row" alignItems="center" gap="1rem">
+              <Typography
+                component="h3"
+                sx={{
+                  fontSize: "1.5rem",
+                }}
+              >
+                سرویس ها
+              </Typography>
+
+              <Box
+                sx={{
+                  position: "relative",
+                }}
+              >
+                <Select
+                  IconComponent={IoChevronDown}
+                  label="فیلتر سرویس ها"
+                  value=""
+                  sx={{
+                    minWidth: "180px",
+                    padding: ".5rem",
+                    border: "1px solid transparent",
+                    borderBottomColor: "gray",
+                    paddingBottom: "0",
+                    ".MuiSelect-icon": {
+                      width: "25px",
+                      height: "25px",
+                    },
+                    ".MuiOutlinedInput-notchedOutline": { border: 0 },
+                    "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                      {
+                        border: 0,
+                      },
+                    ".css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input":
+                      {
+                        padding: "0",
+                      },
+                  }}
+                >
+                  <MenuItem value="weekly">هفتگی</MenuItem>
+                  <MenuItem value="monthly">ماهانه</MenuItem>
+                  <MenuItem value="year">سالانه</MenuItem>
+                </Select>
+                <IoFilterOutline
+                  style={{
+                    position: "absolute",
+                    top: "40%",
+                    left: ".2rem",
+                    transform: "translateY(-50%)",
+                    width: "25px",
+                    height: "25px",
+                    color: "gray",
+                  }}
+                />
+                <Typography
+                  sx={{
+                    position: "absolute",
+                    color: "#707070aa",
+                    left: "50%",
+                    top: "50%",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
+                  فیلتر بر اساس
+                </Typography>
+              </Box>
+            </Stack>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: ".2rem",
+              }}
+            >
+              {/* Table Header*/}
+              <Box
+                sx={{
+                  marginTop: ".5rem",
+                  width: "100%",
+                  padding: ".8rem .5rem",
+                  background: "#E9F1F4",
+                  justifyContent: "space-between",
+                  display: "flex",
+                  borderRadius: ".5rem",
+                }}
+              >
+                <Typography>تعداد سشن‌ها</Typography>
+                <Typography
+                  sx={{
+                    marginLeft: "4rem",
+                  }}
+                >
+                  نام وبسایت
+                </Typography>
+              </Box>
+              {/* Table Body */}
+              <Box
+                sx={{
+                  width: "100%",
+                  padding: ".8rem .5rem",
+                  justifyContent: "space-between",
+                  display: "flex",
+                  borderRadius: ".5rem",
+                  border: "1px solid #E3E3E3",
+                }}
+              >
+                <Typography>5254</Typography>
+                <Typography
+                  sx={{
+                    direction: "ltr",
+                    display: "flex",
+                    gap: "2rem",
+                  }}
+                >
+                  <span>1.</span>
+                  spotify.com
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Addresses Table */}
+          <Box
+            sx={{
+              width: "50%",
+              height: "100%",
+            }}
+          >
+            <Typography
+              component="h3"
+              sx={{
+                fontSize: "1.5rem",
+              }}
+            >
+              آدرس‌های IP
+            </Typography>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: ".2rem",
+              }}
+            >
+              {/* Table Header*/}
+              <Box
+                sx={{
+                  marginTop: ".5rem",
+                  width: "100%",
+                  padding: ".8rem .5rem",
+                  background: "#E9F1F4",
+                  justifyContent: "space-between",
+                  display: "flex",
+                  borderRadius: ".5rem",
+                }}
+              >
+                <Typography>تعداد سشن‌ها</Typography>
+                <Typography
+                  sx={{
+                    marginLeft: "4rem",
+                  }}
+                >
+                  آدرس IP
+                </Typography>
+              </Box>
+
+              {/* Table Body */}
+              <Box
+                sx={{
+                  minHeight: "66vh",
+                  border: "1px solid #E3E3E3",
+                  borderRadius: ".5rem",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: "100%",
+                    padding: ".8rem .5rem",
+                    justifyContent: "space-between",
+                    display: "flex",
+                  }}
+                >
+                  <Typography>5254</Typography>
+                  <Typography
+                    sx={{
+                      direction: "ltr",
+                      display: "flex",
+                      gap: "2rem",
+                    }}
+                  >
+                    <span>1.</span>
+                    198.192.1.1
+                  </Typography>
+                </Box>
+              </Box>
+              <Typography
+                sx={{
+                  textAlign: "left",
+                  color: "gray",
+                }}
+              >
+                Powered By{" "}
+                <span style={{ color: "black", fontWeight: "bold" }}>
+                  Rayka
+                </span>
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
