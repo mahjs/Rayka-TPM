@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { GoSearch } from "react-icons/go";
+import { BsPerson } from "react-icons/bs";
+import { IoChevronDown } from "react-icons/io5";
+
+import { Box, Stack, Typography } from "@mui/material";
+import Search from "../components/dashboard/Search";
 
 const Dashboard: React.FC = () => {
   // State to hold the search input
@@ -23,26 +27,123 @@ const Dashboard: React.FC = () => {
     handleSearch();
   };
   return (
-    <main className="flex flex-row px-6 py-1 h-10">
-      <div className="flex flex-col px-3"></div>
-      <div className="flex flex-col px-3 flex-grow">
-        <form
-          onSubmit={handleSubmit}
-          className="flex items-center border rounded overflow-hidden"
+    <Box
+      component="main"
+      sx={{
+        padding: "2rem 1.5rem",
+      }}
+    >
+      <Box
+        component="header"
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+          }}
         >
-          <input
-            type="search"
-            placeholder="جست و جو سرویس یا IP"
-            value={searchInput}
-            onChange={handleChange}
-            className="pl-4 pr-3 py-2 flex-grow"
+          <Stack
+            sx={{
+              textAlign: "right",
+            }}
+          >
+            <Typography fontWeight="bold" fontSize="1.5rem">
+              TPM
+            </Typography>
+            <Typography fontWeight="300">Dashboard</Typography>
+          </Stack>
+
+          <Box
+            sx={{
+              background: "#000",
+              height: "60px",
+              width: "1px",
+            }}
           />
-          <button type="submit" className="p-2">
-            <GoSearch />
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: ".2rem",
+            }}
+          >
+            <button>
+              <IoChevronDown color="gray" />
+            </button>
+            <button
+              style={{
+                width: "50px",
+                height: "50px",
+                background: "#E6E6E6",
+                borderRadius: "50%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <BsPerson
+                style={{
+                  width: "23px",
+                  height: "23px",
+                  color: "gray",
+                }}
+              />
+            </button>
+            <Typography
+              sx={{
+                paddingRight: ".5rem",
+              }}
+            >
+              {"احمد مهرانفر"}
+            </Typography>
+          </Box>
+        </Box>
+        <Search
+          value={searchInput}
+          onChange={handleChange}
+          handleSubmit={handleSubmit}
+        />
+
+        <Box
+          sx={{
+            display: "flex",
+            height: "40px",
+            background: "#0F6CBD",
+            overflow: "hidden",
+            alignItems: "center",
+            padding: ".5rem",
+            gap: ".5rem",
+            borderRadius: ".5rem",
+          }}
+        >
+          <button>
+            <IoChevronDown color="#fff" />
           </button>
-        </form>
-      </div>
-    </main>
+          <Box
+            sx={{
+              height: "200%",
+              background: "#fff",
+              width: "2px",
+            }}
+          />
+          <Typography
+            sx={{
+              color: "#fff",
+              paddingRight: ".5rem",
+            }}
+          >
+            دریافت خروجی
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
