@@ -1,19 +1,14 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { BsPerson } from "react-icons/bs";
-import { IoFilterOutline, IoJournal } from "react-icons/io5";
+import { IoFilterOutline } from "react-icons/io5";
 import { IoChevronDown } from "react-icons/io5";
 
 import {
   Box,
+  Divider,
   MenuItem,
   Select,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
 } from "@mui/material";
 import Search from "../components/dashboard/Search";
@@ -26,7 +21,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { GoFoldDown } from "react-icons/go";
 
 const dataForSquareChart = [
   { name: "A1", value: 25 },
@@ -61,28 +55,28 @@ const dataForSquareChart = [
   { name: "d7", value: 71 },
 ];
 
-const dataForLineChart = [
+const initialDataForLineChart = [
   {
     name: "بهار",
-    value: 100,
+    value: 1,
   },
   {
     name: "تابستان",
-    value: 200,
+    value: 1,
   },
   {
     name: "پاییز",
-    value: 1000,
+    value: 1,
   },
   {
     name: "زمستان",
-    value: 150,
+    value: 1,
   },
 ];
 
 const Dashboard: React.FC = () => {
   // State to hold the search input
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState<string>("");
 
   // Function to handle the search action
   const handleSearch = () => {
@@ -102,7 +96,32 @@ const Dashboard: React.FC = () => {
     handleSearch();
   };
 
+  // State for SquareCharts
   const [dataForTreeChar, setDataForTreeChart] = useState(dataForSquareChart);
+
+  // State for Area Chart
+  const [dataForAreaChart, setDataForAreaChart] = useState(
+    initialDataForLineChart
+  );
+
+  // State for Selecting a service
+  const [selectedServiceIndex, setSelectedServiceIndex] = useState<
+    number | null
+  >(null);
+
+  // State for Downloading Export file
+  const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
+    null
+  );
+  const [formatToDownload, setFormatToDownload] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (openDownloadMenu === null) return;
+    setOpenDownLoadMenu(false);
+    setFormatToDownload(null);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formatToDownload]);
 
   return (
     <Box
@@ -110,224 +129,340 @@ const Dashboard: React.FC = () => {
       sx={{
         padding: "2rem 1.5rem",
         display: "flex",
-        flexDirection: "column",
+        height: "100vh",
         gap: "1rem",
       }}
     >
+      {/* Right side. Charts*/}
       <Box
-        component="header"
         sx={{
+          width: "50vw",
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          flexDirection: "column",
+          gap: "2rem",
         }}
       >
         <Box
           sx={{
             display: "flex",
+            justifyContent: "space-between",
             alignItems: "center",
-            gap: "1rem",
           }}
         >
-          <Stack
-            sx={{
-              textAlign: "right",
-            }}
-          >
-            <Typography fontWeight="bold" fontSize="1.5rem">
-              TPM
-            </Typography>
-            <Typography fontWeight="300">Dashboard</Typography>
-          </Stack>
-
-          <Box
-            sx={{
-              background: "#000",
-              height: "60px",
-              width: "1px",
-            }}
-          />
-
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: ".2rem",
-            }}
-          >
-            <button>
-              <IoChevronDown color="gray" />
-            </button>
-            <button
-              style={{
-                width: "50px",
-                height: "50px",
-                background: "#E6E6E6",
-                borderRadius: "50%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <BsPerson
-                style={{
-                  width: "23px",
-                  height: "23px",
-                  color: "gray",
-                }}
-              />
-            </button>
-            <Typography
-              sx={{
-                paddingRight: ".5rem",
-              }}
-            >
-              {"احمد مهرانفر"}
-            </Typography>
-          </Box>
-        </Box>
-        <Search
-          value={searchInput}
-          onChange={handleChange}
-          handleSubmit={handleSubmit}
-        />
-
-        <Box
-          sx={{
-            display: "flex",
-            height: "40px",
-            background: "#0F6CBD",
-            overflow: "hidden",
-            alignItems: "center",
-            padding: ".5rem",
-            gap: ".5rem",
-            borderRadius: ".5rem",
-          }}
-        >
-          <button>
-            <IoChevronDown color="#fff" />
-          </button>
-          <Box
-            sx={{
-              height: "200%",
-              background: "#fff",
-              width: "2px",
-            }}
-          />
-          <Typography
-            sx={{
-              color: "#fff",
-              paddingRight: ".5rem",
-            }}
-          >
-            دریافت خروجی
-          </Typography>
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          width: "100%",
-          display: "flex",
-          gap: "1.5rem",
-        }}
-      >
-        {/* Right side. Charts*/}
-        <Box
-          sx={{
-            width: "50%",
-            height: "100px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
               gap: "1rem",
             }}
           >
-            <Typography
-              component="h2"
+            <Stack
               sx={{
-                fontSize: "1.5rem",
+                textAlign: "right",
               }}
             >
-              سهم سرویس ها
-            </Typography>
+              <Typography fontWeight="bold" fontSize="1.5rem">
+                TPM
+              </Typography>
+              <Typography fontWeight="300">Dashboard</Typography>
+            </Stack>
+
             <Box
               sx={{
-                border: "1px solid #707070",
-                padding: ".2rem",
+                background: "#000",
+                height: "60px",
+                width: "1px",
               }}
-            >
-              <ResponsiveContainer width="100%" height={250}>
-                <Treemap
-                  width={200}
-                  height={300}
-                  data={dataForTreeChar}
-                  aspectRatio={4 / 3}
-                  dataKey="value"
-                  content={<CustomizedContent />}
-                />
-              </ResponsiveContainer>
-            </Box>
-          </Box>
-          <Box>
-            <Typography
-              component="h3"
-              sx={{
-                fontSize: "1.5rem",
-              }}
-            >
-              نمودار ترافیک
-            </Typography>
+            />
+
             <Box
-              width="100%"
-              height={300}
               sx={{
-                direction: "ltr",
+                display: "flex",
+                alignItems: "center",
+                gap: ".2rem",
               }}
             >
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  width={500}
-                  height={200}
-                  data={dataForLineChart}
-                  margin={{
-                    top: 10,
-                    right: 30,
-                    left: 0,
-                    bottom: 0,
+              <button>
+                <IoChevronDown color="gray" />
+              </button>
+              <button
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  background: "#E6E6E6",
+                  borderRadius: "50%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <BsPerson
+                  style={{
+                    width: "23px",
+                    height: "23px",
+                    color: "gray",
                   }}
-                >
-                  <Tooltip content={<CustomTooltip />} />
-                  <YAxis
-                    // tickMargin={50}
-                    domain={[20, 20000]}
-                    ticks={[1, 10, 50, 200, 1000, 5000, 20000]}
-                    scale="log"
-                  />
-                  <XAxis padding={{ left: 50, right: 50 }} dataKey="name" />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#0F6CBD"
-                    strokeWidth={3}
-                    fill="transparent"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+                />
+              </button>
+              <Typography
+                sx={{
+                  paddingRight: ".5rem",
+                }}
+              >
+                {"احمد مهرانفر"}
+              </Typography>
             </Box>
           </Box>
         </Box>
-
-        {/* Left side. Tables*/}
         <Box
           sx={{
-            width: "50%",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+            height: "40vh",
+          }}
+        >
+          <Typography
+            component="h2"
+            sx={{
+              fontSize: "1.5rem",
+            }}
+          >
+            سهم سرویس ها
+          </Typography>
+          <Box
+            sx={{
+              border: "1px solid #707070",
+              padding: ".2rem",
+              height: "100%",
+            }}
+          >
+            <ResponsiveContainer width="100%">
+              <Treemap
+                width={200}
+                data={dataForTreeChar}
+                aspectRatio={4 / 3}
+                dataKey="value"
+                content={<CustomizedContent />}
+              />
+            </ResponsiveContainer>
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            marginTop: "auto",
+          }}
+        >
+          <Typography
+            component="h3"
+            sx={{
+              fontSize: "1.5rem",
+            }}
+          >
+            نمودار ترافیک
+          </Typography>
+          <Box
+            width="100%"
+            sx={{
+              direction: "ltr",
+              height: "35vh",
+              position: "relative",
+            }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                width={500}
+                data={dataForAreaChart}
+                margin={{
+                  top: 10,
+                  right: 30,
+                  left: 0,
+                  bottom: 0,
+                }}
+              >
+                <Tooltip content={<CustomTooltip />} />
+                <YAxis
+                  domain={[20, 20000]}
+                  ticks={[1, 10, 50, 200, 1000, 5000, 20000]}
+                  scale="log"
+                  tickFormatter={(tick) => {
+                    if (tick === 1) {
+                      return "0"; // Display '0' for the first tick
+                    }
+                    return tick; // For other ticks, display their actual value
+                  }}
+                />
+                <XAxis padding={{ left: 50, right: 50 }} dataKey="name" />
+                <defs>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="12" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke={
+                    selectedServiceIndex !== null ? "#0F6CBD" : "transparent"
+                  }
+                  strokeWidth={3}
+                  fill="transparent"
+                  style={{ filter: "url(#glow)" }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+            {selectedServiceIndex === null && (
+              <Typography
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  maxWidth: "200px",
+                  textAlign: "center",
+                }}
+              >
+                برای نمایش نمودار ترافیک یک سرویس را از منوی سرویس ها انتخاب
+                کنید.
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Left side. Tables*/}
+      <Box
+        sx={{
+          width: "50%",
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <Search
+            value={searchInput}
+            onChange={handleChange}
+            handleSubmit={handleSubmit}
+          />
+
+          <Box
+            sx={{
+              position: "relative",
+              display: "flex",
+              height: "40px",
+              background: "#0F6CBD",
+              alignItems: "center",
+              padding: ".5rem",
+              gap: ".5rem",
+              borderRadius: ".5rem",
+            }}
+          >
+            <button
+              style={{ zIndex: "10" }}
+              onClick={() => setOpenDownLoadMenu(!openDownloadMenu)}
+            >
+              <IoChevronDown color="#fff" />
+            </button>
+            <Box
+              sx={{
+                height: "200%",
+                background: "#fff",
+                width: "2px",
+              }}
+            />
+            <Typography
+              sx={{
+                color: "#fff",
+                paddingRight: ".5rem",
+              }}
+            >
+              دریافت خروجی
+            </Typography>
+
+            <Box
+              sx={{
+                width: "100%",
+                left: "0",
+                position: "absolute",
+                background: "#0F6CBD",
+                borderRadius: ".5rem",
+                padding: ".5rem",
+                top: "-102%",
+                opacity: "0",
+                color: "#fff",
+                textAlign: "center",
+                animation:
+                  openDownloadMenu !== null
+                    ? openDownloadMenu
+                      ? "slideDown .2s linear both"
+                      : "slideUp .2s linear both"
+                    : "",
+                "@keyframes slideUp": {
+                  "0%": {
+                    opacity: "1",
+                    top: "102%",
+                  },
+
+                  "60%": {
+                    opacity: "0",
+                  },
+
+                  "100%": {
+                    opacity: "0",
+                    top: "-102%",
+                  },
+                },
+                "@keyframes slideDown": {
+                  "0%": {
+                    opacity: "0",
+                    top: "-100%",
+                  },
+
+                  "60%": {
+                    opacity: ".1",
+                  },
+
+                  "100%": {
+                    opacity: "1",
+                    top: "102%",
+                  },
+                },
+              }}
+            >
+              <button
+                onClick={() => setFormatToDownload("PDF")}
+                style={{ width: "100%" }}
+              >
+                PDF
+              </button>
+              <Divider sx={{ background: "#fff" }} />
+              <button
+                onClick={() => setFormatToDownload("CSV")}
+                style={{ width: "100%" }}
+              >
+                CSV
+              </button>
+              <Divider sx={{ background: "#fff" }} />
+              <button
+                onClick={() => setFormatToDownload("Excel")}
+                style={{ width: "100%" }}
+              >
+                Excel
+              </button>
+            </Box>
+          </Box>
+        </Box>
+        <Box
+          sx={{
             display: "flex",
             gap: "1rem",
           }}
@@ -392,6 +527,7 @@ const Dashboard: React.FC = () => {
                     width: "25px",
                     height: "25px",
                     color: "gray",
+                    zIndex: "-1",
                   }}
                 />
                 <Typography
@@ -401,6 +537,7 @@ const Dashboard: React.FC = () => {
                     left: "50%",
                     top: "50%",
                     transform: "translate(-50%, -50%)",
+                    zIndex: "-1",
                   }}
                 >
                   فیلتر بر اساس
@@ -435,28 +572,60 @@ const Dashboard: React.FC = () => {
                   نام وبسایت
                 </Typography>
               </Box>
-              {/* Table Body */}
               <Box
                 sx={{
-                  width: "100%",
-                  padding: ".8rem .5rem",
-                  justifyContent: "space-between",
+                  maxHeight: "70vh",
+                  overflow: "auto",
                   display: "flex",
-                  borderRadius: ".5rem",
-                  border: "1px solid #E3E3E3",
+                  flexDirection: "column",
+                  gap: ".2rem",
                 }}
               >
-                <Typography>5254</Typography>
-                <Typography
-                  sx={{
-                    direction: "ltr",
-                    display: "flex",
-                    gap: "2rem",
-                  }}
-                >
-                  <span>1.</span>
-                  spotify.com
-                </Typography>
+                {/* Table Body */}
+                {Array(30)
+                  .fill(null)
+                  .map((_, index) => (
+                    <Box
+                      key={index}
+                      onClick={() => {
+                        setDataForAreaChart((prevData) =>
+                          prevData.map((data) => ({
+                            ...data,
+                            value: Math.round(Math.random() * 150),
+                          }))
+                        );
+
+                        if (selectedServiceIndex === index)
+                          setSelectedServiceIndex(null);
+                        else setSelectedServiceIndex(index);
+                      }}
+                      sx={{
+                        background:
+                          selectedServiceIndex === index ? "#5E819F" : "",
+                        color: selectedServiceIndex === index ? "#fff" : "",
+                        transition: "all .2s linear",
+                        cursor: "pointer",
+                        width: "100%",
+                        padding: ".8rem .5rem",
+                        justifyContent: "space-between",
+                        display: "flex",
+                        borderRadius: ".5rem",
+                        border: "1px solid #E3E3E3",
+                      }}
+                    >
+                      <Typography>5254</Typography>
+                      <Typography
+                        sx={{
+                          direction: "ltr",
+                          display: "flex",
+                          gap: "2rem",
+                        }}
+                      >
+                        <span>{index + 1}.</span>
+                        spotify.com
+                      </Typography>
+                    </Box>
+                  ))}
               </Box>
             </Box>
           </Box>
@@ -509,31 +678,50 @@ const Dashboard: React.FC = () => {
               {/* Table Body */}
               <Box
                 sx={{
+                  position: "relative",
                   minHeight: "66vh",
                   border: "1px solid #E3E3E3",
                   borderRadius: ".5rem",
                 }}
               >
-                <Box
-                  sx={{
-                    width: "100%",
-                    padding: ".8rem .5rem",
-                    justifyContent: "space-between",
-                    display: "flex",
-                  }}
-                >
-                  <Typography>5254</Typography>
-                  <Typography
+                {/* Rows for the body */}
+                {selectedServiceIndex !== null && (
+                  <Box
                     sx={{
-                      direction: "ltr",
+                      width: "100%",
+                      padding: ".8rem .5rem",
+                      justifyContent: "space-between",
                       display: "flex",
-                      gap: "2rem",
                     }}
                   >
-                    <span>1.</span>
-                    198.192.1.1
+                    <Typography>5254</Typography>
+                    <Typography
+                      sx={{
+                        direction: "ltr",
+                        display: "flex",
+                        gap: "2rem",
+                      }}
+                    >
+                      <span>1.</span>
+                      198.192.1.1
+                    </Typography>
+                  </Box>
+                )}
+                {selectedServiceIndex === null && (
+                  <Typography
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      maxWidth: "200px",
+                      textAlign: "center",
+                    }}
+                  >
+                    برای مشاهده آدرس های IP یک سرویس را از منوی سرویس ها انتخاب
+                    کنید.
                   </Typography>
-                </Box>
+                )}
               </Box>
               <Typography
                 sx={{
@@ -555,7 +743,7 @@ const Dashboard: React.FC = () => {
 };
 
 const CustomizedContent = (props: any) => {
-  const { depth, x, y, width, height, index } = props;
+  const { depth, x, y, width, height, index, selectedIndex } = props;
 
   return (
     <g>
@@ -565,8 +753,11 @@ const CustomizedContent = (props: any) => {
         width={width}
         height={height}
         style={{
-          // fill: depth <= 2 ? COLORS[Math.floor(index % 6)] : "none",
-          fill: "#608DB4",
+          fill: selectedIndex
+            ? selectedIndex === index
+              ? "#608DB4"
+              : "#B2CADF"
+            : "#608DB4",
           stroke: "#fff",
           strokeWidth: 2 / (depth + 1e-10),
           strokeOpacity: 1 / (depth + 1e-10),
