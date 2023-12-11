@@ -7,6 +7,7 @@ import {
   Box,
   Divider,
   MenuItem,
+  Pagination,
   Select,
   Stack,
   Typography,
@@ -53,6 +54,34 @@ const dataForSquareChart = [
   { name: "d5", value: 27 },
   { name: "d6", value: 36 },
   { name: "d7", value: 71 },
+];
+
+const dataForAddresses = [
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.2", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
+  { ip: "198.192.1.1", session: "5254" },
 ];
 
 const initialDataForLineChart = [
@@ -122,6 +151,15 @@ const Dashboard: React.FC = () => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formatToDownload]);
+
+  const [addressesData, setAddressesData] = useState(dataForAddresses);
+  const [addressTablePage, setAddressTablePage] = useState(1);
+  const handleChangePage = (
+    _event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setAddressTablePage(value);
+  };
 
   return (
     <Box
@@ -681,34 +719,47 @@ const Dashboard: React.FC = () => {
               <Box
                 sx={{
                   position: "relative",
-                  minHeight: "66vh",
+                  minHeight: "58vh",
                   border: "1px solid #E3E3E3",
                   borderRadius: ".5rem",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
               >
                 {/* Rows for the body */}
-                {selectedServiceIndex !== null && (
-                  <Box
-                    sx={{
-                      width: "100%",
-                      padding: ".8rem .5rem",
-                      justifyContent: "space-between",
-                      display: "flex",
-                    }}
-                  >
-                    <Typography>5254</Typography>
-                    <Typography
-                      sx={{
-                        direction: "ltr",
-                        display: "flex",
-                        gap: "2rem",
-                      }}
-                    >
-                      <span>1.</span>
-                      198.192.1.1
-                    </Typography>
-                  </Box>
-                )}
+                {selectedServiceIndex !== null &&
+                  addressesData
+                    .slice(
+                      (addressTablePage - 1) * 10,
+                      Math.min(
+                        (addressTablePage - 1) * 10 + 10,
+                        dataForAddresses.length
+                      )
+                    )
+                    .map((address, index) => (
+                      <Box
+                        sx={{
+                          width: "100%",
+                          padding: ".7rem .5rem",
+                          justifyContent: "space-between",
+                          display: "flex",
+                        }}
+                      >
+                        <Typography>{address.session}</Typography>
+                        <Typography
+                          sx={{
+                            direction: "ltr",
+                            display: "flex",
+                            minWidth: "125px",
+                          }}
+                        >
+                          <span>{index + 1}.</span>
+                          <span style={{ marginLeft: "auto" }}>
+                            {address.ip}
+                          </span>
+                        </Typography>
+                      </Box>
+                    ))}
                 {selectedServiceIndex === null && (
                   <Typography
                     sx={{
@@ -723,6 +774,23 @@ const Dashboard: React.FC = () => {
                     برای مشاهده آدرس های IP یک سرویس را از منوی سرویس ها انتخاب
                     کنید.
                   </Typography>
+                )}
+                {selectedServiceIndex !== null && (
+                  <Pagination
+                    sx={{
+                      direction: "ltr",
+                      marginTop: "auto",
+                      marginBottom: "1rem",
+                      marginX: "auto",
+                    }}
+                    color="primary"
+                    onChange={handleChangePage}
+                    count={Math.ceil(addressesData.length / 10)}
+                    variant="outlined"
+                    shape="rounded"
+                    hidePrevButton
+                    hideNextButton
+                  />
                 )}
               </Box>
               <Typography
