@@ -755,6 +755,7 @@ const CustomizedContent = (props: any) => {
         width={width}
         height={height}
         style={{
+          transition: "all .2s linear",
           fill:
             selectedIndex !== null
               ? selectedIndex === index
