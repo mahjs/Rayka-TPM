@@ -243,7 +243,9 @@ const Dashboard: React.FC = () => {
                 data={dataForTreeChar}
                 aspectRatio={4 / 3}
                 dataKey="value"
-                content={<CustomizedContent />}
+                content={
+                  <CustomizedContent selectedIndex={selectedServiceIndex} />
+                }
               />
             </ResponsiveContainer>
           </Box>
@@ -753,11 +755,12 @@ const CustomizedContent = (props: any) => {
         width={width}
         height={height}
         style={{
-          fill: selectedIndex
-            ? selectedIndex === index
-              ? "#608DB4"
-              : "#B2CADF"
-            : "#608DB4",
+          fill:
+            selectedIndex !== null
+              ? selectedIndex === index
+                ? "#608DB4"
+                : "#B2CADF"
+              : "#608DB4",
           stroke: "#fff",
           strokeWidth: 2 / (depth + 1e-10),
           strokeOpacity: 1 / (depth + 1e-10),
