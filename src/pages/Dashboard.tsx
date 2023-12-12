@@ -2,7 +2,6 @@ import React, { FC, useEffect, useState } from "react";
 import { BsPerson } from "react-icons/bs";
 import { IoFilterOutline } from "react-icons/io5";
 import { IoChevronDown } from "react-icons/io5";
-
 import {
   Box,
   Divider,
@@ -199,10 +198,10 @@ const Dashboard: React.FC = () => {
                 textAlign: "right",
               }}
             >
-              <Typography fontWeight="bold" fontSize="1.5rem">
+              <Typography fontSize="1.5rem" fontFamily="Tomorrow-SemiBold">
                 TPM
               </Typography>
-              <Typography fontWeight="300">Dashboard</Typography>
+              <Typography fontFamily="Tomorrow-Light">Dashboard</Typography>
             </Stack>
 
             <Box
@@ -243,6 +242,7 @@ const Dashboard: React.FC = () => {
                 />
               </button>
               <Typography
+                fontFamily="YekanBakh-Medium"
                 sx={{
                   paddingRight: ".5rem",
                 }}
@@ -261,6 +261,7 @@ const Dashboard: React.FC = () => {
           }}
         >
           <Typography
+            fontFamily="YekanBakh-Medium"
             component="h2"
             sx={{
               fontSize: "1.5rem",
@@ -294,6 +295,7 @@ const Dashboard: React.FC = () => {
           }}
         >
           <Typography
+            fontFamily="YekanBakh-Medium"
             component="h3"
             sx={{
               fontSize: "1.5rem",
@@ -303,6 +305,7 @@ const Dashboard: React.FC = () => {
           </Typography>
           <Box
             width="100%"
+            fontFamily="YekanBakh-Regular"
             sx={{
               direction: "ltr",
               height: "35vh",
@@ -356,6 +359,7 @@ const Dashboard: React.FC = () => {
             </ResponsiveContainer>
             {selectedServiceIndex === null && (
               <Typography
+                fontFamily="YekanBakh-Regular"
                 sx={{
                   position: "absolute",
                   top: "50%",
@@ -420,6 +424,7 @@ const Dashboard: React.FC = () => {
               }}
             />
             <Typography
+              fontFamily="YekanBakh-Bold"
               sx={{
                 color: "#fff",
                 paddingRight: ".5rem",
@@ -440,6 +445,7 @@ const Dashboard: React.FC = () => {
                 opacity: "0",
                 color: "#fff",
                 textAlign: "center",
+                fontFamily: "YekanBakh-Regular",
                 animation:
                   openDownloadMenu !== null
                     ? openDownloadMenu
@@ -516,6 +522,7 @@ const Dashboard: React.FC = () => {
           >
             <Stack direction="row" alignItems="center" gap="1rem">
               <Typography
+                fontFamily="YekanBakh-Medium"
                 component="h3"
                 sx={{
                   fontSize: "1.5rem",
@@ -554,9 +561,24 @@ const Dashboard: React.FC = () => {
                       },
                   }}
                 >
-                  <MenuItem value="weekly">هفتگی</MenuItem>
-                  <MenuItem value="monthly">ماهانه</MenuItem>
-                  <MenuItem value="year">سالانه</MenuItem>
+                  <MenuItem
+                    sx={{ fontFamily: "YekanBakh-Regular" }}
+                    value="weekly"
+                  >
+                    هفتگی
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ fontFamily: "YekanBakh-Regular" }}
+                    value="monthly"
+                  >
+                    ماهانه
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ fontFamily: "YekanBakh-Regular" }}
+                    value="year"
+                  >
+                    سالانه
+                  </MenuItem>
                 </Select>
                 <IoFilterOutline
                   style={{
@@ -571,6 +593,7 @@ const Dashboard: React.FC = () => {
                   }}
                 />
                 <Typography
+                  fontFamily="YekanBakh-Thin"
                   sx={{
                     position: "absolute",
                     color: "#707070aa",
@@ -603,8 +626,11 @@ const Dashboard: React.FC = () => {
                   borderRadius: ".5rem",
                 }}
               >
-                <Typography>تعداد سشن‌ها</Typography>
+                <Typography fontFamily="YekanBakh-Regular">
+                  تعداد سشن‌ ها
+                </Typography>
                 <Typography
+                  fontFamily="YekanBakh-Regular"
                   sx={{
                     marginLeft: "4rem",
                   }}
@@ -651,10 +677,12 @@ const Dashboard: React.FC = () => {
                         display: "flex",
                         borderRadius: ".5rem",
                         border: "1px solid #E3E3E3",
+                        fontFamily: "SegoeUI",
                       }}
                     >
-                      <Typography>5254</Typography>
+                      <Typography fontFamily="SegoeUI">5254</Typography>
                       <Typography
+                        // fontFamily="SegoeUI"
                         sx={{
                           direction: "ltr",
                           display: "flex",
@@ -679,6 +707,7 @@ const Dashboard: React.FC = () => {
           >
             <Typography
               component="h3"
+              fontFamily="YekanBakh-Medium"
               sx={{
                 fontSize: "1.5rem",
               }}
@@ -705,8 +734,11 @@ const Dashboard: React.FC = () => {
                   borderRadius: ".5rem",
                 }}
               >
-                <Typography>تعداد سشن‌ها</Typography>
+                <Typography fontFamily="YekanBakh-Regular">
+                  تعداد سشن‌ ها
+                </Typography>
                 <Typography
+                  fontFamily="YekanBakh-Regular"
                   sx={{
                     marginLeft: "4rem",
                   }}
@@ -745,8 +777,11 @@ const Dashboard: React.FC = () => {
                           display: "flex",
                         }}
                       >
-                        <Typography>{address.session}</Typography>
+                        <Typography fontFamily="YekanBakh-Regular">
+                          {address.session}
+                        </Typography>
                         <Typography
+                          fontFamily="YekanBakh-Regular"
                           sx={{
                             direction: "ltr",
                             display: "flex",
@@ -762,6 +797,7 @@ const Dashboard: React.FC = () => {
                     ))}
                 {selectedServiceIndex === null && (
                   <Typography
+                    fontFamily="YekanBakh-Regular"
                     sx={{
                       position: "absolute",
                       top: "50%",
@@ -794,13 +830,14 @@ const Dashboard: React.FC = () => {
                 )}
               </Box>
               <Typography
+                fontFamily="YekanBakh-Light"
                 sx={{
                   textAlign: "left",
                   color: "gray",
                 }}
               >
                 Powered By{" "}
-                <span style={{ color: "black", fontWeight: "bold" }}>
+                <span style={{ color: "black", fontFamily: "YekanBakh-Bold" }}>
                   Rayka
                 </span>
               </Typography>
@@ -863,6 +900,7 @@ export const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload }) => {
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
+            fontFamily: "YekanBakh-Regular",
           }}
         >
           <p>زمان: {payload[0].payload.name}</p>

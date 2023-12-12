@@ -49,6 +49,7 @@ const Search: FC<Props> = ({ handleSubmit, value, onChange }) => {
         value={value}
         onChange={onChange}
         sx={{
+          fontFamily: "YekanBakh-Thin",
           padding: ".5rem",
           ":focus": {
             outline: "none",
