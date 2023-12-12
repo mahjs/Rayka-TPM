@@ -4,6 +4,7 @@ import { IoFilterOutline } from "react-icons/io5";
 import { IoChevronDown } from "react-icons/io5";
 import {
   Box,
+  Button,
   Divider,
   MenuItem,
   Pagination,
@@ -125,7 +126,11 @@ const Dashboard: React.FC = () => {
   };
 
   // State for SquareCharts
-  const [dataForTreeChar, setDataForTreeChart] = useState(dataForSquareChart);
+  const [dataForTreeChart, setDataForTreeChart] = useState(dataForSquareChart);
+  const sumOfTreeChartValues = dataForTreeChart.reduce(
+    (sum, data) => (sum += data.value),
+    0
+  );
 
   // State for Area Chart
   const [dataForAreaChart, setDataForAreaChart] = useState(
@@ -166,7 +171,7 @@ const Dashboard: React.FC = () => {
       sx={{
         padding: "2rem 1.5rem",
         display: "flex",
-        height: "100vh",
+        height: "100dvh",
         gap: "1rem",
       }}
     >
@@ -219,11 +224,19 @@ const Dashboard: React.FC = () => {
                 gap: ".2rem",
               }}
             >
-              <button>
-                <IoChevronDown color="gray" />
-              </button>
-              <button
-                style={{
+              <Button
+                sx={{
+                  minWidth: "0",
+                }}
+              >
+                <IoChevronDown
+                  color="gray"
+                  style={{ width: "25px", height: "25px" }}
+                />
+              </Button>
+              <Button
+                sx={{
+                  minWidth: "0",
                   width: "50px",
                   height: "50px",
                   background: "#E6E6E6",
@@ -240,7 +253,7 @@ const Dashboard: React.FC = () => {
                     color: "gray",
                   }}
                 />
-              </button>
+              </Button>
               <Typography
                 fontFamily="YekanBakh-Medium"
                 sx={{
@@ -279,21 +292,25 @@ const Dashboard: React.FC = () => {
             <ResponsiveContainer width="100%">
               <Treemap
                 width={200}
-                data={dataForTreeChar}
+                data={dataForTreeChart}
                 aspectRatio={4 / 3}
                 dataKey="value"
                 content={
                   <CustomizedContent selectedIndex={selectedServiceIndex} />
                 }
-              />
+              >
+                <Tooltip
+                  content={
+                    <CustomTooltipForTreeChart
+                      sumOfData={sumOfTreeChartValues}
+                    />
+                  }
+                />
+              </Treemap>
             </ResponsiveContainer>
           </Box>
         </Box>
-        <Box
-          sx={{
-            marginTop: "auto",
-          }}
-        >
+        <Box>
           <Typography
             fontFamily="YekanBakh-Medium"
             component="h3"
@@ -323,7 +340,7 @@ const Dashboard: React.FC = () => {
                   bottom: 0,
                 }}
               >
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<CustomTooltipForAreaChart />} />
                 <YAxis
                   domain={[20, 20000]}
                   ticks={[1, 10, 50, 200, 1000, 5000, 20000]}
@@ -388,6 +405,7 @@ const Dashboard: React.FC = () => {
       >
         <Box
           sx={{
+            height: "5dvh",
             display: "flex",
             justifyContent: "space-between",
           }}
@@ -408,14 +426,18 @@ const Dashboard: React.FC = () => {
               padding: ".5rem",
               gap: ".5rem",
               borderRadius: ".5rem",
+              zIndex: "5",
             }}
           >
-            <button
-              style={{ zIndex: "10" }}
+            <Button
+              style={{ zIndex: "10", minWidth: "0" }}
               onClick={() => setOpenDownLoadMenu(!openDownloadMenu)}
             >
-              <IoChevronDown color="#fff" />
-            </button>
+              <IoChevronDown
+                color="#fff"
+                style={{ width: "25px", height: "25px" }}
+              />
+            </Button>
             <Box
               sx={{
                 height: "200%",
@@ -484,26 +506,26 @@ const Dashboard: React.FC = () => {
                 },
               }}
             >
-              <button
+              <Button
                 onClick={() => setFormatToDownload("PDF")}
-                style={{ width: "100%" }}
+                sx={{ width: "100", color: "#fff" }}
               >
                 PDF
-              </button>
+              </Button>
               <Divider sx={{ background: "#fff" }} />
-              <button
+              <Button
                 onClick={() => setFormatToDownload("CSV")}
-                style={{ width: "100%" }}
+                sx={{ width: "100%", color: "#fff" }}
               >
                 CSV
-              </button>
+              </Button>
               <Divider sx={{ background: "#fff" }} />
-              <button
+              <Button
                 onClick={() => setFormatToDownload("Excel")}
-                style={{ width: "100%" }}
+                sx={{ width: "100%", color: "#fff" }}
               >
                 Excel
-              </button>
+              </Button>
             </Box>
           </Box>
         </Box>
@@ -517,7 +539,6 @@ const Dashboard: React.FC = () => {
           <Box
             sx={{
               width: "50%",
-              height: "100%",
             }}
           >
             <Stack direction="row" alignItems="center" gap="1rem">
@@ -640,7 +661,7 @@ const Dashboard: React.FC = () => {
               </Box>
               <Box
                 sx={{
-                  maxHeight: "70vh",
+                  height: "75dvh",
                   overflow: "auto",
                   display: "flex",
                   flexDirection: "column",
@@ -702,7 +723,6 @@ const Dashboard: React.FC = () => {
           <Box
             sx={{
               width: "50%",
-              height: "100%",
             }}
           >
             <Typography
@@ -751,7 +771,7 @@ const Dashboard: React.FC = () => {
               <Box
                 sx={{
                   position: "relative",
-                  minHeight: "58vh",
+                  minHeight: "70dvh",
                   border: "1px solid #E3E3E3",
                   borderRadius: ".5rem",
                   display: "flex",
@@ -871,17 +891,22 @@ const CustomizedContent = (props: any) => {
           strokeWidth: 2 / (depth + 1e-10),
           strokeOpacity: 1 / (depth + 1e-10),
         }}
-      />
+      >
+        <title style={{ color: "white" }}>Tooltip text goes here</title>
+      </rect>
     </g>
   );
 };
 
-interface CustomTooltipProps {
+interface CustomTooltipForAreaChartProps {
   active?: boolean;
   payload?: any;
 }
 
-export const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload }) => {
+export const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
+  active,
+  payload,
+}) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -905,6 +930,51 @@ export const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload }) => {
         >
           <p>زمان: {payload[0].payload.name}</p>
           <p>مقدار: {payload[0].payload.value}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+interface CustomTooltipForTreeChartProps {
+  active?: boolean;
+  payload?: any;
+  sumOfData?: number;
+}
+
+export const CustomTooltipForTreeChart: FC<CustomTooltipForTreeChartProps> = ({
+  active,
+  payload,
+  sumOfData = 1,
+}) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        style={{
+          zIndex: "20",
+          background: "#fff",
+          color: "#333",
+          boxShadow: "0 0 14px  rgb(0 0 0 / 40%)",
+          padding: "1px",
+          textAlign: "left",
+          borderRadius: "1rem",
+        }}
+      >
+        <div
+          style={{
+            margin: "13px 19px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            fontFamily: "YekanBakh-Regular",
+          }}
+        >
+          <p>نام: {payload[0].payload.name}</p>
+          <p>مقدار: {payload[0].payload.value}</p>
+          <p>
+            سهم: %{((payload[0].payload.value / sumOfData) * 100).toFixed(2)}
+          </p>
         </div>
       </div>
     );
