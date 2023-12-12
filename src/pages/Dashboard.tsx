@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import { BsPerson } from "react-icons/bs";
 import { IoFilterOutline } from "react-icons/io5";
 import { IoChevronDown } from "react-icons/io5";
@@ -131,6 +131,18 @@ const Dashboard: React.FC = () => {
     (sum, data) => (sum += data.value),
     0
   );
+  const dataRefs = useRef<HTMLDivElement[]>([]);
+  useEffect(() => {
+    if (
+      selectedServiceIndex !== null &&
+      dataRefs.current[selectedServiceIndex]
+    ) {
+      dataRefs.current[selectedServiceIndex].scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  });
 
   // State for Area Chart
   const [dataForAreaChart, setDataForAreaChart] = useState(
@@ -296,7 +308,10 @@ const Dashboard: React.FC = () => {
                 aspectRatio={4 / 3}
                 dataKey="value"
                 content={
-                  <CustomizedContent selectedIndex={selectedServiceIndex} />
+                  <CustomizedContent
+                    selectedIndex={selectedServiceIndex}
+                    onClickHandler={setSelectedServiceIndex}
+                  />
                 }
               >
                 <Tooltip
@@ -673,6 +688,9 @@ const Dashboard: React.FC = () => {
                   .fill(null)
                   .map((_, index) => (
                     <Box
+                      ref={(el: HTMLDivElement) =>
+                        (dataRefs.current[index] = el)
+                      }
                       key={index}
                       onClick={() => {
                         setDataForAreaChart((prevData) =>
@@ -870,10 +888,11 @@ const Dashboard: React.FC = () => {
 };
 
 const CustomizedContent = (props: any) => {
-  const { depth, x, y, width, height, index, selectedIndex } = props;
+  const { depth, x, y, width, height, index, selectedIndex, onClickHandler } =
+    props;
 
   return (
-    <g>
+    <g onClick={() => onClickHandler(index)}>
       <rect
         x={x}
         y={y}
