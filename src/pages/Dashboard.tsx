@@ -139,7 +139,7 @@ const Dashboard: React.FC = () => {
     ) {
       dataRefs.current[selectedServiceIndex].scrollIntoView({
         behavior: "smooth",
-        block: "start",
+        block: "center",
       });
     }
   });
