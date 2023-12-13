@@ -22,6 +22,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useAuth } from "../contexts/authContext";
+import { useNavigate } from "react-router-dom";
 
 const dataForSquareChart = [
   { name: "A1", value: 25 },
@@ -104,6 +106,14 @@ const initialDataForLineChart = [
 ];
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const { isLogin } = useAuth();
+  useEffect(() => {
+    if (!isLogin) {
+      navigate("/login");
+    }
+  });
+
   // State to hold the search input
   const [searchInput, setSearchInput] = useState<string>("");
 

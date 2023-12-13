@@ -1,11 +1,25 @@
 import { Box, Button, Typography } from "@mui/material";
 import Input from "../components/login/Input";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import Logo from "../assets/images/logo.svg";
+import { useAuth } from "../contexts/authContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!userName || !password) return;
+
+    console.log(userName, password);
+    login();
+    navigate("/");
+  };
+
   return (
     <Box
       component="main"
@@ -42,6 +56,7 @@ const Login = () => {
           </Typography>
           <Box
             component="form"
+            onSubmit={handleSubmit}
             sx={{
               display: "flex",
               flexDirection: "column",
@@ -63,6 +78,7 @@ const Login = () => {
             />
 
             <Button
+              type="submit"
               sx={{
                 height: "2.5rem",
                 background: "#0F6CBD",
