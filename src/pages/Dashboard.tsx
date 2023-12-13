@@ -193,7 +193,6 @@ const Dashboard: React.FC = () => {
       sx={{
         padding: "2rem 1.5rem",
         display: "flex",
-        height: "100dvh",
         gap: "1rem",
       }}
     >
@@ -292,7 +291,7 @@ const Dashboard: React.FC = () => {
             display: "flex",
             flexDirection: "column",
             gap: "1rem",
-            height: "40vh",
+            height: "35vh",
           }}
         >
           <Typography
@@ -677,7 +676,6 @@ const Dashboard: React.FC = () => {
               <Box
                 sx={{
                   marginTop: ".5rem",
-                  width: "100%",
                   padding: ".8rem .5rem",
                   background: "#E9F1F4",
                   justifyContent: "space-between",
@@ -699,7 +697,7 @@ const Dashboard: React.FC = () => {
               </Box>
               <Box
                 sx={{
-                  height: "75dvh",
+                  height: "72dvh",
                   overflow: "auto",
                   display: "flex",
                   flexDirection: "column",
@@ -733,7 +731,6 @@ const Dashboard: React.FC = () => {
                         color: selectedServiceIndex === index ? "#fff" : "",
                         transition: "all .2s linear",
                         cursor: "pointer",
-                        width: "100%",
                         padding: ".8rem .5rem",
                         justifyContent: "space-between",
                         display: "flex",
@@ -742,13 +739,15 @@ const Dashboard: React.FC = () => {
                         fontFamily: "SegoeUI",
                       }}
                     >
-                      <Typography fontFamily="SegoeUI">5254</Typography>
+                      <Typography marginRight="1.5rem" fontFamily="SegoeUI">
+                        5254
+                      </Typography>
                       <Typography
-                        // fontFamily="SegoeUI"
                         sx={{
+                          marginLeft: ".6rem",
                           direction: "ltr",
                           display: "flex",
-                          gap: "2rem",
+                          gap: "1.5rem",
                         }}
                       >
                         <span>{index + 1}.</span>
@@ -787,7 +786,6 @@ const Dashboard: React.FC = () => {
               <Box
                 sx={{
                   marginTop: ".5rem",
-                  width: "100%",
                   padding: ".8rem .5rem",
                   background: "#E9F1F4",
                   justifyContent: "space-between",
@@ -832,21 +830,24 @@ const Dashboard: React.FC = () => {
                     .map((address, index) => (
                       <Box
                         sx={{
-                          width: "100%",
                           padding: ".7rem .5rem",
                           justifyContent: "space-between",
                           display: "flex",
                         }}
                       >
-                        <Typography fontFamily="YekanBakh-Regular">
+                        <Typography
+                          marginRight="2rem"
+                          fontFamily="YekanBakh-Regular"
+                        >
                           {address.session}
                         </Typography>
                         <Typography
                           fontFamily="YekanBakh-Regular"
                           sx={{
+                            marginLeft: "1rem",
                             direction: "ltr",
                             display: "flex",
-                            minWidth: "125px",
+                            minWidth: "120px",
                           }}
                         >
                           <span>{index + 1}.</span>
@@ -1012,11 +1013,11 @@ export const CustomTooltipForTreeChart: FC<CustomTooltipForTreeChartProps> = ({
             fontFamily: "YekanBakh-Regular",
           }}
         >
-          <p>نام: {payload[0].payload.name}</p>
-          <p>مقدار: {payload[0].payload.value}</p>
-          <p>
+          <Typography>نام: {payload[0].payload.name}</Typography>
+          <Typography>مقدار: {payload[0].payload.value}</Typography>
+          <Typography>
             سهم: %{((payload[0].payload.value / sumOfData) * 100).toFixed(2)}
-          </p>
+          </Typography>
         </div>
       </div>
     );

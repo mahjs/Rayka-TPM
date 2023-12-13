@@ -93,3 +93,9 @@
   font-weight: 500;
   font-style: normal;
 }
+
+/* Maybe temporary */
+body {
+  max-height: 100vh;
+  overflow: hidden;
+}
