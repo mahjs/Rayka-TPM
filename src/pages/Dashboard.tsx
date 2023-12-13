@@ -337,12 +337,25 @@ const Dashboard: React.FC = () => {
                 />
                 <XAxis padding={{ left: 50, right: 50 }} dataKey="name" />
                 <defs>
-                  <filter id="glow">
-                    <feGaussianBlur stdDeviation="12" result="coloredBlur" />
-                    <feMerge>
-                      <feMergeNode in="coloredBlur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
+                  <filter
+                    id="glow"
+                    x="-70%"
+                    y="-70%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feOffset
+                      result="offOut"
+                      in="SourceGraphic"
+                      dx="0"
+                      dy="0"
+                    />
+                    <feGaussianBlur
+                      result="blurOut"
+                      in="offOut"
+                      stdDeviation="5"
+                    />
+                    <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
                   </filter>
                 </defs>
                 <Area

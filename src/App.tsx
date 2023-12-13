@@ -1,14 +1,19 @@
-import './layout/App.css'
-import './layout/normalize.css'
-import Dashboard from './pages/Dashboard'
+import { CssBaseline } from "@mui/material";
+import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/NotFound";
 
 function App() {
+  const renderContent = () => {
+    const path = window.location.pathname;
+    return (
+      <>
+        <CssBaseline />
+        {path === "/" ? <Dashboard /> : <NotFound />}
+      </>
+    );
+  };
 
-  return (
-    <>
-      <Dashboard />
-    </>
-  )
+  return <>{renderContent()}</>;
 }
 
-export default App
+export default App;
