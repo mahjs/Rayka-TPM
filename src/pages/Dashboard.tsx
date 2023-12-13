@@ -289,6 +289,7 @@ const Dashboard: React.FC = () => {
               dataForTreeChart={dataForTreeChart}
               selectedServiceIndex={selectedServiceIndex}
               setSelectedServiceIndex={setSelectedServiceIndex}
+              setDataForAreaChart={setDataForAreaChart}
             />
           </Box>
         </Box>

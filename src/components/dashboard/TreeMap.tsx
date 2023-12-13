@@ -6,10 +6,19 @@ interface Props {
   dataForTreeChart: { name: string; value: number }[];
   selectedServiceIndex: number | null;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  setDataForAreaChart: React.Dispatch<
+    React.SetStateAction<
+      {
+        name: string;
+        value: number;
+      }[]
+    >
+  >;
 }
 
 const TreeMap: FC<Props> = ({
   dataForTreeChart,
+  setDataForAreaChart,
   selectedServiceIndex,
   setSelectedServiceIndex,
 }) => {
@@ -28,6 +37,7 @@ const TreeMap: FC<Props> = ({
           <CustomizedContent
             selectedIndex={selectedServiceIndex}
             onClickHandler={setSelectedServiceIndex}
+            setDataForAreaChart={setDataForAreaChart}
           />
         }
       >
@@ -44,11 +54,30 @@ const TreeMap: FC<Props> = ({
 export default TreeMap;
 
 const CustomizedContent = (props: any) => {
-  const { depth, x, y, width, height, index, selectedIndex, onClickHandler } =
-    props;
+  const {
+    depth,
+    x,
+    y,
+    width,
+    height,
+    index,
+    selectedIndex,
+    onClickHandler,
+    setDataForAreaChart,
+  } = props;
 
   return (
-    <g onClick={() => onClickHandler(index)}>
+    <g
+      onClick={() => {
+        setDataForAreaChart((prevData: { name: string; value: number }[]) =>
+          prevData.map((data) => ({
+            ...data,
+            value: Math.round(Math.random() * 150),
+          }))
+        );
+        onClickHandler(index);
+      }}
+    >
       <rect
         x={x}
         y={y}
