@@ -7,9 +7,17 @@ interface Props {
   value: string;
   title: string;
   type?: string;
+  sx?: any;
 }
 
-const Input: FC<Props> = ({ onChange, value, title, name, type = "text" }) => {
+const Input: FC<Props> = ({
+  onChange,
+  sx,
+  value,
+  title,
+  name,
+  type = "text",
+}) => {
   return (
     <Box
       sx={{
@@ -26,11 +34,13 @@ const Input: FC<Props> = ({ onChange, value, title, name, type = "text" }) => {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         sx={{
+          paddingX: ".5rem",
           borderRadius: ".3rem",
           outline: "none",
           border: "1px solid #D1D1D1",
           borderBottomWidth: "1px",
           borderBottomColor: "gray",
+          ...sx,
         }}
       />
     </Box>
