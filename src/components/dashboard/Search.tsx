@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material";
+import { Box, Button, Input } from "@mui/material";
 import { FC } from "react";
 import { GoSearch } from "react-icons/go";
 
@@ -42,8 +42,7 @@ const Search: FC<Props> = ({ handleSubmit, value, onChange }) => {
           }}
         />
       </Button>
-      <Box
-        component="input"
+      <Input
         type="search"
         placeholder="جست و جو سرویس یا IP"
         value={value}
