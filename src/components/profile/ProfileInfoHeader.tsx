@@ -21,8 +21,10 @@ const ProfileInfo = () => {
         }}
       >
         <Stack
+          onClick={() => navigate("/")}
           sx={{
             textAlign: "right",
+            cursor: "pointer",
           }}
         >
           <Typography fontSize="1.5rem" fontFamily="Tomorrow-SemiBold">
