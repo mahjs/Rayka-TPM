@@ -1,5 +1,6 @@
 import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
+import Profile from "../pages/Profile";
 
 export const mainRoutes = [
   {
@@ -9,5 +10,9 @@ export const mainRoutes = [
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
   },
 ];
