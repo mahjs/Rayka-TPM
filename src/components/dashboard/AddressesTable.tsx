@@ -1,12 +1,17 @@
-import { Box, Pagination, Typography } from "@mui/material";
-import { FC, useState } from "react";
+import { Box, CircularProgress, Pagination, Typography } from "@mui/material";
+import { FC, useEffect, useState } from "react";
 
 interface Props {
   selectedServiceIndex: number | null;
-  addressesData: { ip: string; session: string }[];
+  loading: boolean;
+  addressesData: string[] | null;
 }
 
-const AddressesTable: FC<Props> = ({ selectedServiceIndex, addressesData }) => {
+const AddressesTable: FC<Props> = ({
+  selectedServiceIndex,
+  loading,
+  addressesData,
+}) => {
   const [addressTablePage, setAddressTablePage] = useState(1);
   const handleChangePage = (
     _event: React.ChangeEvent<unknown>,
@@ -14,6 +19,10 @@ const AddressesTable: FC<Props> = ({ selectedServiceIndex, addressesData }) => {
   ) => {
     setAddressTablePage(value);
   };
+
+  useEffect(() => {
+    setAddressTablePage(1);
+  }, [selectedServiceIndex, loading]);
 
   return (
     <Box
@@ -71,8 +80,16 @@ const AddressesTable: FC<Props> = ({ selectedServiceIndex, addressesData }) => {
             flexDirection: "column",
           }}
         >
+          {loading && (
+            <CircularProgress
+              sx={{
+                margin: "auto",
+              }}
+            />
+          )}
           {/* Rows for the body */}
           {selectedServiceIndex !== null &&
+            addressesData &&
             addressesData
               .slice(
                 (addressTablePage - 1) * 10,
@@ -80,6 +97,7 @@ const AddressesTable: FC<Props> = ({ selectedServiceIndex, addressesData }) => {
               )
               .map((address, index) => (
                 <Box
+                  key={index}
                   sx={{
                     padding: ".7rem .5rem",
                     justifyContent: "space-between",
@@ -87,7 +105,8 @@ const AddressesTable: FC<Props> = ({ selectedServiceIndex, addressesData }) => {
                   }}
                 >
                   <Typography marginRight="2rem" fontFamily="YekanBakh-Regular">
-                    {address.session}
+                    {/* {address.session} */}
+                    5254
                   </Typography>
                   <Typography
                     fontFamily="YekanBakh-Regular"
@@ -99,7 +118,9 @@ const AddressesTable: FC<Props> = ({ selectedServiceIndex, addressesData }) => {
                     }}
                   >
                     <span>{index + 1}.</span>
-                    <span style={{ marginLeft: "auto" }}>{address.ip}</span>
+                    <span style={{ textAlign: "left", marginLeft: "1rem" }}>
+                      {address}
+                    </span>
                   </Typography>
                 </Box>
               ))}
@@ -118,7 +139,7 @@ const AddressesTable: FC<Props> = ({ selectedServiceIndex, addressesData }) => {
               برای مشاهده آدرس های IP یک سرویس را از منوی سرویس ها انتخاب کنید.
             </Typography>
           )}
-          {selectedServiceIndex !== null && (
+          {selectedServiceIndex !== null && !loading && (
             <Pagination
               sx={{
                 direction: "ltr",
@@ -128,7 +149,9 @@ const AddressesTable: FC<Props> = ({ selectedServiceIndex, addressesData }) => {
               }}
               color="primary"
               onChange={handleChangePage}
-              count={Math.ceil(addressesData.length / 10)}
+              count={Math.ceil(
+                (addressesData && addressesData.length / 10) || 0
+              )}
               variant="outlined"
               shape="rounded"
               hidePrevButton
