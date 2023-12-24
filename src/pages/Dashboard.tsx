@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { BsPerson } from "react-icons/bs";
 import { IoChevronDown } from "react-icons/io5";
-import { Box, Button, Divider, Stack, Typography } from "@mui/material";
+import { Box, Button, Divider, Typography } from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
@@ -10,8 +9,10 @@ import ServicesTable from "../components/dashboard/ServicesTable";
 import TreeMap from "../components/dashboard/TreeMap";
 import AreaChart from "../components/dashboard/AreaChart";
 import ProfileInfo from "../components/profile/ProfileInfoHeader";
+import api from "../services";
+import { Domain } from "../services/domain";
 
-const dataForSquareChart = [
+const mockDomainsData = [
   { name: "A1", value: 25 },
   { name: "A2", value: 32 },
   { name: "B1", value: 65 },
@@ -44,7 +45,7 @@ const dataForSquareChart = [
   { name: "d7", value: 71 },
 ];
 
-const dataForAddresses = [
+const mockIpAddressesForDomain = [
   { ip: "198.192.1.1", session: "5254" },
   { ip: "198.192.1.1", session: "5254" },
   { ip: "198.192.1.1", session: "5254" },
@@ -122,7 +123,39 @@ const Dashboard: React.FC = () => {
   };
 
   // State for SquareCharts
-  const [dataForTreeChart, setDataForTreeChart] = useState(dataForSquareChart);
+  const [dataForTreeChart, setDataForTreeChart] = useState(mockDomainsData);
+  const [domains, setDomains] = useState<Domain[] | null>(null);
+  const [loadingDomains, setLoadingDomains] = useState<boolean>(false);
+  useEffect(() => {
+    setLoadingDomains(true);
+    api.domain.getAllDomains().then((res) => {
+      setDomains(res.data);
+      setLoadingDomains(false);
+    });
+  }, []);
+
+  // State for Selecting a service
+  const [selectedServiceIndex, setSelectedServiceIndex] = useState<
+    number | null
+  >(null);
+
+  const [ipAddressesForDomain, setIpAddressesForDomain] = useState<
+    string[] | null
+  >(null);
+  const [loadingAddresses, setLoadingAddresses] = useState<boolean>(false);
+  useEffect(() => {
+    if (selectedServiceIndex === null) return;
+    setLoadingAddresses(true);
+    setIpAddressesForDomain(null);
+    api.domain
+      .getIpAddressesForDomain(domains![selectedServiceIndex].name)
+      .then((res) => {
+        setIpAddressesForDomain(res.data.ips);
+        setLoadingAddresses(false);
+      });
+  }, [domains, selectedServiceIndex]);
+
+  console.log(ipAddressesForDomain);
 
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
@@ -142,11 +175,6 @@ const Dashboard: React.FC = () => {
     initialDataForLineChart
   );
 
-  // State for Selecting a service
-  const [selectedServiceIndex, setSelectedServiceIndex] = useState<
-    number | null
-  >(null);
-
   // State for Downloading Export file
   const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
     null
@@ -160,8 +188,6 @@ const Dashboard: React.FC = () => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formatToDownload]);
-
-  const [addressesData, setAddressesData] = useState(dataForAddresses);
 
   return (
     <Box
@@ -363,12 +389,15 @@ const Dashboard: React.FC = () => {
         >
           {/* Services Table*/}
           <ServicesTable
+            loading={loadingDomains}
+            domains={domains}
             selectedServiceIndex={selectedServiceIndex}
             setDataForAreaChart={setDataForAreaChart}
             setSelectedServiceIndex={setSelectedServiceIndex}
           />
           <AddressesTable
-            addressesData={addressesData}
+            loading={loadingAddresses}
+            addressesData={ipAddressesForDomain}
             selectedServiceIndex={selectedServiceIndex}
           />
         </Box>

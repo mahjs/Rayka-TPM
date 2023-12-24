@@ -1,8 +1,18 @@
-import { Box, MenuItem, Select, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useRef, useEffect, FC } from "react";
 import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
+import { Domain } from "../../services/domain";
 
 interface Props {
+  loading: boolean;
+  domains: Domain[] | null;
   selectedServiceIndex: number | null;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
   setDataForAreaChart: React.Dispatch<
@@ -16,6 +26,8 @@ interface Props {
 }
 
 const ServicesTable: FC<Props> = ({
+  loading,
+  domains,
   selectedServiceIndex,
   setDataForAreaChart,
   setSelectedServiceIndex,
@@ -155,9 +167,15 @@ const ServicesTable: FC<Props> = ({
           }}
         >
           {/* Table Body */}
-          {Array(30)
-            .fill(null)
-            .map((_, index) => (
+          {loading && (
+            <CircularProgress
+              sx={{
+                margin: "auto",
+              }}
+            />
+          )}
+          {domains &&
+            domains.map((domain, index) => (
               <Box
                 ref={(el: HTMLDivElement) => (dataRefs.current[index] = el)}
                 key={index}
@@ -198,7 +216,7 @@ const ServicesTable: FC<Props> = ({
                   }}
                 >
                   <span>{index + 1}.</span>
-                  spotify.com
+                  {domain.name}.com
                 </Typography>
               </Box>
             ))}
