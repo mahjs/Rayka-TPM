@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Pagination, Typography } from "@mui/material";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 interface Props {
   selectedServiceIndex: number | null;
@@ -19,6 +19,10 @@ const AddressesTable: FC<Props> = ({
   ) => {
     setAddressTablePage(value);
   };
+
+  useEffect(() => {
+    setAddressTablePage(1);
+  }, [selectedServiceIndex, loading]);
 
   return (
     <Box
@@ -135,7 +139,7 @@ const AddressesTable: FC<Props> = ({
               برای مشاهده آدرس های IP یک سرویس را از منوی سرویس ها انتخاب کنید.
             </Typography>
           )}
-          {selectedServiceIndex !== null && (
+          {selectedServiceIndex !== null && !loading && (
             <Pagination
               sx={{
                 direction: "ltr",
