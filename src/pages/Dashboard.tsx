@@ -124,6 +124,8 @@ const Dashboard: React.FC = () => {
 
   // State for SquareCharts
   const [dataForTreeChart, setDataForTreeChart] = useState(mockDomainsData);
+
+  // State and config for getting all domains
   const [domains, setDomains] = useState<Domain[] | null>(null);
   const [loadingDomains, setLoadingDomains] = useState<boolean>(false);
   useEffect(() => {
@@ -139,6 +141,7 @@ const Dashboard: React.FC = () => {
     number | null
   >(null);
 
+  // State and config for getting IP addresses for a domain
   const [ipAddressesForDomain, setIpAddressesForDomain] = useState<
     string[] | null
   >(null);
@@ -155,8 +158,7 @@ const Dashboard: React.FC = () => {
       });
   }, [domains, selectedServiceIndex]);
 
-  console.log(ipAddressesForDomain);
-
+  // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
     if (
