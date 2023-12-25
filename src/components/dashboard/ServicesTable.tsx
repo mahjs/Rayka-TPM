@@ -246,7 +246,7 @@ const ServicesTable: FC<Props> = ({
                     }}
                   >
                     <span>{index + 1}.</span>
-                    {domain.name}.com
+                    {domain.name}
                   </Typography>
                 </Box>
               ))}
