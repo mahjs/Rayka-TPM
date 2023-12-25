@@ -25,7 +25,7 @@ const Input: FC<Props> = ({
         flexDirection: "column",
       }}
     >
-      <Typography fontWeight="700" fontSize="1.2rem">
+      <Typography fontWeight="700" fontSize="1rem">
         {title}
       </Typography>
       <MuiInput

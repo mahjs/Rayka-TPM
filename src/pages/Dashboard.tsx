@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IoChevronDown } from "react-icons/io5";
-import { Box, Button, Divider, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +10,9 @@ import AreaChart from "../components/dashboard/AreaChart";
 import ProfileInfo from "../components/profile/ProfileInfoHeader";
 import api from "../services";
 import { Domain } from "../services/domain";
+import ExportDocModal from "../components/dashboard/ExportDocModal";
+import useIpAddresses from "../hooks/useIpAddresses";
+import useDomains from "../hooks/useDomains";
 
 const mockDomainsData = [
   { name: "A1", value: 25 },
@@ -43,34 +45,6 @@ const mockDomainsData = [
   { name: "d5", value: 27 },
   { name: "d6", value: 36 },
   { name: "d7", value: 71 },
-];
-
-const mockIpAddressesForDomain = [
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.2", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
-  { ip: "198.192.1.1", session: "5254" },
 ];
 
 const initialDataForLineChart = [
@@ -125,38 +99,17 @@ const Dashboard: React.FC = () => {
   // State for SquareCharts
   const [dataForTreeChart, setDataForTreeChart] = useState(mockDomainsData);
 
-  // State and config for getting all domains
-  const [domains, setDomains] = useState<Domain[] | null>(null);
-  const [loadingDomains, setLoadingDomains] = useState<boolean>(false);
-  useEffect(() => {
-    setLoadingDomains(true);
-    api.domain.getAllDomains().then((res) => {
-      setDomains(res.data);
-      setLoadingDomains(false);
-    });
-  }, []);
-
   // State for Selecting a service
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
     number | null
   >(null);
 
-  // State and config for getting IP addresses for a domain
-  const [ipAddressesForDomain, setIpAddressesForDomain] = useState<
-    string[] | null
-  >(null);
-  const [loadingAddresses, setLoadingAddresses] = useState<boolean>(false);
-  useEffect(() => {
-    if (selectedServiceIndex === null) return;
-    setLoadingAddresses(true);
-    setIpAddressesForDomain(null);
-    api.domain
-      .getIpAddressesForDomain(domains![selectedServiceIndex].name)
-      .then((res) => {
-        setIpAddressesForDomain(res.data.ips);
-        setLoadingAddresses(false);
-      });
-  }, [domains, selectedServiceIndex]);
+  // State for getting all domains
+  const { loadingDomains, domains, reFetchDomains } = useDomains();
+
+  // State for getting the ip addresses
+  const { ipAddressesForDomain, loadingAddresses, reFetchAddresses } =
+    useIpAddresses(domains ? domains![selectedServiceIndex!]?.name : null);
 
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
@@ -191,220 +144,146 @@ const Dashboard: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formatToDownload]);
 
-  return (
-    <Box
-      component="main"
-      sx={{
-        padding: "2rem 1.5rem",
-        display: "flex",
-        gap: "1rem",
-      }}
-    >
-      {/* Right side. Charts*/}
-      <Box
-        sx={{
-          width: "50vw",
-          display: "flex",
-          flexDirection: "column",
-          gap: "2rem",
-        }}
-      >
-        <ProfileInfo />
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            height: "35vh",
-          }}
-        >
-          <Typography
-            fontFamily="YekanBakh-Medium"
-            component="h2"
-            sx={{
-              fontSize: "1.5rem",
-            }}
-          >
-            سهم سرویس ها
-          </Typography>
-          <Box
-            sx={{
-              border: "1px solid #707070",
-              padding: ".2rem",
-              height: "100%",
-            }}
-          >
-            <TreeMap
-              dataForTreeChart={dataForTreeChart}
-              selectedServiceIndex={selectedServiceIndex}
-              setSelectedServiceIndex={setSelectedServiceIndex}
-              setDataForAreaChart={setDataForAreaChart}
-            />
-          </Box>
-        </Box>
-        <AreaChart
-          dataForAreaChart={dataForAreaChart}
-          selectedServiceIndex={selectedServiceIndex}
-        />
-      </Box>
+  const [openExportModal, setOpenExportModal] = useState<boolean>(false);
+  const [selectedFormat, setSelectedFormat] = useState<string>("pdf");
 
-      {/* Left side. Tables*/}
+  return (
+    <>
       <Box
+        component="main"
         sx={{
-          width: "50%",
+          padding: "2rem 1.5rem",
           display: "flex",
-          flexDirection: "column",
           gap: "1rem",
         }}
       >
+        {/* Right side. Charts*/}
         <Box
           sx={{
-            height: "5dvh",
+            width: "50vw",
             display: "flex",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            gap: "2rem",
           }}
         >
-          <Search
-            value={searchInput}
-            onChange={handleChange}
-            handleSubmit={handleSubmit}
-          />
-
+          <ProfileInfo />
           <Box
             sx={{
-              position: "relative",
               display: "flex",
-              height: "40px",
-              background: "#0F6CBD",
-              alignItems: "center",
-              padding: ".5rem",
-              gap: ".5rem",
-              borderRadius: ".5rem",
-              zIndex: "5",
+              flexDirection: "column",
+              gap: "1rem",
+              height: "35vh",
             }}
           >
-            <Button
-              style={{ zIndex: "10", minWidth: "0" }}
-              onClick={() => setOpenDownLoadMenu(!openDownloadMenu)}
-            >
-              <IoChevronDown
-                color="#fff"
-                style={{ width: "25px", height: "25px" }}
-              />
-            </Button>
-            <Box
-              sx={{
-                height: "200%",
-                background: "#fff",
-                width: "2px",
-              }}
-            />
             <Typography
-              fontFamily="YekanBakh-Bold"
+              fontFamily="YekanBakh-Medium"
+              component="h2"
               sx={{
-                color: "#fff",
-                paddingRight: ".5rem",
+                fontSize: "1.5rem",
               }}
             >
-              دریافت خروجی
+              سهم سرویس ها
             </Typography>
-
             <Box
               sx={{
-                width: "100%",
-                left: "0",
-                position: "absolute",
-                background: "#0F6CBD",
-                borderRadius: ".5rem",
-                padding: ".5rem",
-                top: "-102%",
-                opacity: "0",
-                color: "#fff",
-                textAlign: "center",
-                fontFamily: "YekanBakh-Regular",
-                animation:
-                  openDownloadMenu !== null
-                    ? openDownloadMenu
-                      ? "slideDown .2s linear both"
-                      : "slideUp .2s linear both"
-                    : "",
-                "@keyframes slideUp": {
-                  "0%": {
-                    opacity: "1",
-                    top: "102%",
-                  },
-
-                  "60%": {
-                    opacity: "0",
-                  },
-
-                  "100%": {
-                    opacity: "0",
-                    top: "-102%",
-                  },
-                },
-                "@keyframes slideDown": {
-                  "0%": {
-                    opacity: "0",
-                    top: "-100%",
-                  },
-
-                  "60%": {
-                    opacity: ".1",
-                  },
-
-                  "100%": {
-                    opacity: "1",
-                    top: "102%",
-                  },
-                },
+                border: "1px solid #707070",
+                padding: ".2rem",
+                height: "100%",
               }}
             >
-              <Button
-                onClick={() => setFormatToDownload("PDF")}
-                sx={{ width: "100", color: "#fff" }}
-              >
-                PDF
-              </Button>
-              <Divider sx={{ background: "#fff" }} />
-              <Button
-                onClick={() => setFormatToDownload("CSV")}
-                sx={{ width: "100%", color: "#fff" }}
-              >
-                CSV
-              </Button>
-              <Divider sx={{ background: "#fff" }} />
-              <Button
-                onClick={() => setFormatToDownload("Excel")}
-                sx={{ width: "100%", color: "#fff" }}
-              >
-                Excel
-              </Button>
+              <TreeMap
+                dataForTreeChart={dataForTreeChart}
+                selectedServiceIndex={selectedServiceIndex}
+                setSelectedServiceIndex={setSelectedServiceIndex}
+                setDataForAreaChart={setDataForAreaChart}
+              />
             </Box>
           </Box>
+          <AreaChart
+            dataForAreaChart={dataForAreaChart}
+            selectedServiceIndex={selectedServiceIndex}
+          />
         </Box>
+
+        {/* Left side. Tables*/}
         <Box
           sx={{
+            width: "50%",
             display: "flex",
+            flexDirection: "column",
             gap: "1rem",
           }}
         >
-          {/* Services Table*/}
-          <ServicesTable
-            loading={loadingDomains}
-            domains={domains}
-            selectedServiceIndex={selectedServiceIndex}
-            setDataForAreaChart={setDataForAreaChart}
-            setSelectedServiceIndex={setSelectedServiceIndex}
-          />
-          <AddressesTable
-            loading={loadingAddresses}
-            addressesData={ipAddressesForDomain}
-            selectedServiceIndex={selectedServiceIndex}
-          />
+          <Box
+            sx={{
+              height: "5dvh",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <Search
+              value={searchInput}
+              onChange={handleChange}
+              handleSubmit={handleSubmit}
+            />
+
+            <Button
+              onClick={() => setOpenExportModal(true)}
+              sx={{
+                fontFamily: "YekanBakh-Bold",
+                color: "#fff",
+                paddingRight: ".5rem",
+                display: "flex",
+                background: "#0F6CBD",
+                alignItems: "center",
+                padding: ".5rem",
+                gap: ".5rem",
+                borderRadius: ".5rem",
+                zIndex: "5",
+                ":hover": {
+                  color: "#0F6CBD",
+                  background: "#0F6CBD33",
+                },
+              }}
+            >
+              دریافت خروجی
+            </Button>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              gap: "1rem",
+            }}
+          >
+            {/* Services Table*/}
+            <ServicesTable
+              refetchDomains={reFetchDomains}
+              refetchIpAddresses={reFetchAddresses}
+              loading={loadingDomains}
+              domains={domains}
+              selectedServiceIndex={selectedServiceIndex}
+              setDataForAreaChart={setDataForAreaChart}
+              setSelectedServiceIndex={setSelectedServiceIndex}
+            />
+            <AddressesTable
+              refetchIpAddresses={reFetchAddresses}
+              domainName={
+                domains ? domains![selectedServiceIndex!]?.name : null
+              }
+              loading={loadingAddresses}
+              addressesData={ipAddressesForDomain}
+              selectedServiceIndex={selectedServiceIndex}
+            />
+          </Box>
         </Box>
       </Box>
-    </Box>
+      <ExportDocModal
+        openModal={openExportModal}
+        setOpenModal={setOpenExportModal}
+        selectedFormat={selectedFormat}
+        setSelectedFormat={setSelectedFormat}
+      />
+    </>
   );
 };
 

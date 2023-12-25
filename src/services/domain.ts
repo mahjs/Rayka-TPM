@@ -1,9 +1,7 @@
-// import ClientApi from "./clientApi";
-import { AxiosReturnType } from "./config";
+import ClientApi from "./clientApi";
+import config from "./config";
 
-// const axios = new ClientApi();
-
-import axios from "axios";
+const axios = new ClientApi();
 
 export interface Domain {
   name: string;
@@ -14,10 +12,21 @@ interface IpAddressReturnType {
   ips: string[];
 }
 
-export const getAllDomains = async (): Promise<AxiosReturnType<Domain[]>> =>
-  await axios.get("http://2.189.59.122:2312/domains");
+export const getAllDomains = async (): Promise<Domain[]> =>
+  await axios.http.get(config.rootAddress + "/domains");
 
 export const getIpAddressesForDomain = async (
   domain: string
-): Promise<AxiosReturnType<IpAddressReturnType>> =>
-  await axios.get(`http://2.189.59.122:2312/get-ip/${domain}`);
+): Promise<IpAddressReturnType> =>
+  await axios.http.get(`${config.rootAddress}/get-ip/${domain}`);
+
+export const addDomain = async (domains: string[]) =>
+  await axios.http.post(config.rootAddress + "/add-domain", {
+    names: domains,
+  });
+
+export const addIpAddressesToDomain = async (domain: string, ips: string[]) =>
+  await axios.http.post(config.rootAddress + "/add-ip", {
+    domain,
+    ip_addresses: ips,
+  });

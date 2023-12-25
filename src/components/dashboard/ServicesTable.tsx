@@ -1,18 +1,22 @@
 import {
   Box,
+  Button,
   CircularProgress,
   MenuItem,
   Select,
-  Stack,
   Typography,
 } from "@mui/material";
-import { useRef, useEffect, FC } from "react";
+import { GoPlus } from "react-icons/go";
+import { useRef, useEffect, FC, useState } from "react";
 import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
 import { Domain } from "../../services/domain";
+import AddDomainModal from "./AddDomainModal";
 
 interface Props {
   loading: boolean;
   domains: Domain[] | null;
+  refetchDomains: () => void;
+  refetchIpAddresses: () => void;
   selectedServiceIndex: number | null;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
   setDataForAreaChart: React.Dispatch<
@@ -28,10 +32,13 @@ interface Props {
 const ServicesTable: FC<Props> = ({
   loading,
   domains,
+  refetchDomains,
+  refetchIpAddresses,
   selectedServiceIndex,
   setDataForAreaChart,
   setSelectedServiceIndex,
 }) => {
+  // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
     if (
@@ -45,184 +52,214 @@ const ServicesTable: FC<Props> = ({
     }
   });
 
-  return (
-    <Box
-      sx={{
-        width: "50%",
-      }}
-    >
-      <Stack direction="row" alignItems="center" gap="1rem">
-        <Typography
-          fontFamily="YekanBakh-Medium"
-          component="h3"
-          sx={{
-            fontSize: "1.5rem",
-          }}
-        >
-          سرویس ها
-        </Typography>
+  const [openAddDomainModal, setOpenAddDomainModal] = useState<boolean>(false);
 
-        <Box
-          sx={{
-            position: "relative",
-          }}
-        >
-          <Select
-            IconComponent={IoChevronDown}
-            label="فیلتر سرویس ها"
-            value=""
-            sx={{
-              minWidth: "180px",
-              padding: ".5rem",
-              border: "1px solid transparent",
-              borderBottomColor: "gray",
-              paddingBottom: "0",
-              ".MuiSelect-icon": {
-                width: "25px",
-                height: "25px",
-              },
-              ".MuiOutlinedInput-notchedOutline": { border: 0 },
-              "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                {
-                  border: 0,
-                },
-              ".css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input":
-                {
-                  padding: "0",
-                },
-            }}
-          >
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
-              هفتگی
-            </MenuItem>
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="monthly">
-              ماهانه
-            </MenuItem>
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="year">
-              سالانه
-            </MenuItem>
-          </Select>
-          <IoFilterOutline
-            style={{
-              position: "absolute",
-              top: "40%",
-              left: ".2rem",
-              transform: "translateY(-50%)",
-              width: "25px",
-              height: "25px",
-              color: "gray",
-              zIndex: "-1",
-            }}
-          />
-          <Typography
-            fontFamily="YekanBakh-Thin"
-            sx={{
-              position: "absolute",
-              color: "#707070aa",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: "-1",
-            }}
-          >
-            فیلتر بر اساس
-          </Typography>
-        </Box>
-      </Stack>
+  return (
+    <>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: ".2rem",
+          width: "50%",
         }}
       >
-        {/* Table Header*/}
         <Box
           sx={{
-            marginTop: ".5rem",
-            padding: ".8rem .5rem",
-            background: "#E9F1F4",
-            justifyContent: "space-between",
             display: "flex",
-            borderRadius: ".5rem",
+            alignItems: "center",
+            gap: "1rem",
           }}
         >
-          <Typography fontFamily="YekanBakh-Regular">تعداد سشن‌ ها</Typography>
           <Typography
-            fontFamily="YekanBakh-Regular"
+            fontFamily="YekanBakh-Medium"
+            component="h3"
             sx={{
-              marginLeft: "4rem",
+              fontSize: "1.5rem",
             }}
           >
-            نام وبسایت
+            سرویس ها
           </Typography>
+          <Button
+            onClick={() => setOpenAddDomainModal(true)}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: ".3rem",
+              background: "#0F6CBD",
+              color: "#fff",
+              fontFamily: "YekanBakh-Regular",
+              borderRadius: ".5rem",
+              ":hover": {
+                background: "#0F6CBD",
+                color: "#fff",
+              },
+            }}
+          >
+            <GoPlus style={{ width: "20px", height: "20px" }} />
+            افزودن
+          </Button>
+
+          <Box
+            sx={{
+              position: "relative",
+              marginRight: "auto",
+              marginLeft: "1rem",
+            }}
+          >
+            <Select
+              IconComponent={IoChevronDown}
+              label="فیلتر سرویس ها"
+              value=""
+              sx={{
+                minWidth: "4rem",
+                padding: ".5rem",
+                border: "1px solid transparent",
+                borderBottomColor: "gray",
+                paddingBottom: "0",
+                ".MuiSelect-icon": {
+                  width: "25px",
+                  height: "25px",
+                  marginTop: "-.25rem",
+                },
+                ".MuiOutlinedInput-notchedOutline": { border: 0 },
+                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    border: 0,
+                  },
+                ".css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input":
+                  {
+                    padding: "0",
+                  },
+              }}
+            >
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
+                هفتگی
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="monthly"
+              >
+                ماهانه
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="year">
+                سالانه
+              </MenuItem>
+            </Select>
+            <IoFilterOutline
+              style={{
+                position: "absolute",
+                top: "40%",
+                left: ".2rem",
+                transform: "translateY(-50%)",
+                width: "25px",
+                height: "25px",
+                color: "gray",
+                zIndex: "-1",
+              }}
+            />
+          </Box>
         </Box>
         <Box
           sx={{
-            height: "72dvh",
-            overflow: "auto",
             display: "flex",
             flexDirection: "column",
             gap: ".2rem",
           }}
         >
-          {/* Table Body */}
-          {loading && (
-            <CircularProgress
+          {/* Table Header*/}
+          <Box
+            sx={{
+              marginTop: ".5rem",
+              padding: ".8rem .5rem",
+              background: "#E9F1F4",
+              justifyContent: "space-between",
+              display: "flex",
+              borderRadius: ".5rem",
+            }}
+          >
+            <Typography fontFamily="YekanBakh-Regular">
+              تعداد سشن‌ ها
+            </Typography>
+            <Typography
+              fontFamily="YekanBakh-Regular"
               sx={{
-                margin: "auto",
+                marginLeft: "4rem",
               }}
-            />
-          )}
-          {domains &&
-            domains.map((domain, index) => (
-              <Box
-                ref={(el: HTMLDivElement) => (dataRefs.current[index] = el)}
-                key={index}
-                onClick={() => {
-                  setDataForAreaChart((prevData) =>
-                    prevData.map((data) => ({
-                      ...data,
-                      value: Math.round(Math.random() * 150),
-                    }))
-                  );
-
-                  if (selectedServiceIndex === index)
-                    setSelectedServiceIndex(null);
-                  else setSelectedServiceIndex(index);
-                }}
+            >
+              نام وبسایت
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              height: "72dvh",
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: ".2rem",
+            }}
+          >
+            {/* Table Body */}
+            {loading && (
+              <CircularProgress
                 sx={{
-                  background: selectedServiceIndex === index ? "#5E819F" : "",
-                  color: selectedServiceIndex === index ? "#fff" : "",
-                  transition: "all .2s linear",
-                  cursor: "pointer",
-                  padding: ".8rem .5rem",
-                  justifyContent: "space-between",
-                  display: "flex",
-                  borderRadius: ".5rem",
-                  border: "1px solid #E3E3E3",
-                  fontFamily: "SegoeUI",
+                  margin: "auto",
                 }}
-              >
-                <Typography marginRight="1.5rem" fontFamily="SegoeUI">
-                  5254
-                </Typography>
-                <Typography
+              />
+            )}
+            {domains &&
+              domains.map((domain, index) => (
+                <Box
+                  ref={(el: HTMLDivElement) => (dataRefs.current[index] = el)}
+                  key={index}
+                  onClick={() => {
+                    setDataForAreaChart((prevData) =>
+                      prevData.map((data) => ({
+                        ...data,
+                        value: Math.round(Math.random() * 150),
+                      }))
+                    );
+
+                    if (selectedServiceIndex === index)
+                      setSelectedServiceIndex(null);
+                    else setSelectedServiceIndex(index);
+                  }}
                   sx={{
-                    marginLeft: ".6rem",
-                    direction: "ltr",
+                    background: selectedServiceIndex === index ? "#5E819F" : "",
+                    color: selectedServiceIndex === index ? "#fff" : "",
+                    transition: "all .2s linear",
+                    cursor: "pointer",
+                    padding: ".8rem .5rem",
+                    justifyContent: "space-between",
                     display: "flex",
-                    gap: "1.5rem",
+                    borderRadius: ".5rem",
+                    border: "1px solid #E3E3E3",
+                    fontFamily: "SegoeUI",
                   }}
                 >
-                  <span>{index + 1}.</span>
-                  {domain.name}.com
-                </Typography>
-              </Box>
-            ))}
+                  <Typography marginRight="1.5rem" fontFamily="SegoeUI">
+                    5254
+                  </Typography>
+                  <Typography
+                    sx={{
+                      marginLeft: ".6rem",
+                      direction: "ltr",
+                      display: "flex",
+                      gap: "1.5rem",
+                    }}
+                  >
+                    <span>{index + 1}.</span>
+                    {domain.name}.com
+                  </Typography>
+                </Box>
+              ))}
+          </Box>
         </Box>
       </Box>
-    </Box>
+      <AddDomainModal
+        openModal={openAddDomainModal}
+        setOpenModal={setOpenAddDomainModal}
+        refetchDomains={refetchDomains}
+        refetchIpAddresses={refetchIpAddresses}
+      />
+    </>
   );
 };
 
