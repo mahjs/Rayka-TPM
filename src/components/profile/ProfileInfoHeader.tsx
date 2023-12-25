@@ -1,10 +1,12 @@
 import { Box, Stack, Typography, Button } from "@mui/material";
 import { BsPerson } from "react-icons/bs";
 import { IoChevronDown } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { RiHistoryLine } from "react-icons/ri";
 
 const ProfileInfo = () => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   return (
     <Box
       sx={{
@@ -88,6 +90,31 @@ const ProfileInfo = () => {
             {"احمد مهرانفر"}
           </Typography>
         </Box>
+        {pathname === "/" && (
+          <>
+            <Box
+              sx={{
+                background: "#000",
+                height: "60px",
+                width: "1px",
+              }}
+            />
+            <Button
+              onClick={() => navigate("/profile")}
+              sx={{
+                fontFamily: "YekanBakh-Medium",
+                color: "#000",
+                fontSize: "1rem",
+                display: "flex",
+                alignItems: "center",
+                gap: ".5rem",
+              }}
+            >
+              <RiHistoryLine />
+              فعالیت های کاربران
+            </Button>
+          </>
+        )}
       </Box>
     </Box>
   );

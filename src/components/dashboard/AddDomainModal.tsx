@@ -99,7 +99,7 @@ const AddDomainModal: FC<Props> = ({
               }}
             >
               بستن پنجره
-              <RxCross2 />
+              <RxCross2 style={{ marginTop: "-.2rem " }} />
             </Button>
           </Stack>
         </Box>
