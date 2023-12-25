@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   Pagination,
   Stack,
@@ -9,6 +10,8 @@ import {
 import { FC, useEffect, useState } from "react";
 import { GoPlus } from "react-icons/go";
 import AddIpAddressesModal from "./AddIpAddressesModal";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import api from "../../services";
 
 interface Props {
   selectedServiceIndex: number | null;
@@ -38,6 +41,30 @@ const AddressesTable: FC<Props> = ({
   }, [selectedServiceIndex, loading]);
 
   const [openAddAddressModal, setOpenAddDomainModal] = useState(false);
+
+  const [selectedAddresses, setSelectedAddresses] = useState<string[]>([]);
+
+  const handleSelectIps = (
+    _event: React.ChangeEvent<HTMLInputElement>,
+    address: string
+  ) => {
+    const prevAddresses = [...selectedAddresses];
+    const index = prevAddresses.indexOf(address);
+    if (index !== -1) prevAddresses.splice(index, 1);
+    else prevAddresses.push(address);
+    setSelectedAddresses(prevAddresses);
+  };
+
+  console.log(selectedAddresses);
+
+  const handleDeleteIpsFromDomian = () => {
+    api.domain
+      .deleteIpAddressesFromDomain(domainName!, selectedAddresses)
+      .then(() => {
+        refetchIpAddresses();
+        setSelectedAddresses([]);
+      });
+  };
   return (
     <>
       <Box
@@ -75,6 +102,27 @@ const AddressesTable: FC<Props> = ({
             >
               <GoPlus style={{ width: "20px", height: "20px" }} />
               افزودن
+            </Button>
+          )}
+          {selectedAddresses.length > 0 && (
+            <Button
+              onClick={handleDeleteIpsFromDomian}
+              sx={{
+                color: "red",
+                fontFamily: "YekanBakh-Regular",
+                display: "flex",
+                alignItems: "center",
+                gap: ".3rem",
+              }}
+            >
+              <RiDeleteBin6Line
+                style={{
+                  width: "15px",
+                  height: "15px",
+                  color: "red",
+                }}
+              />
+              حذف
             </Button>
           )}
         </Stack>
@@ -140,14 +188,22 @@ const AddressesTable: FC<Props> = ({
                 )
                 .map((address, index) => (
                   <Box
-                    key={index}
+                    key={address}
                     sx={{
                       padding: ".7rem .5rem",
-                      justifyContent: "space-between",
                       display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
+                    <Checkbox
+                      sx={{
+                        padding: ".1rem",
+                      }}
+                      onChange={(e) => handleSelectIps(e, address)}
+                    />
                     <Typography
+                      marginLeft="auto"
                       marginRight="2rem"
                       fontFamily="YekanBakh-Regular"
                     >
