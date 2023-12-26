@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
@@ -188,9 +188,11 @@ const Dashboard: React.FC = () => {
                 border: "1px solid #707070",
                 padding: ".2rem",
                 height: "100%",
+                position: "relative",
               }}
             >
               <TreeMap
+                loadingData={loadingData}
                 dataForTreeChart={
                   loadingData ? [{ name: "nothing", value: 100 }] : treeMapData
                 }
@@ -198,6 +200,16 @@ const Dashboard: React.FC = () => {
                 setSelectedServiceIndex={setSelectedServiceIndex}
                 setDataForAreaChart={setDataForAreaChart}
               />
+              {loadingData && (
+                <CircularProgress
+                  sx={{
+                    position: "absolute",
+                    top: "40%",
+                    left: "48%",
+                    transform: "translate(-50% -50%)",
+                  }}
+                />
+              )}
             </Box>
           </Box>
           <AreaChart

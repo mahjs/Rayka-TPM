@@ -3,6 +3,7 @@ import { FC } from "react";
 import { Typography } from "@mui/material";
 
 interface Props {
+  loadingData: boolean;
   dataForTreeChart: { name: string; value: number }[];
   selectedServiceIndex: number | null;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const TreeMap: FC<Props> = ({
+  loadingData,
   dataForTreeChart,
   setDataForAreaChart,
   selectedServiceIndex,
@@ -35,6 +37,7 @@ const TreeMap: FC<Props> = ({
         dataKey="value"
         content={
           <CustomizedContent
+            loading={loadingData}
             selectedIndex={selectedServiceIndex}
             onClickHandler={setSelectedServiceIndex}
             setDataForAreaChart={setDataForAreaChart}
@@ -64,10 +67,12 @@ const CustomizedContent = (props: any) => {
     selectedIndex,
     onClickHandler,
     setDataForAreaChart,
+    loading,
   } = props;
 
-  const hue = (index * 137.508) % 360; // using golden angle approximation
-  const color = `hsl(${hue}, 70%, 60%)`;
+  const hue = (index * 137.508) % 360;
+  let color = `hsl(${hue}, 70%, 60%)`;
+  if (index === 0 && loading) color = "#fff";
 
   return (
     <g
