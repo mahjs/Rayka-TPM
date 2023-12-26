@@ -44,7 +44,7 @@ const Search: FC<Props> = ({ handleSubmit, value, onChange }) => {
       </Button>
       <Input
         type="search"
-        placeholder="جست و جو سرویس یا IP"
+        placeholder="جستجوی سرویس یا IP"
         value={value}
         onChange={onChange}
         sx={{
