@@ -122,12 +122,15 @@ const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
             margin: "13px 19px",
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-start",
+            alignItems: "flex-end",
             fontFamily: "YekanBakh-Regular",
           }}
         >
-          <p>زمان: {payload[0].payload.name}</p>
-          <p>مقدار: {payload[0].payload.value}</p>
+          <Typography>زمان: {payload[0].payload.name}</Typography>
+          <Typography>
+            مقدار:{" "}
+            {payload[0].payload.value === 1 ? 0 : payload[0].payload.value}
+          </Typography>
         </div>
       </div>
     );
