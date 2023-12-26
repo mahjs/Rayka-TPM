@@ -236,10 +236,12 @@ const Dashboard: React.FC = () => {
                 display: "flex",
                 background: "#0F6CBD",
                 alignItems: "center",
-                padding: ".5rem",
+                paddingX: "1rem",
+                paddingY: ".75rem",
                 gap: ".5rem",
                 borderRadius: ".5rem",
                 zIndex: "5",
+                height: "fit-content",
                 ":hover": {
                   color: "#0F6CBD",
                   background: "#0F6CBD33",
