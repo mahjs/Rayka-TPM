@@ -4,20 +4,29 @@ import { FormEvent, useState } from "react";
 import Logo from "../assets/images/logo.svg";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
+import api from "../services";
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [userName, setUserName] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [verifyCode, setVerifyCode] = useState("");
+  const [successCodeSend, setSuccessCodeSend] = useState(false);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!userName || !password) return;
+    // if (!userName || !password) return;
+    if (!mobileNumber || mobileNumber.length < 11) return;
 
-    console.log(userName, password);
-    login();
-    navigate("/");
+    if (!successCodeSend)
+      api.auth.sendCode(mobileNumber).then((res) => {
+        setSuccessCodeSend(true);
+      });
+    else
+      api.auth.verifyCode(mobileNumber, verifyCode).then((res) => {
+        login();
+        navigate("/");
+      });
   };
 
   return (
@@ -64,18 +73,19 @@ const Login = () => {
             }}
           >
             <Input
-              name="username"
-              title="نام کاربری"
-              value={userName}
-              onChange={setUserName}
+              name="mobile"
+              title="شماره همراه"
+              value={mobileNumber}
+              onChange={setMobileNumber}
             />
-            <Input
-              type="password"
-              name="password"
-              title="رمز عبور"
-              value={password}
-              onChange={setPassword}
-            />
+            {successCodeSend && (
+              <Input
+                name="code"
+                title="کد ارسالی"
+                value={verifyCode}
+                onChange={setVerifyCode}
+              />
+            )}
 
             <Button
               type="submit"

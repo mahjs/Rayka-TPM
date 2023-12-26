@@ -5,6 +5,8 @@ import {
   useContext,
   useState,
 } from "react";
+import storage from "../services/storage";
+import config from "../services/config";
 
 interface AuthContextType {
   isLogin: boolean;
@@ -19,7 +21,10 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [isLogin, setIsLogin] = useState<boolean>(
+    !!storage.get(config.tokenName)
+  );
+
   const login = () => {
     setIsLogin(true);
   };
