@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   MenuItem,
   Select,
@@ -10,7 +11,9 @@ import { GoPlus } from "react-icons/go";
 import { useRef, useEffect, FC, useState } from "react";
 import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
 import { Domain } from "../../services/domain";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import AddDomainModal from "./AddDomainModal";
+import api from "../../services";
 
 interface Props {
   loading: boolean;
@@ -53,6 +56,25 @@ const ServicesTable: FC<Props> = ({
   });
 
   const [openAddDomainModal, setOpenAddDomainModal] = useState<boolean>(false);
+  const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
+
+  const handleSelectDomain = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    domain: string
+  ) => {
+    const prevDomains = [...selectedDomains];
+    const index = prevDomains.indexOf(domain);
+    if (index !== -1) prevDomains.splice(index, 1);
+    else prevDomains.push(domain);
+    setSelectedDomains(prevDomains);
+  };
+
+  const handleDeleteDomains = () => {
+    api.domain.deleteDomains(selectedDomains).then(() => {
+      refetchDomains();
+      setSelectedDomains([]);
+    });
+  };
 
   return (
     <>
@@ -65,7 +87,7 @@ const ServicesTable: FC<Props> = ({
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: "1rem",
+            gap: ".3rem",
           }}
         >
           <Typography
@@ -73,6 +95,7 @@ const ServicesTable: FC<Props> = ({
             component="h3"
             sx={{
               fontSize: "1.5rem",
+              whiteSpace: "nowrap",
             }}
           >
             سرویس ها
@@ -96,6 +119,28 @@ const ServicesTable: FC<Props> = ({
             <GoPlus style={{ width: "20px", height: "20px" }} />
             افزودن
           </Button>
+
+          {selectedDomains.length > 0 && (
+            <Button
+              onClick={handleDeleteDomains}
+              sx={{
+                color: "red",
+                fontFamily: "YekanBakh-Regular",
+                display: "flex",
+                alignItems: "center",
+                gap: ".3rem",
+              }}
+            >
+              <RiDeleteBin6Line
+                style={{
+                  width: "15px",
+                  height: "15px",
+                  color: "red",
+                }}
+              />
+              حذف
+            </Button>
+          )}
 
           <Box
             sx={{
@@ -208,33 +253,57 @@ const ServicesTable: FC<Props> = ({
               domains.map((domain, index) => (
                 <Box
                   ref={(el: HTMLDivElement) => (dataRefs.current[index] = el)}
-                  key={index}
-                  onClick={() => {
-                    setDataForAreaChart((prevData) =>
-                      prevData.map((data) => ({
-                        ...data,
-                        value: Math.round(Math.random() * 150),
-                      }))
-                    );
-
-                    if (selectedServiceIndex === index)
-                      setSelectedServiceIndex(null);
-                    else setSelectedServiceIndex(index);
-                  }}
+                  key={domain.name}
                   sx={{
                     background: selectedServiceIndex === index ? "#5E819F" : "",
                     color: selectedServiceIndex === index ? "#fff" : "",
                     transition: "all .2s linear",
                     cursor: "pointer",
                     padding: ".8rem .5rem",
+                    alignItems: "center",
                     justifyContent: "space-between",
                     display: "flex",
                     borderRadius: ".5rem",
                     border: "1px solid #E3E3E3",
                     fontFamily: "SegoeUI",
+                    position: "relative",
                   }}
                 >
-                  <Typography marginRight="1.5rem" fontFamily="SegoeUI">
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      height: "100%",
+                      width: "85%",
+                      left: "0",
+                      top: "0",
+                      bottom: "0",
+                      borderRadius: "1rem",
+                    }}
+                    onClick={() => {
+                      setDataForAreaChart((prevData) =>
+                        prevData.map((data) => ({
+                          ...data,
+                          value: Math.round(Math.random() * 150),
+                        }))
+                      );
+
+                      if (selectedServiceIndex === index)
+                        setSelectedServiceIndex(null);
+                      else setSelectedServiceIndex(index);
+                    }}
+                  />
+                  <Checkbox
+                    onChange={(e) => handleSelectDomain(e, domain.name)}
+                    sx={{
+                      zIndex: "100",
+                      padding: ".1rem",
+                    }}
+                  />
+                  <Typography
+                    marginLeft="auto"
+                    marginRight="1.5rem"
+                    fontFamily="SegoeUI"
+                  >
                     5254
                   </Typography>
                   <Typography

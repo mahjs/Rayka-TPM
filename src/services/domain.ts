@@ -24,9 +24,22 @@ export const addDomain = async (domains: string[]) =>
   await axios.http.post(config.rootAddress + "/add-domain", {
     names: domains,
   });
+export const deleteDomains = async (domains: string[]) =>
+  await axios.http.post(config.rootAddress + "/delete-domain", {
+    names: domains,
+  });
 
 export const addIpAddressesToDomain = async (domain: string, ips: string[]) =>
   await axios.http.post(config.rootAddress + "/add-ip", {
     domain,
     ip_addresses: ips,
+  });
+
+export const deleteIpAddressesFromDomain = async (
+  domain: string,
+  ip_addresses: string[]
+) =>
+  await axios.http.post(config.rootAddress + "/delete-ips", {
+    domain,
+    ip_addresses,
   });
