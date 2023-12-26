@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
@@ -8,11 +8,10 @@ import ServicesTable from "../components/dashboard/ServicesTable";
 import TreeMap from "../components/dashboard/TreeMap";
 import AreaChart from "../components/dashboard/AreaChart";
 import ProfileInfo from "../components/profile/ProfileInfoHeader";
-import api from "../services";
-import { Domain } from "../services/domain";
 import ExportDocModal from "../components/dashboard/ExportDocModal";
 import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
+import useTreeMapData from "../hooks/useTreeMapData";
 
 const mockDomainsData = [
   { name: "A1", value: 25 },
@@ -97,7 +96,7 @@ const Dashboard: React.FC = () => {
   };
 
   // State for SquareCharts
-  const [dataForTreeChart, setDataForTreeChart] = useState(mockDomainsData);
+  const { loadingData, treeMapData } = useTreeMapData();
 
   // State for Selecting a service
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
@@ -189,14 +188,28 @@ const Dashboard: React.FC = () => {
                 border: "1px solid #707070",
                 padding: ".2rem",
                 height: "100%",
+                position: "relative",
               }}
             >
               <TreeMap
-                dataForTreeChart={dataForTreeChart}
+                loadingData={loadingData}
+                dataForTreeChart={
+                  loadingData ? [{ name: "nothing", value: 100 }] : treeMapData
+                }
                 selectedServiceIndex={selectedServiceIndex}
                 setSelectedServiceIndex={setSelectedServiceIndex}
                 setDataForAreaChart={setDataForAreaChart}
               />
+              {loadingData && (
+                <CircularProgress
+                  sx={{
+                    position: "absolute",
+                    top: "40%",
+                    left: "48%",
+                    transform: "translate(-50% -50%)",
+                  }}
+                />
+              )}
             </Box>
           </Box>
           <AreaChart
