@@ -8,11 +8,10 @@ import ServicesTable from "../components/dashboard/ServicesTable";
 import TreeMap from "../components/dashboard/TreeMap";
 import AreaChart from "../components/dashboard/AreaChart";
 import ProfileInfo from "../components/profile/ProfileInfoHeader";
-import api from "../services";
-import { Domain } from "../services/domain";
 import ExportDocModal from "../components/dashboard/ExportDocModal";
 import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
+import useTreeMapData from "../hooks/useTreeMapData";
 
 const mockDomainsData = [
   { name: "A1", value: 25 },
@@ -97,7 +96,7 @@ const Dashboard: React.FC = () => {
   };
 
   // State for SquareCharts
-  const [dataForTreeChart, setDataForTreeChart] = useState(mockDomainsData);
+  const { loadingData, treeMapData } = useTreeMapData();
 
   // State for Selecting a service
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
@@ -192,7 +191,9 @@ const Dashboard: React.FC = () => {
               }}
             >
               <TreeMap
-                dataForTreeChart={dataForTreeChart}
+                dataForTreeChart={
+                  loadingData ? [{ name: "nothing", value: 100 }] : treeMapData
+                }
                 selectedServiceIndex={selectedServiceIndex}
                 setSelectedServiceIndex={setSelectedServiceIndex}
                 setDataForAreaChart={setDataForAreaChart}

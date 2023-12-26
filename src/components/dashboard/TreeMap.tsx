@@ -66,6 +66,9 @@ const CustomizedContent = (props: any) => {
     setDataForAreaChart,
   } = props;
 
+  const hue = (index * 137.508) % 360; // using golden angle approximation
+  const color = `hsl(${hue}, 70%, 60%)`;
+
   return (
     <g
       onClick={() => {
@@ -88,9 +91,9 @@ const CustomizedContent = (props: any) => {
           fill:
             selectedIndex !== null
               ? selectedIndex === index
-                ? "#608DB4"
-                : "#B2CADF"
-              : "#608DB4",
+                ? "blue"
+                : color
+              : color,
           stroke: "#fff",
           strokeWidth: 2 / (depth + 1e-10),
           strokeOpacity: 1 / (depth + 1e-10),
