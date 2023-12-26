@@ -55,9 +55,7 @@ const AddressesTable: FC<Props> = ({
     setSelectedAddresses(prevAddresses);
   };
 
-  console.log(selectedAddresses);
-
-  const handleDeleteIpsFromDomian = () => {
+  const handleDeleteIpsFromDomain = () => {
     api.domain
       .deleteIpAddressesFromDomain(domainName!, selectedAddresses)
       .then(() => {
@@ -107,7 +105,7 @@ const AddressesTable: FC<Props> = ({
           )}
           {selectedAddresses.length > 0 && (
             <Button
-              onClick={handleDeleteIpsFromDomian}
+              onClick={handleDeleteIpsFromDomain}
               sx={{
                 color: "red",
                 fontFamily: "YekanBakh-Regular",

@@ -188,17 +188,17 @@ const Dashboard: React.FC = () => {
 
   // State for Area Chart
   const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
-    useState("season");
+    useState("yearly");
   const [dataForAreaChart, setDataForAreaChart] = useState(
     initialSeasonDataForLineChart
   );
 
   useEffect(() => {
-    selectedTimeForAreaChart === "season"
+    selectedTimeForAreaChart === "yearly"
       ? setDataForAreaChart(initialSeasonDataForLineChart)
       : selectedTimeForAreaChart === "monthly"
       ? setDataForAreaChart(initialMonthDataForLineChart)
-      : selectedTimeForAreaChart === "weekly"
+      : selectedTimeForAreaChart === "daily"
       ? setDataForAreaChart(initialDayDataForLineChart)
       : setDataForAreaChart(initialMinDataForLineChart);
 
@@ -328,14 +328,11 @@ const Dashboard: React.FC = () => {
                   },
               }}
             >
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="fiveMin"
-              >
-                پنج دقیقه‌ای
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="minute">
+                دقیقه‌ای
               </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
-                هفتگی
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="daily">
+                روزانه
               </MenuItem>
               <MenuItem
                 sx={{ fontFamily: "YekanBakh-Regular" }}
@@ -343,8 +340,8 @@ const Dashboard: React.FC = () => {
               >
                 ماهانه
               </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="season">
-                فصلی
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="yearly">
+                سالانه
               </MenuItem>
             </Select>
             <AreaChart

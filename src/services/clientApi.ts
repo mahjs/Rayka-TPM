@@ -24,8 +24,8 @@ export default class ClientApi {
     });
 
     this.http.interceptors.response.use((response) => {
-      if (response.data.datas) {
-        const { token } = response.data.datas;
+      if (response.data) {
+        const { token } = response.data;
 
         token && storage.set(config.tokenName, token);
       }
