@@ -188,7 +188,7 @@ const Login = () => {
         </Box>
       </Box>
 
-      <Typography
+      {/* <Typography
         sx={{
           position: "absolute",
           bottom: "2rem",
@@ -199,7 +199,7 @@ const Login = () => {
       >
         Powered by{" "}
         <span style={{ color: "#000", fontWeight: "bold" }}>Rayka</span>
-      </Typography>
+      </Typography> */}
     </Box>
   );
 };
