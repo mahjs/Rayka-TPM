@@ -1,13 +1,13 @@
 import { Box, Button, Typography } from "@mui/material";
 import Input from "../components/login/Input";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Logo from "../assets/images/logo.svg";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
 import api from "../services";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, isLogin } = useAuth();
   const navigate = useNavigate();
   const [mobileNumber, setMobileNumber] = useState("");
   const [verifyCode, setVerifyCode] = useState("");
@@ -28,6 +28,10 @@ const Login = () => {
         navigate("/");
       });
   };
+
+  useEffect(() => {
+    if (isLogin) navigate("/");
+  });
 
   return (
     <Box
@@ -188,7 +192,7 @@ const Login = () => {
         </Box>
       </Box>
 
-      <Typography
+      {/* <Typography
         sx={{
           position: "absolute",
           bottom: "2rem",
@@ -199,7 +203,7 @@ const Login = () => {
       >
         Powered by{" "}
         <span style={{ color: "#000", fontWeight: "bold" }}>Rayka</span>
-      </Typography>
+      </Typography> */}
     </Box>
   );
 };

@@ -7,6 +7,7 @@ import {
 } from "react";
 import storage from "../services/storage";
 import config from "../services/config";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   isLogin: boolean;
@@ -29,6 +30,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     setIsLogin(true);
   };
   const logout = () => {
+    storage.remove(config.tokenName);
     setIsLogin(false);
   };
   return (
