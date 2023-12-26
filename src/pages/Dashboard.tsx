@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
@@ -46,7 +53,7 @@ const mockDomainsData = [
   { name: "d7", value: 71 },
 ];
 
-const initialDataForLineChart = [
+const initialSeasonDataForLineChart = [
   {
     name: "بهار",
     value: 1,
@@ -61,6 +68,60 @@ const initialDataForLineChart = [
   },
   {
     name: "زمستان",
+    value: 1,
+  },
+];
+const initialMonthDataForLineChart = [
+  {
+    name: "مهر",
+    value: 1,
+  },
+  {
+    name: "آبان",
+    value: 1,
+  },
+  {
+    name: "آذر",
+    value: 1,
+  },
+  {
+    name: "دی",
+    value: 1,
+  },
+];
+const initialDayDataForLineChart = [
+  {
+    name: "سه روز پیش",
+    value: 1,
+  },
+  {
+    name: "دو روز پیش",
+    value: 1,
+  },
+  {
+    name: "دیروز",
+    value: 1,
+  },
+  {
+    name: "امروز",
+    value: 1,
+  },
+];
+const initialMinDataForLineChart = [
+  {
+    name: "سه دقیقه پیش",
+    value: 1,
+  },
+  {
+    name: "دو دقیقه پیش",
+    value: 1,
+  },
+  {
+    name: "یک دقیقه قبل",
+    value: 1,
+  },
+  {
+    name: "الان",
     value: 1,
   },
 ];
@@ -125,9 +186,28 @@ const Dashboard: React.FC = () => {
   });
 
   // State for Area Chart
+  const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
+    useState("season");
   const [dataForAreaChart, setDataForAreaChart] = useState(
-    initialDataForLineChart
+    initialSeasonDataForLineChart
   );
+
+  useEffect(() => {
+    selectedTimeForAreaChart === "season"
+      ? setDataForAreaChart(initialSeasonDataForLineChart)
+      : selectedTimeForAreaChart === "monthly"
+      ? setDataForAreaChart(initialMonthDataForLineChart)
+      : selectedTimeForAreaChart === "weekly"
+      ? setDataForAreaChart(initialDayDataForLineChart)
+      : setDataForAreaChart(initialMinDataForLineChart);
+
+    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
+      prevData.map((data) => ({
+        ...data,
+        value: Math.round(Math.random() * 150),
+      }))
+    );
+  }, [selectedTimeForAreaChart]);
 
   // State for Downloading Export file
   const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
@@ -212,10 +292,62 @@ const Dashboard: React.FC = () => {
               )}
             </Box>
           </Box>
-          <AreaChart
-            dataForAreaChart={dataForAreaChart}
-            selectedServiceIndex={selectedServiceIndex}
-          />
+          <Box
+            sx={{
+              position: "relative",
+            }}
+          >
+            <Select
+              label="فیلتر سرویس ها"
+              value={selectedTimeForAreaChart}
+              onChange={(e) => setSelectedTimeForAreaChart(e.target.value)}
+              sx={{
+                position: "absolute",
+                left: "50%",
+                padding: ".5rem",
+                border: "1px solid transparent",
+                borderBottomColor: "gray",
+                paddingBottom: "0",
+                ".MuiSelect-icon": {
+                  width: "25px",
+                  height: "25px",
+                  marginTop: "-.25rem",
+                },
+                ".MuiOutlinedInput-notchedOutline": { border: 0 },
+                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    border: 0,
+                  },
+                ".css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input":
+                  {
+                    padding: "0",
+                  },
+              }}
+            >
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="fiveMin"
+              >
+                پنج دقیقه‌ای
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
+                هفتگی
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="monthly"
+              >
+                ماهانه
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="season">
+                فصلی
+              </MenuItem>
+            </Select>
+            <AreaChart
+              dataForAreaChart={dataForAreaChart}
+              selectedServiceIndex={selectedServiceIndex}
+            />
+          </Box>
         </Box>
 
         {/* Left side. Tables*/}
