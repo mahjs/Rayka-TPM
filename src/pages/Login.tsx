@@ -107,7 +107,7 @@ const Login = () => {
               ورود
             </Button>
           </Box>
-          <Button
+          {/* <Button
             sx={{
               maxWidth: "300px",
               color: "#0F6CBD",
@@ -117,7 +117,7 @@ const Login = () => {
             }}
           >
             رمز عبور خود را فراموش کرده ام.
-          </Button>
+          </Button> */}
         </Box>
       </Box>
 
