@@ -5,6 +5,8 @@ import { RxCross2 } from "react-icons/rx";
 import Input from "../components/login/Input";
 import formatPersianDateTime from "../utils/formatPersianDateTime";
 import { useState } from "react";
+import { useAuth } from "../contexts/authContext";
+import { useNavigate } from "react-router-dom";
 
 const mockData = [
   {
@@ -35,6 +37,8 @@ const mockData = [
 
 const Profile = () => {
   const [historyData, setHistoryData] = useState(mockData);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   return (
     <Box
       sx={{
@@ -97,6 +101,10 @@ const Profile = () => {
             />
           </Box>
           <Button
+            onClick={() => {
+              logout();
+              navigate("/login");
+            }}
             sx={{
               color: "#DD2025",
               marginLeft: "auto",
