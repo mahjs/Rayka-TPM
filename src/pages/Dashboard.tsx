@@ -19,6 +19,7 @@ import ExportDocModal from "../components/dashboard/ExportDocModal";
 import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
 import useTreeMapData from "../hooks/useTreeMapData";
+import { IoChevronDown } from "react-icons/io5";
 
 const mockDomainsData = [
   { name: "A1", value: 25 },
@@ -201,13 +202,14 @@ const Dashboard: React.FC = () => {
       ? setDataForAreaChart(initialDayDataForLineChart)
       : setDataForAreaChart(initialMinDataForLineChart);
 
-    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-      prevData.map((data) => ({
-        ...data,
-        value: Math.round(Math.random() * 150),
-      }))
-    );
-  }, [selectedTimeForAreaChart]);
+    if (selectedServiceIndex)
+      setDataForAreaChart((prevData: { name: string; value: number }[]) =>
+        prevData.map((data) => ({
+          ...data,
+          value: Math.round(Math.random() * 150),
+        }))
+      );
+  }, [selectedServiceIndex, selectedTimeForAreaChart]);
 
   // State for Downloading Export file
   const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
@@ -298,12 +300,14 @@ const Dashboard: React.FC = () => {
             }}
           >
             <Select
+              IconComponent={IoChevronDown}
               label="فیلتر سرویس ها"
               value={selectedTimeForAreaChart}
               onChange={(e) => setSelectedTimeForAreaChart(e.target.value)}
               sx={{
                 position: "absolute",
-                left: "50%",
+                right: "8rem",
+                top: "-.3rem",
                 padding: ".5rem",
                 border: "1px solid transparent",
                 borderBottomColor: "gray",

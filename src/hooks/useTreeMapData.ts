@@ -10,7 +10,7 @@ interface MapData {
 const useTreeMapData = () => {
   const { domains, loadingDomains } = useDomains();
   const [treeMapData, setTreeMapData] = useState<MapData[]>([]);
-  const [loadingData, setLoadingData] = useState<boolean>(false);
+  const [loadingData, setLoadingData] = useState<boolean>(true);
   useEffect(() => {
     if (!domains) return;
     setLoadingData(true);
