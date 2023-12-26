@@ -65,6 +65,7 @@ const AddressesTable: FC<Props> = ({
         setSelectedAddresses([]);
       });
   };
+
   return (
     <>
       <Box
