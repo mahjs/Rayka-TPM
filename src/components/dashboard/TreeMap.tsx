@@ -91,7 +91,7 @@ const CustomizedContent = (props: any) => {
           fill:
             selectedIndex !== null
               ? selectedIndex === index
-                ? "blue"
+                ? "black"
                 : color
               : color,
           stroke: "#fff",
