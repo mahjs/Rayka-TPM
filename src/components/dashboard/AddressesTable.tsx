@@ -160,7 +160,7 @@ const AddressesTable: FC<Props> = ({
           <Box
             sx={{
               position: "relative",
-              minHeight: "70dvh",
+              minHeight: "73dvh",
               border: "1px solid #E3E3E3",
               borderRadius: ".5rem",
               display: "flex",
@@ -261,7 +261,7 @@ const AddressesTable: FC<Props> = ({
               />
             )}
           </Box>
-          <Typography
+          {/* <Typography
             fontFamily="YekanBakh-Light"
             sx={{
               textAlign: "left",
@@ -272,7 +272,7 @@ const AddressesTable: FC<Props> = ({
             <span style={{ color: "black", fontFamily: "YekanBakh-Bold" }}>
               Rayka
             </span>
-          </Typography>
+          </Typography> */}
         </Box>
       </Box>
       <AddIpAddressesModal
