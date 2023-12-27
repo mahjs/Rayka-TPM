@@ -174,7 +174,10 @@ const Dashboard: React.FC = () => {
     setDataForAreaChart((prevData: { name: string; value: number }[]) =>
       prevData.map((data) => ({
         ...data,
-        value: selectedServerForAreaChart === "total" ? Math.round(Math.random() * 24 + 12) : Math.round(Math.random() * 8 + 1),
+        value:
+          selectedServerForAreaChart === "total"
+            ? Math.round(Math.random() * 24 + 12)
+            : Math.round(Math.random() * 8 + 1),
       }))
     );
   }, [selectedTimeForAreaChart]);
@@ -183,7 +186,10 @@ const Dashboard: React.FC = () => {
     setDataForAreaChart((prevData: { name: string; value: number }[]) =>
       prevData.map((data) => ({
         ...data,
-        value: selectedServerForAreaChart === "total" ? Math.round(Math.random() * 24 + 12) : Math.round(Math.random() * 8 + 1),
+        value:
+          selectedServerForAreaChart === "total"
+            ? Math.round(Math.random() * 24 + 12)
+            : Math.round(Math.random() * 8 + 1),
       }))
     );
   }, [selectedServerForAreaChart]);
@@ -323,26 +329,21 @@ const Dashboard: React.FC = () => {
               value={selectedServerForAreaChart}
               onChange={(e) => setSelectedServerForAreaChart(e.target.value)}
               sx={{
+                marginRight: ".5rem",
                 position: "absolute",
                 right: "14rem",
-                top: "-.3rem",
-                padding: ".5rem",
-                border: "1px solid transparent",
-                borderBottomColor: "gray",
-                paddingBottom: "0",
+                height: "2rem",
+                top: "0",
+                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
                 ".MuiSelect-icon": {
-                  width: "25px",
-                  height: "25px",
+                  width: "20px",
+                  height: "20px",
                   marginTop: "-.25rem",
                 },
                 ".MuiOutlinedInput-notchedOutline": { border: 0 },
                 "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                   {
                     border: 0,
-                  },
-                ".css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input":
-                  {
-                    padding: "0",
                   },
               }}
             >
