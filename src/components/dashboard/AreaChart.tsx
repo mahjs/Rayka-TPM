@@ -35,7 +35,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, dataForAreaChart }) => {
           position: "relative",
         }}
       >
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" style={{marginTop: "1rem"}}>
           <RechartAreaChart
             width={500}
             data={dataForAreaChart}
