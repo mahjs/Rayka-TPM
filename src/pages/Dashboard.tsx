@@ -92,19 +92,19 @@ const initialMonthDataForLineChart = [
 ];
 const initialDayDataForLineChart = [
   {
-    name: "سه روز پیش",
+    name: "18 ساعت قبل",
     value: 1,
   },
   {
-    name: "دو روز پیش",
+    name: "12 ساعت قبل",
     value: 1,
   },
   {
-    name: "دیروز",
+    name: "6 ساعت قبل",
     value: 1,
   },
   {
-    name: "امروز",
+    name: "فعلی",
     value: 1,
   },
 ];
@@ -207,7 +207,7 @@ const Dashboard: React.FC = () => {
     setDataForAreaChart((prevData: { name: string; value: number }[]) =>
       prevData.map((data) => ({
         ...data,
-        value: Math.round(Math.random() * 150),
+        value: selectedServerForAreaChart === "total" ? Math.round(Math.random() * 24 + 12) : Math.round(Math.random() * 8 + 1),
       }))
     );
   }, [selectedTimeForAreaChart]);
@@ -216,7 +216,7 @@ const Dashboard: React.FC = () => {
     setDataForAreaChart((prevData: { name: string; value: number }[]) =>
       prevData.map((data) => ({
         ...data,
-        value: selectedServerForAreaChart === "total" ? Math.round(Math.random() * 900) : Math.round(Math.random() * 150),
+        value: selectedServerForAreaChart === "total" ? Math.round(Math.random() * 24 + 12) : Math.round(Math.random() * 8 + 1),
       }))
     );
   }, [selectedServerForAreaChart]);

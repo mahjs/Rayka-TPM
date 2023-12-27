@@ -48,9 +48,10 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, dataForAreaChart }) => {
           >
             <Tooltip content={<CustomTooltipForAreaChart />} />
             <YAxis
-              domain={[20, 20000]}
-              ticks={[1, 10, 50, 200, 1000, 5000, 20000]}
+              domain={[1, 40]}
+              ticks={[1, 5, 10, 20, 40]}
               scale="log"
+              label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
               tickFormatter={(tick) => {
                 if (tick === 1) {
                   return "0"; // Display '0' for the first tick
@@ -126,10 +127,11 @@ const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
             fontFamily: "YekanBakh-Regular",
           }}
         >
-          <Typography>زمان: {payload[0].payload.name}</Typography>
+          {/* <Typography>زمان: {payload[0].payload.name}</Typography> */}
           <Typography>
-            مقدار:{" "}
-            {payload[0].payload.value === 1 ? 0 : payload[0].payload.value}
+            {`${
+              payload[0].payload.value === 1 ? 0 : payload[0].payload.value
+            } Gbps`}
           </Typography>
         </div>
       </div>
