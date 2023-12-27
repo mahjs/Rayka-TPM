@@ -59,19 +59,19 @@ const initialMonthDataForLineChart = [
 ];
 const initialDayDataForLineChart = [
   {
-    name: "سه روز پیش",
+    name: "18 ساعت قبل",
     value: 1,
   },
   {
-    name: "دو روز پیش",
+    name: "12 ساعت قبل",
     value: 1,
   },
   {
-    name: "دیروز",
+    name: "6 ساعت قبل",
     value: 1,
   },
   {
-    name: "امروز",
+    name: "فعلی",
     value: 1,
   },
 ];
@@ -156,6 +156,8 @@ const Dashboard: React.FC = () => {
   // State for Area Chart
   const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
     useState("yearly");
+  const [selectedServerForAreaChart, setSelectedServerForAreaChart] =
+    useState("total");
   const [dataForAreaChart, setDataForAreaChart] = useState(
     initialSeasonDataForLineChart
   );
@@ -169,14 +171,22 @@ const Dashboard: React.FC = () => {
       ? setDataForAreaChart(initialDayDataForLineChart)
       : setDataForAreaChart(initialMinDataForLineChart);
 
-    if (selectedServiceIndex)
-      setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-        prevData.map((data) => ({
-          ...data,
-          value: Math.round(Math.random() * 150),
-        }))
-      );
-  }, [selectedServiceIndex, selectedTimeForAreaChart]);
+    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
+      prevData.map((data) => ({
+        ...data,
+        value: selectedServerForAreaChart === "total" ? Math.round(Math.random() * 24 + 12) : Math.round(Math.random() * 8 + 1),
+      }))
+    );
+  }, [selectedTimeForAreaChart]);
+
+  useEffect(() => {
+    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
+      prevData.map((data) => ({
+        ...data,
+        value: selectedServerForAreaChart === "total" ? Math.round(Math.random() * 24 + 12) : Math.round(Math.random() * 8 + 1),
+      }))
+    );
+  }, [selectedServerForAreaChart]);
 
   // State for Downloading Export file
   const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
@@ -307,9 +317,78 @@ const Dashboard: React.FC = () => {
                 سالانه
               </MenuItem>
             </Select>
+            <Select
+              IconComponent={IoChevronDown}
+              label="فیلتر سرویس ها"
+              value={selectedServerForAreaChart}
+              onChange={(e) => setSelectedServerForAreaChart(e.target.value)}
+              sx={{
+                position: "absolute",
+                right: "14rem",
+                top: "-.3rem",
+                padding: ".5rem",
+                border: "1px solid transparent",
+                borderBottomColor: "gray",
+                paddingBottom: "0",
+                ".MuiSelect-icon": {
+                  width: "25px",
+                  height: "25px",
+                  marginTop: "-.25rem",
+                },
+                ".MuiOutlinedInput-notchedOutline": { border: 0 },
+                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    border: 0,
+                  },
+                ".css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input":
+                  {
+                    padding: "0",
+                  },
+              }}
+            >
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="total">
+                مجموع ترافیک
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server1"
+              >
+                سرور یک
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server2"
+              >
+                سرور دو
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server3"
+              >
+                سرور سه
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server4"
+              >
+                سرور چهار
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server5"
+              >
+                سرور پنچ
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server6"
+              >
+                سرور شش
+              </MenuItem>
+            </Select>
             <AreaChart
               dataForAreaChart={dataForAreaChart}
-              selectedServiceIndex={selectedServiceIndex}
+              selectedServiceIndex={1}
             />
           </Box>
         </Box>

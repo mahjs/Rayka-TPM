@@ -77,12 +77,6 @@ const CustomizedContent = (props: any) => {
   return (
     <g
       onClick={() => {
-        setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-          prevData.map((data) => ({
-            ...data,
-            value: Math.round(Math.random() * 150),
-          }))
-        );
         onClickHandler(index);
       }}
     >
