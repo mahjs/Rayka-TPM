@@ -158,7 +158,6 @@ const ServicesTable: FC<Props> = ({
                 minWidth: "4rem",
                 height: "2rem",
                 paddingX: ".5rem",
-                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
