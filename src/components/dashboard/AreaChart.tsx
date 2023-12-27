@@ -10,11 +10,11 @@ import {
 import { FC } from "react";
 
 interface Props {
-  selectedServiceIndex: number | null;
+  // selectedServiceIndex: number | null;
   dataForAreaChart: { name: string; value: number }[];
 }
 
-const AreaChart: FC<Props> = ({ selectedServiceIndex, dataForAreaChart }) => {
+const AreaChart: FC<Props> = ({ dataForAreaChart }) => {
   return (
     <Box>
       <Typography

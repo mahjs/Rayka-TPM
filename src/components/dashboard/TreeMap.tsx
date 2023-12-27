@@ -7,20 +7,19 @@ interface Props {
   dataForTreeChart: { name: string; value: number }[];
   selectedServiceIndex: number | null;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
-  setDataForAreaChart: React.Dispatch<
-    React.SetStateAction<
-      {
-        name: string;
-        value: number;
-      }[]
-    >
-  >;
+  // setDataForAreaChart: React.Dispatch<
+  //   React.SetStateAction<
+  //     {
+  //       name: string;
+  //       value: number;
+  //     }[]
+  //   >
+  // >;
 }
 
 const TreeMap: FC<Props> = ({
   loadingData,
   dataForTreeChart,
-  setDataForAreaChart,
   selectedServiceIndex,
   setSelectedServiceIndex,
 }) => {
@@ -40,7 +39,6 @@ const TreeMap: FC<Props> = ({
             loading={loadingData}
             selectedIndex={selectedServiceIndex}
             onClickHandler={setSelectedServiceIndex}
-            setDataForAreaChart={setDataForAreaChart}
           />
         }
       >
@@ -66,7 +64,6 @@ const CustomizedContent = (props: any) => {
     index,
     selectedIndex,
     onClickHandler,
-    setDataForAreaChart,
     loading,
   } = props;
 

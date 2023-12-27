@@ -263,7 +263,6 @@ const Dashboard: React.FC = () => {
                 }
                 selectedServiceIndex={selectedServiceIndex}
                 setSelectedServiceIndex={setSelectedServiceIndex}
-                setDataForAreaChart={setDataForAreaChart}
               />
               {loadingData && (
                 <CircularProgress
@@ -387,10 +386,7 @@ const Dashboard: React.FC = () => {
                 سرور شش
               </MenuItem>
             </Select>
-            <AreaChart
-              dataForAreaChart={dataForAreaChart}
-              selectedServiceIndex={1}
-            />
+            <AreaChart dataForAreaChart={dataForAreaChart} />
           </Box>
         </Box>
 
