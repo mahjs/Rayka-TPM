@@ -280,12 +280,12 @@ const ServicesTable: FC<Props> = ({
                       borderRadius: "1rem",
                     }}
                     onClick={() => {
-                      setDataForAreaChart((prevData) =>
-                        prevData.map((data) => ({
-                          ...data,
-                          value: Math.round(Math.random() * 150),
-                        }))
-                      );
+                      // setDataForAreaChart((prevData) =>
+                      //   prevData.map((data) => ({
+                      //     ...data,
+                      //     value: Math.round(Math.random() * 150),
+                      //   }))
+                      // );
 
                       if (selectedServiceIndex === index)
                         setSelectedServiceIndex(null);

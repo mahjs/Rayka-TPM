@@ -69,14 +69,14 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, dataForAreaChart }) => {
             <Area
               type="monotone"
               dataKey="value"
-              stroke={selectedServiceIndex !== null ? "#0F6CBD" : "transparent"}
+              stroke={"#0F6CBD"}
               strokeWidth={3}
               fill="transparent"
               style={{ filter: "url(#glow)" }}
             />
           </RechartAreaChart>
         </ResponsiveContainer>
-        {selectedServiceIndex === null && (
+        {/* {selectedServiceIndex === null && (
           <Typography
             fontFamily="YekanBakh-Regular"
             sx={{
@@ -90,7 +90,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, dataForAreaChart }) => {
           >
             برای نمایش نمودار ترافیک یک سرویس را از منوی سرویس ها انتخاب کنید.
           </Typography>
-        )}
+        )} */}
       </Box>
     </Box>
   );
