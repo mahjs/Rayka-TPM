@@ -21,39 +21,6 @@ import useDomains from "../hooks/useDomains";
 import useTreeMapData from "../hooks/useTreeMapData";
 import { IoChevronDown } from "react-icons/io5";
 
-const mockDomainsData = [
-  { name: "A1", value: 25 },
-  { name: "A2", value: 32 },
-  { name: "B1", value: 65 },
-  { name: "B2", value: 38 },
-  { name: "B3", value: 36 },
-  { name: "A4", value: 41 },
-  { name: "A5", value: 82 },
-  { name: "B6", value: 73 },
-  { name: "B3", value: 21 },
-  { name: "B4", value: 13 },
-  { name: "A7", value: 12 },
-  { name: "A8", value: 39 },
-  { name: "B5", value: 77 },
-  { name: "B6", value: 93 },
-  { name: "B7", value: 48 },
-  { name: "c1", value: 10 },
-  { name: "c2", value: 20 },
-  { name: "d1", value: 70 },
-  { name: "d2", value: 60 },
-  { name: "d3", value: 33 },
-  { name: "c3", value: 43 },
-  { name: "c4", value: 55 },
-  { name: "c5", value: 58 },
-  { name: "d4", value: 59 },
-  { name: "d5", value: 82 },
-  { name: "c6", value: 18 },
-  { name: "c7", value: 15 },
-  { name: "d5", value: 27 },
-  { name: "d6", value: 36 },
-  { name: "d7", value: 71 },
-];
-
 const initialSeasonDataForLineChart = [
   {
     name: "بهار",
@@ -92,19 +59,19 @@ const initialMonthDataForLineChart = [
 ];
 const initialDayDataForLineChart = [
   {
-    name: "سه روز پیش",
+    name: "18 ساعت قبل",
     value: 1,
   },
   {
-    name: "دو روز پیش",
+    name: "12 ساعت قبل",
     value: 1,
   },
   {
-    name: "دیروز",
+    name: "6 ساعت قبل",
     value: 1,
   },
   {
-    name: "امروز",
+    name: "فعلی",
     value: 1,
   },
 ];
@@ -189,6 +156,8 @@ const Dashboard: React.FC = () => {
   // State for Area Chart
   const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
     useState("yearly");
+  const [selectedServerForAreaChart, setSelectedServerForAreaChart] =
+    useState("total");
   const [dataForAreaChart, setDataForAreaChart] = useState(
     initialSeasonDataForLineChart
   );
@@ -202,14 +171,28 @@ const Dashboard: React.FC = () => {
       ? setDataForAreaChart(initialDayDataForLineChart)
       : setDataForAreaChart(initialMinDataForLineChart);
 
-    if (selectedServiceIndex)
-      setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-        prevData.map((data) => ({
-          ...data,
-          value: Math.round(Math.random() * 150),
-        }))
-      );
-  }, [selectedServiceIndex, selectedTimeForAreaChart]);
+    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
+      prevData.map((data) => ({
+        ...data,
+        value:
+          selectedServerForAreaChart === "total"
+            ? Math.round(Math.random() * 24 + 12)
+            : Math.round(Math.random() * 8 + 1),
+      }))
+    );
+  }, [selectedTimeForAreaChart]);
+
+  useEffect(() => {
+    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
+      prevData.map((data) => ({
+        ...data,
+        value:
+          selectedServerForAreaChart === "total"
+            ? Math.round(Math.random() * 24 + 12)
+            : Math.round(Math.random() * 8 + 1),
+      }))
+    );
+  }, [selectedServerForAreaChart]);
 
   // State for Downloading Export file
   const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
@@ -280,7 +263,6 @@ const Dashboard: React.FC = () => {
                 }
                 selectedServiceIndex={selectedServiceIndex}
                 setSelectedServiceIndex={setSelectedServiceIndex}
-                setDataForAreaChart={setDataForAreaChart}
               />
               {loadingData && (
                 <CircularProgress
@@ -306,25 +288,21 @@ const Dashboard: React.FC = () => {
               onChange={(e) => setSelectedTimeForAreaChart(e.target.value)}
               sx={{
                 position: "absolute",
+                height: "2rem",
                 right: "8rem",
-                top: "-.3rem",
+                top: "0",
+                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
+                borderRadius: ".5rem",
                 padding: ".5rem",
-                border: "1px solid transparent",
-                borderBottomColor: "gray",
-                paddingBottom: "0",
                 ".MuiSelect-icon": {
-                  width: "25px",
-                  height: "25px",
+                  width: "20px",
+                  height: "20px",
                   marginTop: "-.25rem",
                 },
                 ".MuiOutlinedInput-notchedOutline": { border: 0 },
                 "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                   {
                     border: 0,
-                  },
-                ".css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input":
-                  {
-                    padding: "0",
                   },
               }}
             >
@@ -344,10 +322,71 @@ const Dashboard: React.FC = () => {
                 سالانه
               </MenuItem>
             </Select>
-            <AreaChart
-              dataForAreaChart={dataForAreaChart}
-              selectedServiceIndex={selectedServiceIndex}
-            />
+            <Select
+              IconComponent={IoChevronDown}
+              label="فیلتر سرویس ها"
+              value={selectedServerForAreaChart}
+              onChange={(e) => setSelectedServerForAreaChart(e.target.value)}
+              sx={{
+                marginRight: ".5rem",
+                position: "absolute",
+                right: "14rem",
+                height: "2rem",
+                top: "0",
+                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
+                ".MuiSelect-icon": {
+                  width: "20px",
+                  height: "20px",
+                  marginTop: "-.25rem",
+                },
+                ".MuiOutlinedInput-notchedOutline": { border: 0 },
+                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    border: 0,
+                  },
+              }}
+            >
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="total">
+                مجموع ترافیک
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server1"
+              >
+                سرور یک
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server2"
+              >
+                سرور دو
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server3"
+              >
+                سرور سه
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server4"
+              >
+                سرور چهار
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server5"
+              >
+                سرور پنچ
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="server6"
+              >
+                سرور شش
+              </MenuItem>
+            </Select>
+            <AreaChart dataForAreaChart={dataForAreaChart} />
           </Box>
         </Box>
 

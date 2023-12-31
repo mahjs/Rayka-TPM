@@ -85,6 +85,7 @@ const ServicesTable: FC<Props> = ({
       >
         <Box
           sx={{
+            // marginTop: "-1rem",
             display: "flex",
             alignItems: "center",
             gap: ".3rem",
@@ -155,23 +156,17 @@ const ServicesTable: FC<Props> = ({
               value=""
               sx={{
                 minWidth: "4rem",
-                padding: ".5rem",
-                border: "1px solid transparent",
-                borderBottomColor: "gray",
-                paddingBottom: "0",
+                height: "2rem",
+                paddingX: ".5rem",
                 ".MuiSelect-icon": {
-                  width: "25px",
-                  height: "25px",
-                  marginTop: "-.25rem",
+                  width: "20px",
+                  height: "20px",
+                  marginTop: "-.20rem",
                 },
                 ".MuiOutlinedInput-notchedOutline": { border: 0 },
                 "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                   {
                     border: 0,
-                  },
-                ".css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input":
-                  {
-                    padding: "0",
                   },
               }}
             >
@@ -280,12 +275,12 @@ const ServicesTable: FC<Props> = ({
                       borderRadius: "1rem",
                     }}
                     onClick={() => {
-                      setDataForAreaChart((prevData) =>
-                        prevData.map((data) => ({
-                          ...data,
-                          value: Math.round(Math.random() * 150),
-                        }))
-                      );
+                      // setDataForAreaChart((prevData) =>
+                      //   prevData.map((data) => ({
+                      //     ...data,
+                      //     value: Math.round(Math.random() * 150),
+                      //   }))
+                      // );
 
                       if (selectedServiceIndex === index)
                         setSelectedServiceIndex(null);

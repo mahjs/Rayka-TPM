@@ -10,11 +10,11 @@ import {
 import { FC } from "react";
 
 interface Props {
-  selectedServiceIndex: number | null;
+  // selectedServiceIndex: number | null;
   dataForAreaChart: { name: string; value: number }[];
 }
 
-const AreaChart: FC<Props> = ({ selectedServiceIndex, dataForAreaChart }) => {
+const AreaChart: FC<Props> = ({ dataForAreaChart }) => {
   return (
     <Box>
       <Typography
@@ -48,9 +48,10 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, dataForAreaChart }) => {
           >
             <Tooltip content={<CustomTooltipForAreaChart />} />
             <YAxis
-              domain={[20, 20000]}
-              ticks={[1, 10, 50, 200, 1000, 5000, 20000]}
+              domain={[1, 40]}
+              ticks={[1, 5, 10, 20, 40]}
               scale="log"
+              label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
               tickFormatter={(tick) => {
                 if (tick === 1) {
                   return "0"; // Display '0' for the first tick
@@ -69,14 +70,14 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, dataForAreaChart }) => {
             <Area
               type="monotone"
               dataKey="value"
-              stroke={selectedServiceIndex !== null ? "#0F6CBD" : "transparent"}
+              stroke={"#0F6CBD"}
               strokeWidth={3}
               fill="transparent"
               style={{ filter: "url(#glow)" }}
             />
           </RechartAreaChart>
         </ResponsiveContainer>
-        {selectedServiceIndex === null && (
+        {/* {selectedServiceIndex === null && (
           <Typography
             fontFamily="YekanBakh-Regular"
             sx={{
@@ -90,7 +91,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, dataForAreaChart }) => {
           >
             برای نمایش نمودار ترافیک یک سرویس را از منوی سرویس ها انتخاب کنید.
           </Typography>
-        )}
+        )} */}
       </Box>
     </Box>
   );
@@ -126,10 +127,11 @@ const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
             fontFamily: "YekanBakh-Regular",
           }}
         >
-          <Typography>زمان: {payload[0].payload.name}</Typography>
+          {/* <Typography>زمان: {payload[0].payload.name}</Typography> */}
           <Typography>
-            مقدار:{" "}
-            {payload[0].payload.value === 1 ? 0 : payload[0].payload.value}
+            {`${
+              payload[0].payload.value === 1 ? 0 : payload[0].payload.value
+            } Gbps`}
           </Typography>
         </div>
       </div>
