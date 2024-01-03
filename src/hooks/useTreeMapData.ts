@@ -10,7 +10,14 @@ interface MapData {
 const useTreeMapData = () => {
   const { domains, loadingDomains } = useDomains();
   const [treeMapData, setTreeMapData] = useState<MapData[]>([]);
+  const [totalIps, setTotalIps] = useState<number>(0);
   const [loadingData, setLoadingData] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (loadingData) return;
+    setTotalIps(treeMapData.reduce((acc, cur) => acc + cur.value, 0));
+  }, [loadingData, treeMapData]);
+
   useEffect(() => {
     if (!domains) return;
     setLoadingData(true);
@@ -29,6 +36,7 @@ const useTreeMapData = () => {
   return {
     loadingData,
     treeMapData,
+    totalIps,
   };
 };
 
