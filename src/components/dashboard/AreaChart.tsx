@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import {
   ResponsiveContainer,
   Tooltip,
@@ -15,8 +15,40 @@ interface Props {
 }
 
 const AreaChart: FC<Props> = ({ dataForAreaChart }) => {
+  const max = Math.max(...dataForAreaChart.map((item) => item.value));
+  const min = Math.min(...dataForAreaChart.map((item) => item.value));
+  const avg =
+    dataForAreaChart.reduce((a, b) => a + b.value, 0) / dataForAreaChart.length;
+
   return (
-    <Box>
+    <Box position="relative">
+      <Stack
+        direction="row"
+        sx={{
+          gap: "2rem",
+          position: "absolute",
+          left: "4rem",
+          top: "0",
+          border: "1px solid #ccc",
+          padding: ".5rem",
+          borderRadius: "2rem",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Stack direction="row" gap=".5rem">
+          <Typography>بیشترین:</Typography>
+          <Typography>{max}</Typography>
+        </Stack>
+        <Stack direction="row" gap=".5rem">
+          <Typography>کمترین:</Typography>
+          <Typography>{min}</Typography>
+        </Stack>
+        <Stack direction="row" gap=".5rem">
+          <Typography>میانگین:</Typography>
+          <Typography>{avg}</Typography>
+        </Stack>
+      </Stack>
       <Typography
         fontFamily="YekanBakh-Medium"
         component="h3"
@@ -35,7 +67,11 @@ const AreaChart: FC<Props> = ({ dataForAreaChart }) => {
           position: "relative",
         }}
       >
-        <ResponsiveContainer width="100%" height="100%" style={{marginTop: "1rem"}}>
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          style={{ marginTop: "1rem" }}
+        >
           <RechartAreaChart
             width={500}
             data={dataForAreaChart}
