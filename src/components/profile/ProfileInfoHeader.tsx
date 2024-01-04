@@ -1,10 +1,24 @@
-import { Box, Stack, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Typography,
+  Button,
+  Divider,
+  CircularProgress,
+} from "@mui/material";
 import { BsPerson } from "react-icons/bs";
 import { IoChevronDown } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RiHistoryLine } from "react-icons/ri";
+import { FC } from "react";
 
-const ProfileInfo = () => {
+interface Props {
+  totalDomains: number;
+  totalAddresses: number;
+  loading: boolean;
+}
+
+const ProfileInfo: FC<Props> = ({ totalAddresses, totalDomains, loading }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   return (
@@ -115,6 +129,48 @@ const ProfileInfo = () => {
             </Button>
           </>
         )}
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Stack direction="row" gap=".5rem" justifyContent="space-between">
+          <Typography>تعداد دامین‌ها:</Typography>
+          <Typography
+            sx={{
+              width: "2rem",
+              textAlign: "left",
+            }}
+          >
+            {loading ? (
+              <CircularProgress size="1rem" />
+            ) : (
+              totalDomains.toLocaleString()
+            )}
+          </Typography>
+        </Stack>
+        <Divider
+          sx={{
+            marginBottom: ".3rem",
+          }}
+        />
+        <Stack direction="row" gap=".5rem" justifyContent="space-between">
+          <Typography>تعداد کل آدرس‌ها:</Typography>
+          <Typography
+            sx={{
+              width: "2rem",
+              textAlign: "left",
+            }}
+          >
+            {loading ? (
+              <CircularProgress size="1rem" />
+            ) : (
+              totalAddresses.toLocaleString()
+            )}
+          </Typography>
+        </Stack>
       </Box>
     </Box>
   );

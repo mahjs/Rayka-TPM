@@ -57,35 +57,56 @@ const initialMonthDataForLineChart = [
     value: 1,
   },
 ];
-const initialDayDataForLineChart = [
+
+const initialWeeklyDataForLineChart = [
   {
-    name: "18 ساعت قبل",
+    name: "سه هفته پیش",
     value: 1,
   },
   {
-    name: "12 ساعت قبل",
+    name: "دو هفته پیش",
     value: 1,
   },
   {
-    name: "6 ساعت قبل",
+    name: "یک هفته قبل",
     value: 1,
   },
   {
-    name: "فعلی",
+    name: "الان",
     value: 1,
   },
 ];
-const initialMinDataForLineChart = [
+
+const initialDayDataForLineChart = [
   {
-    name: "سه دقیقه پیش",
+    name: "سه روز پیش",
     value: 1,
   },
   {
-    name: "دو دقیقه پیش",
+    name: "دو روز پیش",
     value: 1,
   },
   {
-    name: "یک دقیقه قبل",
+    name: "دیروز",
+    value: 1,
+  },
+  {
+    name: "امروز",
+    value: 1,
+  },
+];
+
+const initialHourlyDataForLineChart = [
+  {
+    name: "سه ساعت پیش",
+    value: 1,
+  },
+  {
+    name: "دو ساعت پیش",
+    value: 1,
+  },
+  {
+    name: "یک ساعت قبل",
     value: 1,
   },
   {
@@ -125,7 +146,7 @@ const Dashboard: React.FC = () => {
   };
 
   // State for SquareCharts
-  const { loadingData, treeMapData } = useTreeMapData();
+  const { loadingData, treeMapData, totalIps } = useTreeMapData();
 
   // State for Selecting a service
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
@@ -167,9 +188,11 @@ const Dashboard: React.FC = () => {
       ? setDataForAreaChart(initialSeasonDataForLineChart)
       : selectedTimeForAreaChart === "monthly"
       ? setDataForAreaChart(initialMonthDataForLineChart)
+      : selectedTimeForAreaChart === "weekly"
+      ? setDataForAreaChart(initialWeeklyDataForLineChart)
       : selectedTimeForAreaChart === "daily"
       ? setDataForAreaChart(initialDayDataForLineChart)
-      : setDataForAreaChart(initialMinDataForLineChart);
+      : setDataForAreaChart(initialHourlyDataForLineChart);
 
     setDataForAreaChart((prevData: { name: string; value: number }[]) =>
       prevData.map((data) => ({
@@ -180,7 +203,7 @@ const Dashboard: React.FC = () => {
             : Math.round(Math.random() * 8 + 1),
       }))
     );
-  }, [selectedTimeForAreaChart]);
+  }, [selectedServerForAreaChart, selectedTimeForAreaChart]);
 
   useEffect(() => {
     setDataForAreaChart((prevData: { name: string; value: number }[]) =>
@@ -230,7 +253,11 @@ const Dashboard: React.FC = () => {
             gap: "2rem",
           }}
         >
-          <ProfileInfo />
+          <ProfileInfo
+            loading={loadingData || loadingDomains}
+            totalAddresses={totalIps}
+            totalDomains={domains?.length || 0}
+          />
           <Box
             sx={{
               display: "flex",
@@ -294,6 +321,7 @@ const Dashboard: React.FC = () => {
                 boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
                 borderRadius: ".5rem",
                 padding: ".5rem",
+                zIndex: "10",
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
@@ -306,11 +334,14 @@ const Dashboard: React.FC = () => {
                   },
               }}
             >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="minute">
-                دقیقه‌ای
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="hourly">
+                ساعتی
               </MenuItem>
               <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="daily">
                 روزانه
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
+                هفته‌‌ای
               </MenuItem>
               <MenuItem
                 sx={{ fontFamily: "YekanBakh-Regular" }}
@@ -334,6 +365,7 @@ const Dashboard: React.FC = () => {
                 height: "2rem",
                 top: "0",
                 boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
+                zIndex: "10",
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
