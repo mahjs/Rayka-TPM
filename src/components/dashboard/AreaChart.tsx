@@ -6,6 +6,7 @@ import {
   XAxis,
   Area,
   AreaChart as RechartAreaChart,
+  CartesianGrid,
 } from "recharts";
 import { FC } from "react";
 
@@ -47,6 +48,7 @@ const AreaChart: FC<Props> = ({ dataForAreaChart }) => {
             }}
           >
             <Tooltip content={<CustomTooltipForAreaChart />} />
+            <CartesianGrid strokeDasharray="3 3" />
             <YAxis
               domain={[1, 40]}
               ticks={[1, 5, 10, 20, 40]}
