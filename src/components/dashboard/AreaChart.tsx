@@ -26,9 +26,10 @@ const AreaChart: FC<Props> = ({ dataForAreaChart }) => {
       <Stack
         direction="row"
         sx={{
-          gap: "2rem",
+          gap: "1rem",
+          zIndex: "-1",
           position: "absolute",
-          left: "4rem",
+          left: "2rem",
           top: "0",
           border: "1px solid #ccc",
           padding: ".5rem",

@@ -321,6 +321,7 @@ const Dashboard: React.FC = () => {
                 boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
                 borderRadius: ".5rem",
                 padding: ".5rem",
+                zIndex: "10",
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
@@ -364,6 +365,7 @@ const Dashboard: React.FC = () => {
                 height: "2rem",
                 top: "0",
                 boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
+                zIndex: "10",
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
