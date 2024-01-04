@@ -54,7 +54,7 @@ const Profile = () => {
           height: "100%",
         }}
       >
-        <ProfileInfoHeader />
+        <ProfileInfoHeader isDashboard={false} />
 
         <Box
           sx={{
