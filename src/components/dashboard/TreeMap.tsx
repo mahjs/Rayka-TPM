@@ -67,9 +67,9 @@ const CustomizedContent = (props: any) => {
     loading,
   } = props;
 
-  const hue = (index * 137.508) % 360;
-  let color = `hsl(${hue}, 70%, 60%)`;
-  if (index === 0 && loading) color = "#fff";
+  // const hue = (index * 137.508) % 360;
+  // let color = `hsl(${hue}, 70%, 60%)`;
+  // if (index === 0 && loading) color = "#fff";
 
   return (
     <g
@@ -84,12 +84,13 @@ const CustomizedContent = (props: any) => {
         height={height}
         style={{
           transition: "all .2s linear",
-          fill:
-            selectedIndex !== null
-              ? selectedIndex === index
-                ? "black"
-                : color
-              : color,
+          fill: loading
+            ? "transparent"
+            : selectedIndex !== null
+            ? selectedIndex === index
+              ? "#7160B4"
+              : "#B2CADF"
+            : "#608DB4",
           stroke: "#fff",
           strokeWidth: 2 / (depth + 1e-10),
           strokeOpacity: 1 / (depth + 1e-10),

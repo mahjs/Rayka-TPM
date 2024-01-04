@@ -418,7 +418,10 @@ const Dashboard: React.FC = () => {
                 سرور شش
               </MenuItem>
             </Select>
-            <AreaChart dataForAreaChart={dataForAreaChart} />
+            <AreaChart
+              selectedServiceIndex={selectedServiceIndex}
+              dataForAreaChart={dataForAreaChart}
+            />
           </Box>
         </Box>
 

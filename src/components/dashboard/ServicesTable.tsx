@@ -292,6 +292,10 @@ const ServicesTable: FC<Props> = ({
                     sx={{
                       zIndex: "100",
                       padding: ".1rem",
+                      background: "#fff",
+                      ":hover": {
+                        background: "#fff",
+                      },
                     }}
                   />
                   <Typography

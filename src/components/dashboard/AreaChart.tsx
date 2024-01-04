@@ -11,11 +11,11 @@ import {
 import { FC } from "react";
 
 interface Props {
-  // selectedServiceIndex: number | null;
+  selectedServiceIndex: number | null;
   dataForAreaChart: { name: string; value: number }[];
 }
 
-const AreaChart: FC<Props> = ({ dataForAreaChart }) => {
+const AreaChart: FC<Props> = ({ dataForAreaChart, selectedServiceIndex }) => {
   const max = Math.max(...dataForAreaChart.map((item) => item.value));
   const min = Math.min(...dataForAreaChart.map((item) => item.value));
   const avg =
@@ -109,7 +109,7 @@ const AreaChart: FC<Props> = ({ dataForAreaChart }) => {
             <Area
               type="monotone"
               dataKey="value"
-              stroke={"#0F6CBD"}
+              stroke={selectedServiceIndex !== null ? "#7160B4" : "#608DB4"}
               strokeWidth={3}
               fill="transparent"
               style={{ filter: "url(#glow)" }}
