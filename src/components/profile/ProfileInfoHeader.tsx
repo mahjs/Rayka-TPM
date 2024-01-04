@@ -13,12 +13,18 @@ import { RiHistoryLine } from "react-icons/ri";
 import { FC } from "react";
 
 interface Props {
-  totalDomains: number;
-  totalAddresses: number;
-  loading: boolean;
+  totalDomains?: number;
+  totalAddresses?: number;
+  loading?: boolean;
+  isDashboard?: boolean;
 }
 
-const ProfileInfo: FC<Props> = ({ totalAddresses, totalDomains, loading }) => {
+const ProfileInfo: FC<Props> = ({
+  totalAddresses,
+  totalDomains,
+  loading,
+  isDashboard = true,
+}) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   return (
@@ -130,48 +136,50 @@ const ProfileInfo: FC<Props> = ({ totalAddresses, totalDomains, loading }) => {
           </>
         )}
       </Box>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Stack direction="row" gap=".5rem" justifyContent="space-between">
-          <Typography>تعداد دامین‌ها:</Typography>
-          <Typography
-            sx={{
-              width: "2rem",
-              textAlign: "left",
-            }}
-          >
-            {loading ? (
-              <CircularProgress size="1rem" />
-            ) : (
-              totalDomains.toLocaleString()
-            )}
-          </Typography>
-        </Stack>
-        <Divider
+      {isDashboard && (
+        <Box
           sx={{
-            marginBottom: ".3rem",
+            display: "flex",
+            flexDirection: "column",
           }}
-        />
-        <Stack direction="row" gap=".5rem" justifyContent="space-between">
-          <Typography>تعداد کل آدرس‌ها:</Typography>
-          <Typography
+        >
+          <Stack direction="row" gap=".5rem" justifyContent="space-between">
+            <Typography>تعداد دامین‌ها:</Typography>
+            <Typography
+              sx={{
+                width: "2rem",
+                textAlign: "left",
+              }}
+            >
+              {loading ? (
+                <CircularProgress size="1rem" />
+              ) : (
+                totalDomains!.toLocaleString()
+              )}
+            </Typography>
+          </Stack>
+          <Divider
             sx={{
-              width: "2rem",
-              textAlign: "left",
+              marginBottom: ".3rem",
             }}
-          >
-            {loading ? (
-              <CircularProgress size="1rem" />
-            ) : (
-              totalAddresses.toLocaleString()
-            )}
-          </Typography>
-        </Stack>
-      </Box>
+          />
+          <Stack direction="row" gap=".5rem" justifyContent="space-between">
+            <Typography>تعداد کل آدرس‌ها:</Typography>
+            <Typography
+              sx={{
+                width: "2rem",
+                textAlign: "left",
+              }}
+            >
+              {loading ? (
+                <CircularProgress size="1rem" />
+              ) : (
+                totalAddresses!.toLocaleString()
+              )}
+            </Typography>
+          </Stack>
+        </Box>
+      )}
     </Box>
   );
 };
