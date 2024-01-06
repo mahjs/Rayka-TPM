@@ -7,6 +7,10 @@ import {
   Area,
   AreaChart as RechartAreaChart,
   CartesianGrid,
+  ReferenceLine,
+  Label,
+  Layer,
+  Line,
 } from "recharts";
 import { FC } from "react";
 
@@ -23,7 +27,7 @@ const AreaChart: FC<Props> = ({ dataForAreaChart, selectedServiceIndex }) => {
 
   return (
     <Box position="relative">
-      <Stack
+      {/* <Stack
         direction="row"
         sx={{
           gap: "1rem",
@@ -50,7 +54,7 @@ const AreaChart: FC<Props> = ({ dataForAreaChart, selectedServiceIndex }) => {
           <Typography>میانگین:</Typography>
           <Typography>{avg}</Typography>
         </Stack>
-      </Stack>
+      </Stack> */}
       <Typography
         fontFamily="YekanBakh-Medium"
         component="h3"
@@ -113,6 +117,42 @@ const AreaChart: FC<Props> = ({ dataForAreaChart, selectedServiceIndex }) => {
               strokeWidth={3}
               fill="transparent"
               style={{ filter: "url(#glow)" }}
+            />
+            <ReferenceLine
+              y={min}
+              label={{
+                value: "Min",
+                position: "insideRight",
+                stroke: "red",
+                opacity: ".5",
+              }}
+              stroke="red"
+              strokeDasharray="5 5"
+              opacity=".5"
+            />
+            <ReferenceLine
+              y={max}
+              label={{
+                value: "Max",
+                position: "insideRight",
+                stroke: "green",
+                opacity: ".5",
+              }}
+              stroke="green"
+              strokeDasharray="5 5"
+              opacity=".5"
+            />
+            <ReferenceLine
+              y={avg}
+              label={{
+                value: "Avg",
+                position: "insideRight",
+                stroke: "blue",
+                opacity: ".5",
+              }}
+              stroke="blue"
+              strokeDasharray="5 5"
+              opacity=".5"
             />
           </RechartAreaChart>
         </ResponsiveContainer>

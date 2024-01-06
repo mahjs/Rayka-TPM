@@ -146,12 +146,29 @@ const Dashboard: React.FC = () => {
     handleSearch();
   };
 
-  // State for SquareCharts
-  const { loadingData, treeMapData, totalIps } = useTreeMapData();
   // State for Selecting a service
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
     number | null
   >(null);
+
+  // State for SquareCharts
+  const { loadingData, treeMapData, totalIps } = useTreeMapData();
+  const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
+
+  useEffect(() => {
+    if (totalIps.length === 0) return;
+    setFilteredIps(totalIps);
+  }, [totalIps]);
+
+  useEffect(() => {
+    if (isNaN(parseInt(searchInput)) || selectedServiceIndex !== null) return;
+
+    setFilteredIps(
+      filteredIps.filter((ip) =>
+        ip.toLowerCase().includes(searchInput.toLowerCase())
+      )
+    );
+  }, [searchInput, selectedServiceIndex]);
 
   // State for getting all domains
   const { loadingDomains, domains, reFetchDomains } = useDomains();
@@ -166,7 +183,7 @@ const Dashboard: React.FC = () => {
       setFilteredDomains(domains);
       return;
     }
-    setSelectedServiceIndex(null);
+    // setSelectedServiceIndex(null);
     const filteredDomains = treeMapData.filter(
       (data) =>
         data.ips.filter((ip) =>
@@ -186,6 +203,7 @@ const Dashboard: React.FC = () => {
       )
     );
   }, [searchInput, domains, treeMapData]);
+
   // State for getting the ip addresses
   const { ipAddressesForDomain, loadingAddresses, reFetchAddresses } =
     useIpAddresses(
@@ -308,7 +326,7 @@ const Dashboard: React.FC = () => {
         >
           <ProfileInfo
             loading={loadingData || loadingDomains}
-            totalAddresses={totalIps}
+            totalAddresses={totalIps.length}
             totalDomains={domains?.length || 0}
           />
           <Box
@@ -554,8 +572,18 @@ const Dashboard: React.FC = () => {
                 domains ? filteredDomains![selectedServiceIndex!]?.name : null
               }
               loading={loadingAddresses}
-              addressesData={filteredIpAddresses}
-              selectedServiceIndex={selectedServiceIndex}
+              addressesData={
+                selectedServiceIndex !== null
+                  ? filteredIpAddresses
+                  : !isNaN(parseInt(searchInput))
+                  ? filteredIps
+                  : null
+              }
+              showData={
+                isNaN(parseInt(searchInput))
+                  ? selectedServiceIndex !== null
+                  : true
+              }
             />
           </Box>
         </Box>
