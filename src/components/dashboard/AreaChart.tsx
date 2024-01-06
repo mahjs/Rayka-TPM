@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
 import {
   ResponsiveContainer,
   Tooltip,
@@ -8,63 +8,327 @@ import {
   AreaChart as RechartAreaChart,
   CartesianGrid,
   ReferenceLine,
-  Label,
-  Layer,
-  Line,
 } from "recharts";
-import { FC } from "react";
+import { FC, useEffect, useRef, useState } from "react";
+import { IoChevronDown } from "react-icons/io5";
+import { BsCalendar2DateFill } from "react-icons/bs";
+import zIndex from "@mui/material/styles/zIndex";
+import html2canvas from "html2canvas";
+import RangeDatePicker from "./DatePicker";
 
 interface Props {
   selectedServiceIndex: number | null;
-  dataForAreaChart: { name: string; value: number }[];
 }
 
-const AreaChart: FC<Props> = ({ dataForAreaChart, selectedServiceIndex }) => {
+const initialSeasonDataForLineChart = [
+  {
+    name: "بهار",
+    value: 1,
+  },
+  {
+    name: "تابستان",
+    value: 1,
+  },
+  {
+    name: "پاییز",
+    value: 1,
+  },
+  {
+    name: "زمستان",
+    value: 1,
+  },
+];
+const initialMonthDataForLineChart = [
+  {
+    name: "مهر",
+    value: 1,
+  },
+  {
+    name: "آبان",
+    value: 1,
+  },
+  {
+    name: "آذر",
+    value: 1,
+  },
+  {
+    name: "دی",
+    value: 1,
+  },
+];
+
+const initialWeeklyDataForLineChart = [
+  {
+    name: "سه هفته پیش",
+    value: 1,
+  },
+  {
+    name: "دو هفته پیش",
+    value: 1,
+  },
+  {
+    name: "یک هفته قبل",
+    value: 1,
+  },
+  {
+    name: "الان",
+    value: 1,
+  },
+];
+
+const initialDayDataForLineChart = [
+  {
+    name: "سه روز پیش",
+    value: 1,
+  },
+  {
+    name: "دو روز پیش",
+    value: 1,
+  },
+  {
+    name: "دیروز",
+    value: 1,
+  },
+  {
+    name: "امروز",
+    value: 1,
+  },
+];
+
+const initialHourlyDataForLineChart = [
+  {
+    name: "سه ساعت پیش",
+    value: 1,
+  },
+  {
+    name: "دو ساعت پیش",
+    value: 1,
+  },
+  {
+    name: "یک ساعت قبل",
+    value: 1,
+  },
+  {
+    name: "الان",
+    value: 1,
+  },
+];
+
+const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
+  const [dataForAreaChart, setDataForAreaChart] = useState(
+    initialSeasonDataForLineChart
+  );
+
   const max = Math.max(...dataForAreaChart.map((item) => item.value));
   const min = Math.min(...dataForAreaChart.map((item) => item.value));
   const avg =
     dataForAreaChart.reduce((a, b) => a + b.value, 0) / dataForAreaChart.length;
 
+  const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
+    useState("yearly");
+  const [selectedServerForAreaChart, setSelectedServerForAreaChart] =
+    useState("total");
+
+  useEffect(() => {
+    selectedTimeForAreaChart === "yearly"
+      ? setDataForAreaChart(initialSeasonDataForLineChart)
+      : selectedTimeForAreaChart === "monthly"
+      ? setDataForAreaChart(initialMonthDataForLineChart)
+      : selectedTimeForAreaChart === "weekly"
+      ? setDataForAreaChart(initialWeeklyDataForLineChart)
+      : selectedTimeForAreaChart === "daily"
+      ? setDataForAreaChart(initialDayDataForLineChart)
+      : setDataForAreaChart(initialHourlyDataForLineChart);
+
+    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
+      prevData.map((data) => ({
+        ...data,
+        value:
+          selectedServerForAreaChart === "total"
+            ? Math.round(Math.random() * 24 + 12)
+            : Math.round(Math.random() * 8 + 1),
+      }))
+    );
+  }, [selectedServerForAreaChart, selectedTimeForAreaChart]);
+
+  const chartRef = useRef(null);
+  const exportChartPNG = () => {
+    if (chartRef.current) {
+      html2canvas(chartRef.current).then((canvas) => {
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = "chart.png";
+        link.click();
+      });
+    }
+  };
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
+  useEffect(() => {});
+
   return (
-    <Box position="relative">
-      {/* <Stack
-        direction="row"
-        sx={{
-          gap: "1rem",
-          zIndex: "-1",
-          position: "absolute",
-          left: "2rem",
-          top: "0",
-          border: "1px solid #ccc",
-          padding: ".5rem",
-          borderRadius: "2rem",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Stack direction="row" gap=".5rem">
-          <Typography>بیشترین:</Typography>
-          <Typography>{max}</Typography>
-        </Stack>
-        <Stack direction="row" gap=".5rem">
-          <Typography>کمترین:</Typography>
-          <Typography>{min}</Typography>
-        </Stack>
-        <Stack direction="row" gap=".5rem">
-          <Typography>میانگین:</Typography>
-          <Typography>{avg}</Typography>
-        </Stack>
-      </Stack> */}
-      <Typography
-        fontFamily="YekanBakh-Medium"
-        component="h3"
-        sx={{
-          fontSize: "1.5rem",
-        }}
-      >
-        نمودار ترافیک
-      </Typography>
+    <Box onClick={() => setShowDatePicker(false)} position="relative">
       <Box
+        sx={{
+          display: "flex",
+          gap: "1rem",
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          fontFamily="YekanBakh-Medium"
+          component="h3"
+          sx={{
+            fontSize: "1.5rem",
+            // marginLeft: "auto",
+          }}
+        >
+          نمودار ترافیک
+        </Typography>
+        <Box
+          sx={{
+            position: "absolute",
+            scale: showDatePicker ? "1" : "0",
+            transformOrigin: "38% 50%",
+            transition: "all .4s ease",
+            right: "1rem",
+            zIndex: "35",
+          }}
+        >
+          <RangeDatePicker
+            key="app"
+            setStartDate={setStartDate}
+            setEndDate={setEndDate}
+          />
+        </Box>
+        <Box
+          sx={{
+            position: "relative",
+          }}
+        >
+          <Select
+            IconComponent={IoChevronDown}
+            label="فیلتر سرویس ها"
+            value={selectedTimeForAreaChart}
+            onChange={(e) => setSelectedTimeForAreaChart(e.target.value)}
+            sx={{
+              height: "2rem",
+              boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
+              borderRadius: ".5rem",
+              paddingLeft: "1rem",
+              zIndex: "10",
+              ".MuiSelect-icon": {
+                width: "20px",
+                height: "20px",
+                marginTop: "-.25rem",
+              },
+              ".MuiOutlinedInput-notchedOutline": { border: 0 },
+              "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                {
+                  border: 0,
+                },
+            }}
+          >
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="hourly">
+              ساعتی
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="daily">
+              روزانه
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
+              هفته‌‌ای
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="monthly">
+              ماهانه
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="yearly">
+              سالانه
+            </MenuItem>
+          </Select>
+          <BsCalendar2DateFill
+            onClick={(e: MouseEvent) => {
+              e.stopPropagation();
+              setShowDatePicker(!showDatePicker);
+            }}
+            style={{
+              position: "absolute",
+              left: "0",
+              top: "50%",
+              transform: "translateY(-50%)",
+              paddingLeft: ".5rem",
+              zIndex: "30",
+              cursor: "pointer",
+            }}
+          />
+        </Box>
+        <Select
+          IconComponent={IoChevronDown}
+          label="فیلتر سرویس ها"
+          value={selectedServerForAreaChart}
+          onChange={(e) => setSelectedServerForAreaChart(e.target.value)}
+          sx={{
+            marginRight: ".5rem",
+            height: "2rem",
+            boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
+            zIndex: "10",
+            ".MuiSelect-icon": {
+              width: "20px",
+              height: "20px",
+              marginTop: "-.25rem",
+            },
+            ".MuiOutlinedInput-notchedOutline": { border: 0 },
+            "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+              {
+                border: 0,
+              },
+          }}
+        >
+          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="total">
+            مجموع ترافیک
+          </MenuItem>
+          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server1">
+            سرور یک
+          </MenuItem>
+          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server2">
+            سرور دو
+          </MenuItem>
+          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server3">
+            سرور سه
+          </MenuItem>
+          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server4">
+            سرور چهار
+          </MenuItem>
+          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server5">
+            سرور پنچ
+          </MenuItem>
+          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server6">
+            سرور شش
+          </MenuItem>
+        </Select>
+        <Button
+          onClick={exportChartPNG}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: ".3rem",
+            background: "#0F6CBD",
+            color: "#fff",
+            fontFamily: "YekanBakh-Regular",
+            borderRadius: ".5rem",
+            ":hover": {
+              background: "#0F6CBD",
+              color: "#fff",
+            },
+          }}
+        >
+          دریافت خروجی
+        </Button>
+      </Box>
+      <Box
+        ref={chartRef}
         width="100%"
         fontFamily="YekanBakh-Regular"
         sx={{
@@ -156,21 +420,6 @@ const AreaChart: FC<Props> = ({ dataForAreaChart, selectedServiceIndex }) => {
             />
           </RechartAreaChart>
         </ResponsiveContainer>
-        {/* {selectedServiceIndex === null && (
-          <Typography
-            fontFamily="YekanBakh-Regular"
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              maxWidth: "200px",
-              textAlign: "center",
-            }}
-          >
-            برای نمایش نمودار ترافیک یک سرویس را از منوی سرویس ها انتخاب کنید.
-          </Typography>
-        )} */}
       </Box>
     </Box>
   );

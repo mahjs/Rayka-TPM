@@ -1,12 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  MenuItem,
-  Select,
-  Typography,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
@@ -18,103 +11,8 @@ import ProfileInfo from "../components/profile/ProfileInfoHeader";
 import ExportDocModal from "../components/dashboard/ExportDocModal";
 import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
-import useTreeMapData, { MapData } from "../hooks/useTreeMapData";
-import { IoChevronDown } from "react-icons/io5";
+import useTreeMapData from "../hooks/useTreeMapData";
 import { Domain } from "../services/domain";
-
-const initialSeasonDataForLineChart = [
-  {
-    name: "بهار",
-    value: 1,
-  },
-  {
-    name: "تابستان",
-    value: 1,
-  },
-  {
-    name: "پاییز",
-    value: 1,
-  },
-  {
-    name: "زمستان",
-    value: 1,
-  },
-];
-const initialMonthDataForLineChart = [
-  {
-    name: "مهر",
-    value: 1,
-  },
-  {
-    name: "آبان",
-    value: 1,
-  },
-  {
-    name: "آذر",
-    value: 1,
-  },
-  {
-    name: "دی",
-    value: 1,
-  },
-];
-
-const initialWeeklyDataForLineChart = [
-  {
-    name: "سه هفته پیش",
-    value: 1,
-  },
-  {
-    name: "دو هفته پیش",
-    value: 1,
-  },
-  {
-    name: "یک هفته قبل",
-    value: 1,
-  },
-  {
-    name: "الان",
-    value: 1,
-  },
-];
-
-const initialDayDataForLineChart = [
-  {
-    name: "سه روز پیش",
-    value: 1,
-  },
-  {
-    name: "دو روز پیش",
-    value: 1,
-  },
-  {
-    name: "دیروز",
-    value: 1,
-  },
-  {
-    name: "امروز",
-    value: 1,
-  },
-];
-
-const initialHourlyDataForLineChart = [
-  {
-    name: "سه ساعت پیش",
-    value: 1,
-  },
-  {
-    name: "دو ساعت پیش",
-    value: 1,
-  },
-  {
-    name: "یک ساعت قبل",
-    value: 1,
-  },
-  {
-    name: "الان",
-    value: 1,
-  },
-];
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -240,49 +138,6 @@ const Dashboard: React.FC = () => {
     }
   });
 
-  // State for Area Chart
-  const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
-    useState("yearly");
-  const [selectedServerForAreaChart, setSelectedServerForAreaChart] =
-    useState("total");
-  const [dataForAreaChart, setDataForAreaChart] = useState(
-    initialSeasonDataForLineChart
-  );
-
-  useEffect(() => {
-    selectedTimeForAreaChart === "yearly"
-      ? setDataForAreaChart(initialSeasonDataForLineChart)
-      : selectedTimeForAreaChart === "monthly"
-      ? setDataForAreaChart(initialMonthDataForLineChart)
-      : selectedTimeForAreaChart === "weekly"
-      ? setDataForAreaChart(initialWeeklyDataForLineChart)
-      : selectedTimeForAreaChart === "daily"
-      ? setDataForAreaChart(initialDayDataForLineChart)
-      : setDataForAreaChart(initialHourlyDataForLineChart);
-
-    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-      prevData.map((data) => ({
-        ...data,
-        value:
-          selectedServerForAreaChart === "total"
-            ? Math.round(Math.random() * 24 + 12)
-            : Math.round(Math.random() * 8 + 1),
-      }))
-    );
-  }, [selectedServerForAreaChart, selectedTimeForAreaChart]);
-
-  useEffect(() => {
-    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-      prevData.map((data) => ({
-        ...data,
-        value:
-          selectedServerForAreaChart === "total"
-            ? Math.round(Math.random() * 24 + 12)
-            : Math.round(Math.random() * 8 + 1),
-      }))
-    );
-  }, [selectedServerForAreaChart]);
-
   // State for Downloading Export file
   const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
     null
@@ -382,120 +237,7 @@ const Dashboard: React.FC = () => {
               position: "relative",
             }}
           >
-            <Select
-              IconComponent={IoChevronDown}
-              label="فیلتر سرویس ها"
-              value={selectedTimeForAreaChart}
-              onChange={(e) => setSelectedTimeForAreaChart(e.target.value)}
-              sx={{
-                position: "absolute",
-                height: "2rem",
-                right: "8rem",
-                top: "0",
-                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
-                borderRadius: ".5rem",
-                padding: ".5rem",
-                zIndex: "10",
-                ".MuiSelect-icon": {
-                  width: "20px",
-                  height: "20px",
-                  marginTop: "-.25rem",
-                },
-                ".MuiOutlinedInput-notchedOutline": { border: 0 },
-                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                  {
-                    border: 0,
-                  },
-              }}
-            >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="hourly">
-                ساعتی
-              </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="daily">
-                روزانه
-              </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
-                هفته‌‌ای
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="monthly"
-              >
-                ماهانه
-              </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="yearly">
-                سالانه
-              </MenuItem>
-            </Select>
-            <Select
-              IconComponent={IoChevronDown}
-              label="فیلتر سرویس ها"
-              value={selectedServerForAreaChart}
-              onChange={(e) => setSelectedServerForAreaChart(e.target.value)}
-              sx={{
-                marginRight: ".5rem",
-                position: "absolute",
-                right: "14rem",
-                height: "2rem",
-                top: "0",
-                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
-                zIndex: "10",
-                ".MuiSelect-icon": {
-                  width: "20px",
-                  height: "20px",
-                  marginTop: "-.25rem",
-                },
-                ".MuiOutlinedInput-notchedOutline": { border: 0 },
-                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                  {
-                    border: 0,
-                  },
-              }}
-            >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="total">
-                مجموع ترافیک
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server1"
-              >
-                سرور یک
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server2"
-              >
-                سرور دو
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server3"
-              >
-                سرور سه
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server4"
-              >
-                سرور چهار
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server5"
-              >
-                سرور پنچ
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server6"
-              >
-                سرور شش
-              </MenuItem>
-            </Select>
-            <AreaChart
-              selectedServiceIndex={selectedServiceIndex}
-              dataForAreaChart={dataForAreaChart}
-            />
+            <AreaChart selectedServiceIndex={selectedServiceIndex} />
           </Box>
         </Box>
 
@@ -558,7 +300,6 @@ const Dashboard: React.FC = () => {
               loading={loadingDomains}
               domains={filteredDomains}
               selectedServiceIndex={selectedServiceIndex}
-              setDataForAreaChart={setDataForAreaChart}
               setSelectedServiceIndex={setSelectedServiceIndex}
             />
             <AddressesTable

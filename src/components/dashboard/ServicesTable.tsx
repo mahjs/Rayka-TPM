@@ -22,14 +22,6 @@ interface Props {
   refetchIpAddresses: () => void;
   selectedServiceIndex: number | null;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
-  setDataForAreaChart: React.Dispatch<
-    React.SetStateAction<
-      {
-        name: string;
-        value: number;
-      }[]
-    >
-  >;
 }
 
 const ServicesTable: FC<Props> = ({
@@ -38,7 +30,6 @@ const ServicesTable: FC<Props> = ({
   refetchDomains,
   refetchIpAddresses,
   selectedServiceIndex,
-  setDataForAreaChart,
   setSelectedServiceIndex,
 }) => {
   // Scroll to selected service
