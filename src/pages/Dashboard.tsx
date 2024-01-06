@@ -135,11 +135,6 @@ const Dashboard: React.FC = () => {
     console.log(`Search for: ${searchInput}`);
   };
 
-  // Function to handle changes in the search input
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(event.target.value);
-  };
-
   // Function to handle submission of the search
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -164,7 +159,7 @@ const Dashboard: React.FC = () => {
     if (isNaN(parseInt(searchInput)) || selectedServiceIndex !== null) return;
 
     setFilteredIps(
-      filteredIps.filter((ip) =>
+      totalIps.filter((ip) =>
         ip.toLowerCase().includes(searchInput.toLowerCase())
       )
     );
@@ -522,7 +517,7 @@ const Dashboard: React.FC = () => {
           >
             <Search
               value={searchInput}
-              onChange={handleChange}
+              setSearchInput={setSearchInput}
               handleSubmit={handleSubmit}
             />
 

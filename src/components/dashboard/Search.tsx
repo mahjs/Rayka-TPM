@@ -1,14 +1,21 @@
 import { Box, Button, Input } from "@mui/material";
 import { FC } from "react";
 import { GoSearch } from "react-icons/go";
+import { RxCross2 } from "react-icons/rx";
 
 interface Props {
-  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  setSearchInput: React.Dispatch<React.SetStateAction<string>>;
   value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSubmit: React.FormEventHandler<HTMLFormElement> | undefined;
 }
 
-const Search: FC<Props> = ({ handleSubmit, value, onChange }) => {
+const Search: FC<Props> = ({ setSearchInput, value, handleSubmit }) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    setSearchInput(e.target.value);
+  };
+
   return (
     <Box
       component="form"
@@ -43,18 +50,28 @@ const Search: FC<Props> = ({ handleSubmit, value, onChange }) => {
         />
       </Button>
       <Input
-        type="search"
+        type="text"
         placeholder="جستجوی سرویس یا IP"
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         sx={{
           fontFamily: "YekanBakh-Thin",
           padding: ".5rem",
-          ":focus": {
-            outline: "none",
-          },
+          border: "none",
         }}
       />
+      {value && (
+        <RxCross2
+          onClick={() => setSearchInput("")}
+          style={{
+            position: "absolute",
+            left: "20%",
+            top: "50%",
+            transform: "translateY(-50%)",
+            cursor: "pointer",
+          }}
+        />
+      )}
     </Box>
   );
 };
