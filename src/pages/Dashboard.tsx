@@ -171,7 +171,7 @@ const Dashboard: React.FC = () => {
             width: "50vw",
             display: "flex",
             flexDirection: "column",
-            gap: "2rem",
+            gap: "1rem",
           }}
         >
           <ProfileInfo
@@ -235,6 +235,7 @@ const Dashboard: React.FC = () => {
           <Box
             sx={{
               position: "relative",
+              marginTop: "auto",
             }}
           >
             <AreaChart selectedServiceIndex={selectedServiceIndex} />

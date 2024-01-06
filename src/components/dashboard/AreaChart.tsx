@@ -170,7 +170,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
   useEffect(() => {});
 
   return (
-    <Box onClick={() => setShowDatePicker(false)} position="relative">
+    <Box position="relative">
       <Box
         sx={{
           display: "flex",
@@ -183,7 +183,6 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
           component="h3"
           sx={{
             fontSize: "1.5rem",
-            // marginLeft: "auto",
           }}
         >
           نمودار ترافیک
@@ -192,7 +191,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
           sx={{
             position: "absolute",
             scale: showDatePicker ? "1" : "0",
-            transformOrigin: "38% 50%",
+            transformOrigin: "37% 50%",
             transition: "all .4s ease",
             right: "1rem",
             zIndex: "35",
@@ -200,6 +199,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
         >
           <RangeDatePicker
             key="app"
+            handleClose={setShowDatePicker}
             setStartDate={setStartDate}
             setEndDate={setEndDate}
           />
