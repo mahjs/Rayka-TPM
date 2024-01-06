@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import useDomains from "./useDomains";
 import api from "../services";
 
-interface MapData {
+export interface MapData {
   name: string;
   value: number;
   ips: string[];

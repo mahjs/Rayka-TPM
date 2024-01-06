@@ -18,7 +18,7 @@ import ProfileInfo from "../components/profile/ProfileInfoHeader";
 import ExportDocModal from "../components/dashboard/ExportDocModal";
 import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
-import useTreeMapData from "../hooks/useTreeMapData";
+import useTreeMapData, { MapData } from "../hooks/useTreeMapData";
 import { IoChevronDown } from "react-icons/io5";
 import { Domain } from "../services/domain";
 
@@ -148,7 +148,6 @@ const Dashboard: React.FC = () => {
 
   // State for SquareCharts
   const { loadingData, treeMapData, totalIps } = useTreeMapData();
-
   // State for Selecting a service
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
     number | null
@@ -160,6 +159,7 @@ const Dashboard: React.FC = () => {
     domains || []
   );
 
+  // Filter functionality
   useEffect(() => {
     if (!domains) return;
     if (searchInput === "") {
@@ -186,10 +186,32 @@ const Dashboard: React.FC = () => {
       )
     );
   }, [searchInput, domains, treeMapData]);
-
   // State for getting the ip addresses
   const { ipAddressesForDomain, loadingAddresses, reFetchAddresses } =
-    useIpAddresses(domains ? domains![selectedServiceIndex!]?.name : null);
+    useIpAddresses(
+      domains ? filteredDomains![selectedServiceIndex!]?.name : null
+    );
+  const [filteredIpAddresses, setFilteredIpAddresses] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!ipAddressesForDomain) return;
+    if (isNaN(parseInt(searchInput))) {
+      setFilteredIpAddresses(ipAddressesForDomain);
+      return;
+    }
+  }, [ipAddressesForDomain, searchInput]);
+
+  useEffect(() => {
+    if (!ipAddressesForDomain) return;
+
+    setFilteredIpAddresses(
+      ipAddressesForDomain.filter((ip) =>
+        isNaN(parseInt(searchInput))
+          ? true
+          : ip.toLowerCase().includes(searchInput.toLowerCase())
+      )
+    );
+  }, [searchInput, selectedServiceIndex, ipAddressesForDomain]);
 
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
@@ -319,7 +341,15 @@ const Dashboard: React.FC = () => {
                 dataForTreeChart={
                   loadingData ? [{ name: "nothing", value: 100 }] : treeMapData
                 }
-                selectedServiceIndex={selectedServiceIndex}
+                selectedServiceIndex={
+                  searchInput === null
+                    ? selectedServiceIndex
+                    : domains?.findIndex(
+                        (domain) =>
+                          domain?.name ===
+                          filteredDomains[selectedServiceIndex!]?.name
+                      )
+                }
                 setSelectedServiceIndex={setSelectedServiceIndex}
               />
               {loadingData && (
@@ -521,10 +551,10 @@ const Dashboard: React.FC = () => {
             <AddressesTable
               refetchIpAddresses={reFetchAddresses}
               domainName={
-                domains ? domains![selectedServiceIndex!]?.name : null
+                domains ? filteredDomains![selectedServiceIndex!]?.name : null
               }
               loading={loadingAddresses}
-              addressesData={ipAddressesForDomain}
+              addressesData={filteredIpAddresses}
               selectedServiceIndex={selectedServiceIndex}
             />
           </Box>
