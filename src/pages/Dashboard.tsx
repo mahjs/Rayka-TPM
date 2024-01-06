@@ -20,6 +20,7 @@ import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
 import useTreeMapData from "../hooks/useTreeMapData";
 import { IoChevronDown } from "react-icons/io5";
+import { Domain } from "../services/domain";
 
 const initialSeasonDataForLineChart = [
   {
@@ -155,6 +156,36 @@ const Dashboard: React.FC = () => {
 
   // State for getting all domains
   const { loadingDomains, domains, reFetchDomains } = useDomains();
+  const [filteredDomains, setFilteredDomains] = useState<Domain[]>(
+    domains || []
+  );
+
+  useEffect(() => {
+    if (!domains) return;
+    if (searchInput === "") {
+      setFilteredDomains(domains);
+      return;
+    }
+    setSelectedServiceIndex(null);
+    const filteredDomains = treeMapData.filter(
+      (data) =>
+        data.ips.filter((ip) =>
+          ip.toLowerCase().includes(searchInput.toLowerCase())
+        ).length > 0
+    );
+
+    setFilteredDomains(
+      Array.from(
+        new Set(
+          domains
+            .filter((domain) =>
+              domain.name.toLowerCase().includes(searchInput.toLowerCase())
+            )
+            .concat(filteredDomains)
+        )
+      )
+    );
+  }, [searchInput, domains, treeMapData]);
 
   // State for getting the ip addresses
   const { ipAddressesForDomain, loadingAddresses, reFetchAddresses } =
@@ -482,7 +513,7 @@ const Dashboard: React.FC = () => {
               refetchDomains={reFetchDomains}
               refetchIpAddresses={reFetchAddresses}
               loading={loadingDomains}
-              domains={domains}
+              domains={filteredDomains}
               selectedServiceIndex={selectedServiceIndex}
               setDataForAreaChart={setDataForAreaChart}
               setSelectedServiceIndex={setSelectedServiceIndex}

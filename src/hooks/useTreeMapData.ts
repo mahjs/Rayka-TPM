@@ -5,6 +5,7 @@ import api from "../services";
 interface MapData {
   name: string;
   value: number;
+  ips: string[];
 }
 
 const useTreeMapData = () => {
@@ -23,9 +24,11 @@ const useTreeMapData = () => {
     setLoadingData(true);
     Promise.all(
       domains.map((domain) =>
-        api.domain
-          .getIpAddressesForDomain(domain.name)
-          .then((res) => ({ name: res.domain, value: res.ips.length }))
+        api.domain.getIpAddressesForDomain(domain.name).then((res) => ({
+          name: res.domain,
+          value: res.ips.length,
+          ips: res.ips,
+        }))
       )
     ).then((res) => {
       setTreeMapData(res);
