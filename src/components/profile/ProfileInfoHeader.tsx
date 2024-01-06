@@ -60,7 +60,7 @@ const ProfileInfo: FC<Props> = ({
           <Typography
             fontFamily="Tomorrow-Light"
             sx={{
-              letterSpacing: ".2rem",
+              letterSpacing: ".15rem",
               fontSize: "1.2rem",
               opacity: ".6",
             }}
