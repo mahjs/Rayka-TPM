@@ -11,6 +11,7 @@ import { IoChevronDown } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RiHistoryLine } from "react-icons/ri";
 import { FC } from "react";
+import Icon from "../../assets/images/icon.svg";
 
 interface Props {
   totalDomains?: number;
@@ -49,10 +50,23 @@ const ProfileInfo: FC<Props> = ({
             cursor: "pointer",
           }}
         >
-          <Typography fontSize="1.5rem" fontFamily="Tomorrow-SemiBold">
-            TPM
+          <img
+            src={Icon}
+            style={{
+              width: "120px",
+              height: "30px",
+            }}
+          />
+          <Typography
+            fontFamily="Tomorrow-Light"
+            sx={{
+              letterSpacing: ".15rem",
+              fontSize: "1.2rem",
+              opacity: ".6",
+            }}
+          >
+            Dashboard
           </Typography>
-          <Typography fontFamily="Tomorrow-Light">Dashboard</Typography>
         </Stack>
 
         <Box

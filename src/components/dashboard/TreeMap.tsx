@@ -5,7 +5,7 @@ import { Typography } from "@mui/material";
 interface Props {
   loadingData: boolean;
   dataForTreeChart: { name: string; value: number }[];
-  selectedServiceIndex: number | null;
+  selectedServiceIndex: number | null | undefined;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
   // setDataForAreaChart: React.Dispatch<
   //   React.SetStateAction<
