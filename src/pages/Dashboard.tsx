@@ -187,7 +187,7 @@ const Dashboard: React.FC = () => {
       // Convert each domain's IP list to a format suitable for Excel sheet
       const ipData = domain.ips.map((ip) => ({ IP: ip }));
       const ws = XLSX.utils.json_to_sheet(ipData);
-
+      ws["!cols"] = [{ wch: 20 }];
       // Append a new sheet for each domain
       XLSX.utils.book_append_sheet(wb, ws, domain.name);
     });
