@@ -244,6 +244,7 @@ const ServicesTable: FC<Props> = ({
                 }}
               />
             )}
+
             {domains &&
               domains.map((domain, index) => (
                 <Box

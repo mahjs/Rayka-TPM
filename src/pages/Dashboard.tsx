@@ -21,6 +21,7 @@ import useDomains from "../hooks/useDomains";
 import useTreeMapData, { MapData } from "../hooks/useTreeMapData";
 import { IoChevronDown } from "react-icons/io5";
 import { Domain } from "../services/domain";
+import * as XLSX from "xlsx";
 
 const initialSeasonDataForLineChart = [
   {
@@ -125,6 +126,26 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  const downloadExcel = () => {
+    const wb = XLSX.utils.book_new(); // Create a new workbook
+
+    filteredDomains.forEach((domain) => {
+      // For each domain, prepare the data
+      const data = filteredIpAddresses.map((address) => ({
+        Address: address,
+        Info: "5254", // Replace with actual data if necessary
+      }));
+
+      // Create a worksheet
+      const ws = XLSX.utils.json_to_sheet(data);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, domain.name);
+    });
+
+    // Write the workbook and initiate download
+    XLSX.writeFile(wb, "output.xlsx");
+  };
   // State to hold the search input
   const [searchInput, setSearchInput] = useState<string>("");
 
@@ -509,7 +530,7 @@ const Dashboard: React.FC = () => {
             />
 
             <Button
-              onClick={() => setOpenExportModal(true)}
+              onClick={downloadExcel}
               sx={{
                 fontFamily: "YekanBakh-Bold",
                 color: "#fff",
