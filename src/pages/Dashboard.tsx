@@ -22,6 +22,15 @@ import useTreeMapData, { MapData } from "../hooks/useTreeMapData";
 import { IoChevronDown } from "react-icons/io5";
 import { Domain } from "../services/domain";
 import * as XLSX from "xlsx";
+interface IPAddressData {
+  domainName: string;
+  ip: string; // Ensure this property is defined in the interface
+  info: string; // Add other properties as needed
+}
+interface DomainData {
+  name: string;
+  // other properties as required
+}
 
 const initialSeasonDataForLineChart = [
   {
@@ -126,26 +135,6 @@ const Dashboard: React.FC = () => {
     }
   });
 
-  const downloadExcel = () => {
-    const wb = XLSX.utils.book_new(); // Create a new workbook
-
-    filteredDomains.forEach((domain) => {
-      // For each domain, prepare the data
-      const data = filteredIpAddresses.map((address) => ({
-        Address: address,
-        Info: "5254", // Replace with actual data if necessary
-      }));
-
-      // Create a worksheet
-      const ws = XLSX.utils.json_to_sheet(data);
-
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(wb, ws, domain.name);
-    });
-
-    // Write the workbook and initiate download
-    XLSX.writeFile(wb, "output.xlsx");
-  };
   // State to hold the search input
   const [searchInput, setSearchInput] = useState<string>("");
 
@@ -169,6 +158,7 @@ const Dashboard: React.FC = () => {
 
   // State for SquareCharts
   const { loadingData, treeMapData, totalIps } = useTreeMapData();
+
   // State for Selecting a service
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
     number | null
@@ -307,6 +297,41 @@ const Dashboard: React.FC = () => {
 
   const [openExportModal, setOpenExportModal] = useState<boolean>(false);
   const [selectedFormat, setSelectedFormat] = useState<string>("pdf");
+  const [ipDownloadData, setIpDownloadData] = useState<IPAddressData[]>([]);
+  const [domainDownloadData, setDomainDownloadData] = useState<DomainData[]>(
+    []
+  );
+
+  const downloadExcel = () => {
+    const wb = XLSX.utils.book_new(); // Create a new workbook
+
+    domainDownloadData.forEach((domainData) => {
+      // Filter addresses specific to the current domain
+      const specificAddresses = ipDownloadData.filter(
+        (address) => address.domainName === domainData.name
+      );
+
+      // Prepare the data for each domain
+      const data = specificAddresses.map((address) => ({
+        Address: address.ip, // Using 'ip' from the IPAddressData interface
+        Info: address.info, // Replace with actual data if necessary
+      }));
+
+      // Create a worksheet
+      const ws = XLSX.utils.json_to_sheet(data);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, domainData.name);
+    });
+
+    // Write the workbook and initiate download
+    XLSX.writeFile(wb, "output.xlsx");
+  };
+  const handleExport = () => {
+    if (selectedFormat === "excel") {
+      downloadExcel();
+    }
+  };
 
   return (
     <>
@@ -530,7 +555,7 @@ const Dashboard: React.FC = () => {
             />
 
             <Button
-              onClick={downloadExcel}
+              onClick={() => setOpenExportModal(true)}
               sx={{
                 fontFamily: "YekanBakh-Bold",
                 color: "#fff",
@@ -568,7 +593,10 @@ const Dashboard: React.FC = () => {
               selectedServiceIndex={selectedServiceIndex}
               setDataForAreaChart={setDataForAreaChart}
               setSelectedServiceIndex={setSelectedServiceIndex}
+              setDomainsDownloadData={setDomainDownloadData}
+              domainsDownloadData={domainDownloadData}
             />
+
             <AddressesTable
               refetchIpAddresses={reFetchAddresses}
               domainName={
@@ -577,6 +605,8 @@ const Dashboard: React.FC = () => {
               loading={loadingAddresses}
               addressesData={filteredIpAddresses}
               selectedServiceIndex={selectedServiceIndex}
+              setAddressesDownloadData={setIpDownloadData}
+              addressesDownloadData={ipDownloadData}
             />
           </Box>
         </Box>
@@ -586,6 +616,7 @@ const Dashboard: React.FC = () => {
         setOpenModal={setOpenExportModal}
         selectedFormat={selectedFormat}
         setSelectedFormat={setSelectedFormat}
+        onExportClick={handleExport}
       />
     </>
   );

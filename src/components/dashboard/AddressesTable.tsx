@@ -17,6 +17,11 @@ interface Props {
   selectedServiceIndex: number | null;
   loading: boolean;
   addressesData: string[] | null;
+  addressesDownloadData: string[] | null;
+  setAddressesDownloadData: React.Dispatch<
+    React.SetStateAction<string[] | null>
+  >;
+
   domainName: string | null;
   refetchIpAddresses: () => void;
 }
@@ -27,6 +32,8 @@ const AddressesTable: FC<Props> = ({
   addressesData,
   domainName,
   refetchIpAddresses,
+  addressesDownloadData,
+  setAddressesDownloadData,
 }) => {
   const [addressTablePage, setAddressTablePage] = useState(1);
   const handleChangePage = (
