@@ -14,6 +14,9 @@ import useDomains from "../hooks/useDomains";
 import useTreeMapData from "../hooks/useTreeMapData";
 import { Domain } from "../services/domain";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 interface DomainData {
   name: string;
   ips: string[];
@@ -200,6 +203,34 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const exportToPDF = () => {
+    const domainData = prepareDataForExport();
+    const doc = new jsPDF();
+
+    domainData.forEach((domain) => {
+      doc.text(domain.name, 10, 10);
+      autoTable(doc, {
+        startY: 20,
+        head: [["IP Address"]],
+        body: domain.ips.map((ip) => [ip]),
+        margin: { top: 10 },
+      });
+
+      // Add a page break if not the last domain
+      if (domain !== domainData[domainData.length - 1]) {
+        doc.addPage();
+      }
+    });
+
+    doc.save("Domains_and_IPs.pdf");
+  };
+  const onExportClick = () => {
+    if (selectedFormat === "excel") {
+      exportToExcel();
+    } else if (selectedFormat === "pdf") {
+      exportToPDF();
+    }
+  };
   return (
     <>
       <Box
@@ -378,7 +409,7 @@ const Dashboard: React.FC = () => {
         setOpenModal={setOpenExportModal}
         selectedFormat={selectedFormat}
         setSelectedFormat={setSelectedFormat}
-        onExportClick={exportToExcel}
+        onExportClick={onExportClick}
       />
     </>
   );
