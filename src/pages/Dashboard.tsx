@@ -13,7 +13,11 @@ import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
 import useTreeMapData from "../hooks/useTreeMapData";
 import { Domain } from "../services/domain";
-
+import * as XLSX from "xlsx";
+interface DomainData {
+  name: string;
+  ips: string[];
+}
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isLogin } = useAuth();
@@ -46,6 +50,7 @@ const Dashboard: React.FC = () => {
 
   // State for SquareCharts
   const { loadingData, treeMapData, totalIps } = useTreeMapData();
+
   const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
 
   useEffect(() => {
@@ -154,39 +159,44 @@ const Dashboard: React.FC = () => {
 
   const [openExportModal, setOpenExportModal] = useState<boolean>(false);
   const [selectedFormat, setSelectedFormat] = useState<string>("pdf");
-  const [ipDownloadData, setIpDownloadData] = useState<IPAddressData[]>([]);
+
   const [domainDownloadData, setDomainDownloadData] = useState<DomainData[]>(
     []
   );
+  const prepareDataForExport = () => {
+    // Create an array to hold the data for each domain
+    let domainExportData = [];
 
-  const downloadExcel = () => {
-    const wb = XLSX.utils.book_new(); // Create a new workbook
+    // Iterate over each domain to prepare its data
+    domainDownloadData.forEach((domain) => {
+      let domainIps =
+        treeMapData.find((data) => data.name === domain.name)?.ips || [];
 
-    domainDownloadData.forEach((domainData) => {
-      // Filter addresses specific to the current domain
-      const specificAddresses = ipDownloadData.filter(
-        (address) => address.domainName === domainData.name
-      );
-
-      // Prepare the data for each domain
-      const data = specificAddresses.map((address) => ({
-        Address: address.ip, // Using 'ip' from the IPAddressData interface
-        Info: address.info, // Replace with actual data if necessary
-      }));
-
-      // Create a worksheet
-      const ws = XLSX.utils.json_to_sheet(data);
-
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(wb, ws, domainData.name);
+      // Add an object for each domain with its name and associated IPs
+      domainExportData.push({ name: domain.name, ips: domainIps });
     });
 
-    // Write the workbook and initiate download
-    XLSX.writeFile(wb, "output.xlsx");
+    return domainExportData;
   };
-  const handleExport = () => {
-    if (selectedFormat === "excel") {
-      downloadExcel();
+
+  const exportToExcel = () => {
+    const domainData = prepareDataForExport();
+    const wb = XLSX.utils.book_new();
+
+    domainData.forEach((domain) => {
+      // Convert each domain's IP list to a format suitable for Excel sheet
+      const ipData = domain.ips.map((ip) => ({ IP: ip }));
+      const ws = XLSX.utils.json_to_sheet(ipData);
+
+      // Append a new sheet for each domain
+      XLSX.utils.book_append_sheet(wb, ws, domain.name);
+    });
+
+    // Write the Excel file if there are sheets
+    if (wb.SheetNames.length > 0) {
+      XLSX.writeFile(wb, "Domains_and_IPs.xlsx");
+    } else {
+      console.error("No data to export.");
     }
   };
 
@@ -359,8 +369,6 @@ const Dashboard: React.FC = () => {
                   ? selectedServiceIndex !== null
                   : true
               }
-              setAddressesDownloadData={setIpDownloadData}
-              addressesDownloadData={ipDownloadData}
             />
           </Box>
         </Box>
@@ -370,7 +378,7 @@ const Dashboard: React.FC = () => {
         setOpenModal={setOpenExportModal}
         selectedFormat={selectedFormat}
         setSelectedFormat={setSelectedFormat}
-        onExportClick={handleExport}
+        onExportClick={exportToExcel}
       />
     </>
   );

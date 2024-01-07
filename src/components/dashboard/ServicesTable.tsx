@@ -75,7 +75,6 @@ const ServicesTable: FC<Props> = ({
       setSelectedDomains([]);
     });
   };
-  console.log(domainsDownloadData);
 
   return (
     <>
