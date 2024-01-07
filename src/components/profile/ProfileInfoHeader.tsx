@@ -158,7 +158,7 @@ const ProfileInfo: FC<Props> = ({
           }}
         >
           <Stack direction="row" gap=".5rem" justifyContent="space-between">
-            <Typography>تعداد دامین‌ها:</Typography>
+            <Typography whiteSpace="nowrap">تعداد دامین‌ها:</Typography>
             <Typography
               sx={{
                 width: "2rem",
@@ -178,7 +178,7 @@ const ProfileInfo: FC<Props> = ({
             }}
           />
           <Stack direction="row" gap=".5rem" justifyContent="space-between">
-            <Typography>تعداد کل آدرس‌ها:</Typography>
+            <Typography whiteSpace="nowrap">تعداد آدرس‌ها:</Typography>
             <Typography
               sx={{
                 width: "2rem",
