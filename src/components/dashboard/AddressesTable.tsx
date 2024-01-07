@@ -14,7 +14,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import api from "../../services";
 
 interface Props {
-  selectedServiceIndex: number | null;
+  showData: boolean;
   loading: boolean;
   addressesData: string[] | null;
   addressesDownloadData: string[] | null;
@@ -27,7 +27,7 @@ interface Props {
 }
 
 const AddressesTable: FC<Props> = ({
-  selectedServiceIndex,
+  showData,
   loading,
   addressesData,
   domainName,
@@ -45,7 +45,7 @@ const AddressesTable: FC<Props> = ({
 
   useEffect(() => {
     setAddressTablePage(1);
-  }, [selectedServiceIndex, loading]);
+  }, [showData, loading]);
 
   const [openAddAddressModal, setOpenAddDomainModal] = useState(false);
 
@@ -89,7 +89,7 @@ const AddressesTable: FC<Props> = ({
             آدرس‌های IP
           </Typography>
 
-          {selectedServiceIndex !== null && (
+          {showData !== null && (
             <Button
               onClick={() => setOpenAddDomainModal(true)}
               sx={{
@@ -185,7 +185,7 @@ const AddressesTable: FC<Props> = ({
               />
             )}
             {/* Rows for the body */}
-            {selectedServiceIndex !== null &&
+            {showData &&
               addressesData &&
               addressesData
                 .slice(
@@ -197,7 +197,7 @@ const AddressesTable: FC<Props> = ({
                 )
                 .map((address, index) => (
                   <Box
-                    key={address}
+                    key={index}
                     sx={{
                       padding: ".7rem .5rem",
                       display: "flex",
@@ -235,7 +235,7 @@ const AddressesTable: FC<Props> = ({
                     </Typography>
                   </Box>
                 ))}
-            {selectedServiceIndex === null && (
+            {!showData && (
               <Typography
                 fontFamily="YekanBakh-Regular"
                 sx={{
@@ -251,7 +251,7 @@ const AddressesTable: FC<Props> = ({
                 کنید.
               </Typography>
             )}
-            {selectedServiceIndex !== null && !loading && (
+            {showData && !loading && (
               <Pagination
                 sx={{
                   direction: "ltr",
