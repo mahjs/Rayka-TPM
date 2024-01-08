@@ -239,6 +239,7 @@ const ServicesTable: FC<Props> = ({
                       zIndex: "100",
                       padding: ".1rem",
                       background: "#fff",
+                      borderRadius: ".2rem",
                       ":hover": {
                         background: "#fff",
                       },
