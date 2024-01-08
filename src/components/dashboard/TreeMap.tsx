@@ -75,7 +75,10 @@ const CustomizedContent = (props: any) => {
   // const hue = (index * 137.508) % 360;
   // let color = `hsl(${hue}, 70%, 60%)`;
   // if (index === 0 && loading) color = "#fff";
-  const percent = (data?.[index]?.ips?.length || 0 / sumOfData) / 100;
+  const percent = +(
+    ((data?.[index]?.ips?.length || 0) / sumOfData) *
+    100
+  ).toFixed(1);
 
   return (
     <g
@@ -106,7 +109,7 @@ const CustomizedContent = (props: any) => {
       </rect>
       {percent > 0.6 && (
         <text
-          fontSize={percent / 3.5 + "rem"}
+          fontSize={percent / 3.8 + "rem"}
           opacity=".8"
           x={x + width / 2}
           y={y + height / 2}
