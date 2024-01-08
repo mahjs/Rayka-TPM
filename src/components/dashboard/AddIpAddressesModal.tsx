@@ -1,4 +1,11 @@
-import { Modal, Box, Stack, Typography, Button } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Stack,
+  Typography,
+  Button,
+  TextField,
+} from "@mui/material";
 import { FC, useState } from "react";
 import { GoPlus } from "react-icons/go";
 import { RxCross2 } from "react-icons/rx";
@@ -21,6 +28,13 @@ const AddIpAddressesModal: FC<Props> = ({
 }) => {
   const [ipAddressCountForAdding, setIpAddressCountForAdding] = useState(1);
   const [ipAddresses, setIpAddresses] = useState<string[]>([]);
+  const [bulkIpInput, setBulkIpInput] = useState("");
+
+  const parseBulkInput = () => {
+    const parsedIps = bulkIpInput.split(/,|\n/).map((ip) => ip.trim());
+    setIpAddresses((prev) => [...prev, ...parsedIps.filter((ip) => ip)]);
+    setBulkIpInput("");
+  };
 
   const handleSubmit = () => {
     if (
@@ -86,6 +100,7 @@ const AddIpAddressesModal: FC<Props> = ({
             <Button
               onClick={() => {
                 setIpAddressCountForAdding(1);
+                setBulkIpInput("");
                 setOpenModal(false);
               }}
               sx={{
@@ -97,7 +112,17 @@ const AddIpAddressesModal: FC<Props> = ({
             </Button>
           </Stack>
         </Box>
-
+        <Box width="100%">
+          <TextField
+            label="افزودن آدرس به صورت گروهی"
+            multiline
+            rows={4}
+            value={bulkIpInput}
+            onChange={(e) => setBulkIpInput(e.target.value)}
+            placeholder="Enter IP addresses separated by commas or new lines"
+            fullWidth
+          />
+        </Box>
         <Box
           onSubmit={(e) => {
             e.preventDefault();
