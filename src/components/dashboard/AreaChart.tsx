@@ -177,26 +177,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
   useEffect(() => {});
 
   return (
-    <Box position="relative">
-      <Stack
-        direction="row"
-        sx={{
-          gap: "1rem",
-          position: "absolute",
-          bottom: "2.5rem",
-          left: "52%",
-          transform: "translateX(-50%)",
-          background: "#fff",
-          zIndex: "40",
-          padding: ".5rem",
-          border: "1px solid #707070",
-          borderRadius: ".5rem",
-        }}
-      >
-        <TitledValue color="red" title="Min" value={min} />
-        <TitledValue color="green" title="Max" value={max} />
-        <TitledValue color="blue" title="Avg" value={avg} />
-      </Stack>
+    <Box>
       <Box
         sx={{
           display: "flex",
@@ -363,6 +344,25 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
           position: "relative",
         }}
       >
+        <Stack
+          direction="row"
+          sx={{
+            gap: "1rem",
+            position: "absolute",
+            bottom: "2.5rem",
+            left: "52%",
+            transform: "translateX(-50%)",
+            background: "#fff",
+            zIndex: "40",
+            padding: ".5rem",
+            border: "1px solid #707070",
+            borderRadius: ".5rem",
+          }}
+        >
+          <TitledValue color="red" title="Min" value={min} />
+          <TitledValue color="green" title="Max" value={max} />
+          <TitledValue color="blue" title="Avg" value={avg} />
+        </Stack>
         <ResponsiveContainer
           width="100%"
           height="100%"
