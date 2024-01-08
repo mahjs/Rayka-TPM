@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +22,7 @@ import { Domain } from "../services/domain";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import html2canvas from "html2canvas";
 
 interface DomainData {
   name: string;
@@ -39,8 +46,8 @@ const Dashboard: React.FC = () => {
     // For now, we'll just log the input to the console
     console.log(`Search for: ${searchInput}`);
   };
-
-  // Function to handle submission of the search
+  const treeMapRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
+  const dashboardRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     handleSearch();
@@ -228,13 +235,43 @@ const Dashboard: React.FC = () => {
       exportToExcel();
     } else if (selectedFormat === "pdf") {
       exportToPDF();
+    } else if (selectedFormat === "csv") {
+      dashboardScreenshot();
     }
   };
-  console.log("XXXXX", domainDownloadData);
+  const captureScreenshotTreeChart = () => {
+    const treeMapElement = treeMapRef.current;
+    if (treeMapElement) {
+      html2canvas(treeMapElement).then((canvas) => {
+        const image = canvas.toDataURL("image/png", 5.0);
+
+        // Download the image
+        let link = document.createElement("a");
+        link.download = "tree-map-screenshot.png";
+        link.href = image;
+        link.click();
+      });
+    }
+  };
+  const dashboardScreenshot = () => {
+    const dashboardElement = dashboardRef.current;
+    if (dashboardElement) {
+      html2canvas(dashboardElement).then((canvas) => {
+        const image = canvas.toDataURL("image/png", 5.0);
+
+        // Download the image
+        let link = document.createElement("a");
+        link.download = "dashboard.png";
+        link.href = image;
+        link.click();
+      });
+    }
+  };
 
   return (
     <>
       <Box
+        ref={dashboardRef}
         component="main"
         sx={{
           padding: "2rem 1.5rem",
@@ -257,22 +294,46 @@ const Dashboard: React.FC = () => {
             totalDomains={domains?.length || 0}
           />
           <Box
+            ref={treeMapRef}
             sx={{
               display: "flex",
               flexDirection: "column",
               gap: "1rem",
               height: "35vh",
+              padding: "1rem",
             }}
           >
-            <Typography
-              fontFamily="YekanBakh-Medium"
-              component="h2"
-              sx={{
-                fontSize: "1.5rem",
-              }}
-            >
-              سهم سرویس ها
-            </Typography>
+            <Stack direction="row" justifyContent="space-between">
+              {" "}
+              <Typography
+                fontFamily="YekanBakh-Medium"
+                component="h2"
+                sx={{
+                  fontSize: "1.5rem",
+                }}
+              >
+                سهم سرویس ها
+              </Typography>
+              <Button
+                onClick={captureScreenshotTreeChart}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: ".3rem",
+                  background: "#0F6CBD",
+                  color: "#fff",
+                  fontFamily: "YekanBakh-Regular",
+                  borderRadius: ".5rem",
+                  ":hover": {
+                    background: "#0F6CBD",
+                    color: "#fff",
+                  },
+                }}
+              >
+                دریافت خروجی
+              </Button>
+            </Stack>
+
             <Box
               sx={{
                 border: "1px solid #707070",
