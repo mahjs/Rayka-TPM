@@ -24,7 +24,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
 
-interface DomainData {
+export interface DomainData {
   name: string;
   ips?: string[];
 }
@@ -53,14 +53,18 @@ const Dashboard: React.FC = () => {
     handleSearch();
   };
 
-  // State for Selecting a service
+  // State for Selecting a service & an address
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
     number | null
   >(null);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedAddress(null);
+  }, [selectedServiceIndex]);
 
   // State for SquareCharts
   const { loadingData, treeMapData, totalIps } = useTreeMapData();
-
   const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
 
   useEffect(() => {
@@ -175,10 +179,10 @@ const Dashboard: React.FC = () => {
   );
   const prepareDataForExport = () => {
     // Create an array to hold the data for each domain
-    let domainExportData: { name: string; ips: string[] }[] = [];
+    const domainExportData: { name: string; ips: string[] }[] = [];
     // Iterate over each domain to prepare its data
     domainDownloadData.forEach((domain) => {
-      let domainIps =
+      const domainIps: string[] =
         treeMapData.find((data) => data.name === domain.name)?.ips || [];
 
       // Add an object for each domain with its name and associated IPs
@@ -435,6 +439,8 @@ const Dashboard: React.FC = () => {
             {/* Services Table*/}
             <ServicesTable
               refetchDomains={reFetchDomains}
+              mapData={treeMapData}
+              loadingMapData={loadingData}
               refetchIpAddresses={reFetchAddresses}
               loading={loadingDomains}
               domains={filteredDomains}
@@ -461,6 +467,8 @@ const Dashboard: React.FC = () => {
                   ? selectedServiceIndex !== null
                   : true
               }
+              selectedAddress={selectedAddress}
+              setSelectedAddress={setSelectedAddress}
             />
           </Box>
         </Box>

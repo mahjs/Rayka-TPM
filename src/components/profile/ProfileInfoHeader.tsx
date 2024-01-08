@@ -10,7 +10,7 @@ import { BsPerson } from "react-icons/bs";
 import { IoChevronDown } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RiHistoryLine } from "react-icons/ri";
-import { FC } from "react";
+import { FC, useState } from "react";
 import Icon from "../../assets/images/icon.svg";
 
 interface Props {
@@ -28,6 +28,8 @@ const ProfileInfo: FC<Props> = ({
 }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  const [openLogout, setOpenLogout] = useState(false);
   return (
     <Box
       sx={{
@@ -82,20 +84,47 @@ const ProfileInfo: FC<Props> = ({
             display: "flex",
             alignItems: "center",
             gap: ".2rem",
+            position: "relative",
           }}
         >
+          <Box
+            sx={{
+              position: "absolute",
+              padding: "1rem",
+              borderRadius: "1rem",
+              bottom: openLogout ? "-110%" : "0",
+              left: "5rem",
+              opacity: openLogout ? "1" : "0",
+              transition: "all .3s ease",
+            }}
+          >
+            <Button
+              variant="outlined"
+              sx={{
+                color: "red",
+              }}
+            >
+              Logout
+            </Button>
+          </Box>
           <Button
             sx={{
               minWidth: "0",
             }}
+            onClick={() => setOpenLogout(!openLogout)}
           >
             <IoChevronDown
               color="gray"
-              style={{ width: "25px", height: "25px" }}
+              style={{
+                width: "25px",
+                height: "25px",
+                transform: openLogout ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "all .3s ease",
+              }}
             />
           </Button>
           <Button
-            onClick={() => navigate("/profile")}
+            // onClick={() => navigate("/profile")}
             sx={{
               minWidth: "0",
               width: "50px",
