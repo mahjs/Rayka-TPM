@@ -17,9 +17,9 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-interface DomainData {
+export interface DomainData {
   name: string;
-  ips: string[];
+  ips?: string[];
 }
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -168,11 +168,11 @@ const Dashboard: React.FC = () => {
   );
   const prepareDataForExport = () => {
     // Create an array to hold the data for each domain
-    let domainExportData = [];
+    const domainExportData: { name: string; ips: string[] }[] = [];
 
     // Iterate over each domain to prepare its data
     domainDownloadData.forEach((domain) => {
-      let domainIps =
+      const domainIps: string[] =
         treeMapData.find((data) => data.name === domain.name)?.ips || [];
 
       // Add an object for each domain with its name and associated IPs
@@ -188,7 +188,7 @@ const Dashboard: React.FC = () => {
 
     domainData.forEach((domain) => {
       // Convert each domain's IP list to a format suitable for Excel sheet
-      const ipData = domain.ips.map((ip) => ({ IP: ip }));
+      const ipData = domain.ips.map((ip: string) => ({ IP: ip }));
       const ws = XLSX.utils.json_to_sheet(ipData);
       ws["!cols"] = [{ wch: 20 }];
       // Append a new sheet for each domain
@@ -212,7 +212,7 @@ const Dashboard: React.FC = () => {
       autoTable(doc, {
         startY: 20,
         head: [["IP Address"]],
-        body: domain.ips.map((ip) => [ip]),
+        body: domain.ips.map((ip: string) => [ip]),
         margin: { top: 10 },
       });
 
