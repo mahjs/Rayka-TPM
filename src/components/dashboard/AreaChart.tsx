@@ -158,74 +158,148 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
     );
   }, [selectedServerForAreaChart, selectedTimeForAreaChart]);
 
-  const chartRef = useRef(null);
-  const exportChartPNG = () => {
-    if (chartRef.current) {
-      html2canvas(chartRef.current).then((canvas) => {
-        const link = document.createElement("a");
-        link.href = canvas.toDataURL("image/png");
-        link.download = "chart.png";
-        link.click();
-      });
-    }
-  };
-
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   useEffect(() => {});
 
+  const chartRef = useRef(null);
+  const downloadImage = (blob: string, fileName: string) => {
+    const fakeLink = window.document.createElement("a");
+    fakeLink.href = blob;
+    fakeLink.download = fileName;
+
+    document.body.appendChild(fakeLink);
+    fakeLink.click();
+    document.body.removeChild(fakeLink);
+    fakeLink.remove();
+  };
+  // Function to capture screenshot
+
+  const captureScreenshot = () => {
+    const chartElement = chartRef.current;
+    if (chartElement) {
+      html2canvas(chartElement).then((canvas) => {
+        const image = canvas.toDataURL("image/png", 5.0);
+
+        // Download the image
+        let link = document.createElement("a");
+        link.download = "chart-screenshot.png";
+        link.href = image;
+        link.click();
+      });
+    }
+  };
   return (
-    <Box>
+    <Box position="relative" padding="1rem" ref={chartRef}>
       <Box
         sx={{
           display: "flex",
           gap: "1rem",
           alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <Typography
-          fontFamily="YekanBakh-Medium"
-          component="h3"
-          sx={{
-            fontSize: "1.5rem",
-          }}
-        >
-          نمودار ترافیک
-        </Typography>
-        <Box
-          sx={{
-            position: "absolute",
-            scale: showDatePicker ? "1" : "0",
-            transformOrigin: "37% 50%",
-            transition: "all .4s ease",
-            right: "1rem",
-            zIndex: "35",
-          }}
-        >
-          <RangeDatePicker
-            key="app"
-            handleClose={setShowDatePicker}
-            setStartDate={setStartDate}
-            setEndDate={setEndDate}
-          />
-        </Box>
-        <Box
-          sx={{
-            position: "relative",
-          }}
-        >
+        <Stack direction="row" gap="1rem" alignItems="center">
+          <Typography
+            fontFamily="YekanBakh-Medium"
+            component="h3"
+            sx={{
+              fontSize: "1.5rem",
+            }}
+          >
+            نمودار ترافیک
+          </Typography>
+          <Box
+            sx={{
+              position: "absolute",
+              scale: showDatePicker ? "1" : "0",
+              transformOrigin: "37% 50%",
+              transition: "all .4s ease",
+              right: "1rem",
+              zIndex: "35",
+            }}
+          >
+            <RangeDatePicker
+              key="app"
+              handleClose={setShowDatePicker}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+            />
+          </Box>
+          <Box
+            sx={{
+              position: "relative",
+            }}
+          >
+            <Select
+              IconComponent={IoChevronDown}
+              label="فیلتر سرویس ها"
+              value={selectedTimeForAreaChart}
+              onChange={(e) => setSelectedTimeForAreaChart(e.target.value)}
+              sx={{
+                height: "2rem",
+                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
+                borderRadius: ".5rem",
+                paddingLeft: "1rem",
+                zIndex: "10",
+                ".MuiSelect-icon": {
+                  width: "20px",
+                  height: "20px",
+                  marginTop: "-.25rem",
+                },
+                ".MuiOutlinedInput-notchedOutline": { border: 0 },
+                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    border: 0,
+                  },
+              }}
+            >
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="hourly">
+                ساعتی
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="daily">
+                روزانه
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
+                هفته‌‌ای
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="monthly"
+              >
+                ماهانه
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="yearly">
+                سالانه
+              </MenuItem>
+            </Select>
+            <BsCalendar2DateFill
+              onClick={(e: MouseEvent) => {
+                e.stopPropagation();
+                setShowDatePicker(!showDatePicker);
+              }}
+              style={{
+                position: "absolute",
+                left: "0",
+                top: "50%",
+                transform: "translateY(-50%)",
+                paddingLeft: ".5rem",
+                zIndex: "30",
+                cursor: "pointer",
+              }}
+            />
+          </Box>
           <Select
             IconComponent={IoChevronDown}
             label="فیلتر سرویس ها"
-            value={selectedTimeForAreaChart}
-            onChange={(e) => setSelectedTimeForAreaChart(e.target.value)}
+            value={selectedServerForAreaChart}
+            onChange={(e) => setSelectedServerForAreaChart(e.target.value)}
             sx={{
+              marginRight: ".5rem",
               height: "2rem",
               boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
-              borderRadius: ".5rem",
-              paddingLeft: "1rem",
               zIndex: "10",
               ".MuiSelect-icon": {
                 width: "20px",
@@ -239,84 +313,31 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
                 },
             }}
           >
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="hourly">
-              ساعتی
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="total">
+              مجموع ترافیک
             </MenuItem>
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="daily">
-              روزانه
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server1">
+              سرور یک
             </MenuItem>
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
-              هفته‌‌ای
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server2">
+              سرور دو
             </MenuItem>
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="monthly">
-              ماهانه
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server3">
+              سرور سه
             </MenuItem>
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="yearly">
-              سالانه
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server4">
+              سرور چهار
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server5">
+              سرور پنچ
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server6">
+              سرور شش
             </MenuItem>
           </Select>
-          <BsCalendar2DateFill
-            onClick={(e: MouseEvent) => {
-              e.stopPropagation();
-              setShowDatePicker(!showDatePicker);
-            }}
-            style={{
-              position: "absolute",
-              left: "0",
-              top: "50%",
-              transform: "translateY(-50%)",
-              paddingLeft: ".5rem",
-              zIndex: "30",
-              cursor: "pointer",
-            }}
-          />
-        </Box>
-        <Select
-          IconComponent={IoChevronDown}
-          label="فیلتر سرویس ها"
-          value={selectedServerForAreaChart}
-          onChange={(e) => setSelectedServerForAreaChart(e.target.value)}
-          sx={{
-            marginRight: ".5rem",
-            height: "2rem",
-            boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
-            zIndex: "10",
-            ".MuiSelect-icon": {
-              width: "20px",
-              height: "20px",
-              marginTop: "-.25rem",
-            },
-            ".MuiOutlinedInput-notchedOutline": { border: 0 },
-            "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-              {
-                border: 0,
-              },
-          }}
-        >
-          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="total">
-            مجموع ترافیک
-          </MenuItem>
-          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server1">
-            سرور یک
-          </MenuItem>
-          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server2">
-            سرور دو
-          </MenuItem>
-          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server3">
-            سرور سه
-          </MenuItem>
-          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server4">
-            سرور چهار
-          </MenuItem>
-          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server5">
-            سرور پنچ
-          </MenuItem>
-          <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server6">
-            سرور شش
-          </MenuItem>
-        </Select>
+        </Stack>
         <Button
-          onClick={exportChartPNG}
+          onClick={captureScreenshot}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -335,7 +356,6 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
         </Button>
       </Box>
       <Box
-        ref={chartRef}
         width="100%"
         fontFamily="YekanBakh-Regular"
         sx={{
