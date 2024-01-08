@@ -46,10 +46,15 @@ const Dashboard: React.FC = () => {
     handleSearch();
   };
 
-  // State for Selecting a service
+  // State for Selecting a service & an address
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
     number | null
   >(null);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedAddress(null);
+  }, [selectedServiceIndex]);
 
   // State for SquareCharts
   const { loadingData, treeMapData, totalIps } = useTreeMapData();
@@ -400,6 +405,8 @@ const Dashboard: React.FC = () => {
                   ? selectedServiceIndex !== null
                   : true
               }
+              selectedAddress={selectedAddress}
+              setSelectedAddress={setSelectedAddress}
             />
           </Box>
         </Box>

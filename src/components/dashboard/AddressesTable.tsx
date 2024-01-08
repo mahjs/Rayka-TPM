@@ -24,6 +24,8 @@ interface Props {
   addressesData: string[] | null;
   domainName: string | null;
   refetchIpAddresses: () => void;
+  selectedAddress: string | null;
+  setSelectedAddress: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const AddressesTable: FC<Props> = ({
@@ -32,7 +34,13 @@ const AddressesTable: FC<Props> = ({
   addressesData,
   domainName,
   refetchIpAddresses,
+  selectedAddress,
+  setSelectedAddress,
 }) => {
+  const [selectedFilter, setSelectedFilter] = useState<
+    "All_IPs" | "CDN" | "Host"
+  >("All_IPs");
+
   const [addressTablePage, setAddressTablePage] = useState(1);
   const handleChangePage = (
     _event: React.ChangeEvent<unknown>,
@@ -66,6 +74,7 @@ const AddressesTable: FC<Props> = ({
       .then(() => {
         refetchIpAddresses();
         setSelectedAddresses([]);
+        setSelectedAddress(null);
       });
   };
 
@@ -79,7 +88,7 @@ const AddressesTable: FC<Props> = ({
           gap: "1rem",
         }}
       >
-        <Stack direction="row" gap="1rem">
+        <Stack direction="row" gap=".25rem">
           <Typography
             component="h3"
             fontFamily="YekanBakh-Medium"
@@ -111,27 +120,6 @@ const AddressesTable: FC<Props> = ({
               افزودن
             </Button>
           )}
-          {selectedAddresses.length > 0 && (
-            <Button
-              onClick={handleDeleteIpsFromDomain}
-              sx={{
-                color: "red",
-                fontFamily: "YekanBakh-Regular",
-                display: "flex",
-                alignItems: "center",
-                gap: ".3rem",
-              }}
-            >
-              <RiDeleteBin6Line
-                style={{
-                  width: "15px",
-                  height: "15px",
-                  color: "red",
-                }}
-              />
-              حذف
-            </Button>
-          )}
 
           <Box
             sx={{
@@ -139,26 +127,17 @@ const AddressesTable: FC<Props> = ({
               marginRight: "auto",
             }}
           >
-            <IoFilterOutline
-              style={{
-                position: "absolute",
-                top: "40%",
-                left: ".2rem",
-                transform: "translateY(-50%)",
-                width: "25px",
-                height: "25px",
-                color: "gray",
-                zIndex: "-1",
-              }}
-            />
             <Select
               IconComponent={IoChevronDown}
               label="فیلتر سرویس ها"
-              value=""
+              value={selectedFilter}
+              onChange={(e) =>
+                setSelectedFilter(e.target.value as "All_IPs" | "CDN" | "Host")
+              }
               sx={{
-                minWidth: "4rem",
+                position: "absolute",
+                left: "-1rem",
                 height: "2rem",
-                paddingX: ".5rem",
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
@@ -171,17 +150,17 @@ const AddressesTable: FC<Props> = ({
                   },
               }}
             >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
-                هفتگی
-              </MenuItem>
               <MenuItem
                 sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="monthly"
+                value="All_IPs"
               >
-                ماهانه
+                همه آی‌پی ها
               </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="year">
-                سالانه
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="CDN">
+                CDN
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Host">
+                Host
               </MenuItem>
             </Select>
           </Box>
@@ -203,15 +182,41 @@ const AddressesTable: FC<Props> = ({
               justifyContent: "space-between",
               display: "flex",
               borderRadius: ".5rem",
+              position: "relative",
             }}
           >
             <Typography fontFamily="YekanBakh-Regular" marginRight="2rem">
               تعداد سشن‌ ها
             </Typography>
+            {selectedAddresses.length > 0 && (
+              <Button
+                onClick={handleDeleteIpsFromDomain}
+                sx={{
+                  color: "red",
+                  fontFamily: "YekanBakh-Regular",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: ".3rem",
+                  position: "absolute",
+                  top: "50%",
+                  left: "35%",
+                  transform: "translate(0, -50%)",
+                }}
+              >
+                <RiDeleteBin6Line
+                  style={{
+                    width: "15px",
+                    height: "15px",
+                    color: "red",
+                  }}
+                />
+                حذف
+              </Button>
+            )}
             <Typography
               fontFamily="YekanBakh-Regular"
               sx={{
-                marginLeft: "3.5rem",
+                marginLeft: "3rem",
               }}
             >
               آدرس IP
@@ -227,15 +232,17 @@ const AddressesTable: FC<Props> = ({
               borderRadius: ".5rem",
               display: "flex",
               flexDirection: "column",
+              gap: ".2rem",
             }}
           >
             {loading && (
               <CircularProgress
                 sx={{
                   position: "absolute",
-                  top: "50%",
-                  left: "50%",
+                  top: "40%",
+                  left: "45%",
                   transform: "translate(-50% -50%)",
+                  zIndex: 110,
                 }}
               />
             )}
@@ -249,18 +256,46 @@ const AddressesTable: FC<Props> = ({
                 )
                 .map((address, index) => (
                   <Box
-                    key={index}
+                    key={address}
                     sx={{
                       padding: ".7rem .5rem",
-                      paddingBottom: "0",
+                      paddingBottom: ".25rem",
                       display: "flex",
-                      justifyContent: "space-between",
                       alignItems: "center",
+                      background:
+                        selectedAddress === address ? "#5E819F" : "#fff",
+                      color: selectedAddress === address ? "#fff" : "",
+                      borderRadius: ".5rem",
+                      cursor: "pointer",
+                      position: "relative",
                     }}
                   >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        height: "100%",
+                        width: "85%",
+                        left: "0",
+                        top: "0",
+                        bottom: "0",
+                        borderRadius: "1rem",
+                      }}
+                      onClick={() => {
+                        if (selectedAddress === address)
+                          setSelectedAddress(null);
+                        else setSelectedAddress(address);
+                      }}
+                    />
                     <Checkbox
                       sx={{
+                        zIndex: "100",
+                        marginBottom: ".3rem",
                         padding: ".1rem",
+                        background: "#fff",
+                        borderRadius: ".2rem",
+                        ":hover": {
+                          background: "#fff",
+                        },
                       }}
                       onChange={(e) => handleSelectIps(e, address)}
                     />
@@ -350,32 +385,47 @@ const AddressesTable: FC<Props> = ({
             gap: "1rem",
           }}
         >
-          <ExpressionValue
-            title="Volume"
-            expression="حجم داده مصرفی"
-            value={1532}
-            unit="mb"
-          />
-          <Divider
-            sx={{
-              width: "50%",
-            }}
-          />
-          <ExpressionValue
-            title="Sessions"
-            expression="تعداد نشست‌ها"
-            value={1532}
-          />
-          <Divider
-            sx={{
-              width: "50%",
-            }}
-          />
-          <ExpressionValue
-            title="Connections"
-            expression="تعداد نشست‌های موفق"
-            value={1532}
-          />
+          {selectedAddress && (
+            <>
+              <ExpressionValue
+                title="Volume"
+                expression="حجم داده مصرفی"
+                value={1532}
+                unit="mb"
+              />
+              <Divider
+                sx={{
+                  width: "50%",
+                }}
+              />
+              <ExpressionValue
+                title="Sessions"
+                expression="تعداد نشست‌ها"
+                value={1532}
+              />
+              <Divider
+                sx={{
+                  width: "50%",
+                }}
+              />
+              <ExpressionValue
+                title="Connections"
+                expression="تعداد نشست‌های موفق"
+                value={1532}
+              />
+            </>
+          )}
+          {!selectedAddress && (
+            <Typography
+              fontFamily="YekanBakh-Regular"
+              sx={{
+                textAlign: "center",
+                color: "gray",
+              }}
+            >
+              برای مشاهده جزئیات یک آدرس را از لیست انتخاب کنید.
+            </Typography>
+          )}
         </Box>
       </Box>
       <AddIpAddressesModal
