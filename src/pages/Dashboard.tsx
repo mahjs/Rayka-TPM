@@ -169,7 +169,6 @@ const Dashboard: React.FC = () => {
   const prepareDataForExport = () => {
     // Create an array to hold the data for each domain
     const domainExportData: { name: string; ips: string[] }[] = [];
-
     // Iterate over each domain to prepare its data
     domainDownloadData.forEach((domain) => {
       const domainIps: string[] =
@@ -231,6 +230,8 @@ const Dashboard: React.FC = () => {
       exportToPDF();
     }
   };
+  console.log("XXXXX", domainDownloadData);
+
   return (
     <>
       <Box
@@ -379,7 +380,6 @@ const Dashboard: React.FC = () => {
               selectedServiceIndex={selectedServiceIndex}
               setSelectedServiceIndex={setSelectedServiceIndex}
               setDomainsDownloadData={setDomainDownloadData}
-              domainsDownloadData={domainDownloadData}
             />
 
             <AddressesTable
