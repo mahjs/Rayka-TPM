@@ -27,6 +27,7 @@ const TreeMap: FC<Props> = ({
     (sum, data) => (sum += data.value),
     0
   );
+
   return (
     <ResponsiveContainer width="100%">
       <Treemap
@@ -36,6 +37,8 @@ const TreeMap: FC<Props> = ({
         dataKey="value"
         content={
           <CustomizedContent
+            data={dataForTreeChart}
+            sumOfData={sumOfTreeChartValues}
             loading={loadingData}
             selectedIndex={selectedServiceIndex}
             onClickHandler={setSelectedServiceIndex}
@@ -65,11 +68,14 @@ const CustomizedContent = (props: any) => {
     selectedIndex,
     onClickHandler,
     loading,
+    data,
+    sumOfData,
   } = props;
 
   // const hue = (index * 137.508) % 360;
   // let color = `hsl(${hue}, 70%, 60%)`;
   // if (index === 0 && loading) color = "#fff";
+  const percent = (data?.[index]?.ips?.length || 0 / sumOfData) / 100;
 
   return (
     <g
@@ -98,6 +104,18 @@ const CustomizedContent = (props: any) => {
       >
         <title style={{ color: "white" }}>Tooltip text goes here</title>
       </rect>
+      {percent > 0.6 && (
+        <text
+          fontSize={percent / 3.5 + "rem"}
+          opacity=".8"
+          x={x + width / 2}
+          y={y + height / 2}
+          textAnchor="middle"
+          dominantBaseline="middle"
+        >
+          {percent}%
+        </text>
+      )}
     </g>
   );
 };

@@ -53,7 +53,6 @@ const Dashboard: React.FC = () => {
 
   // State for SquareCharts
   const { loadingData, treeMapData, totalIps } = useTreeMapData();
-
   const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
 
   useEffect(() => {
@@ -230,7 +229,6 @@ const Dashboard: React.FC = () => {
       exportToPDF();
     }
   };
-  console.log("XXXXX", domainDownloadData);
 
   return (
     <>
@@ -374,6 +372,8 @@ const Dashboard: React.FC = () => {
             {/* Services Table*/}
             <ServicesTable
               refetchDomains={reFetchDomains}
+              mapData={treeMapData}
+              loadingMapData={loadingData}
               refetchIpAddresses={reFetchAddresses}
               loading={loadingDomains}
               domains={filteredDomains}
