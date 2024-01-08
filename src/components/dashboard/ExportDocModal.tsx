@@ -11,6 +11,7 @@ interface Props {
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
   selectedFormat: string;
   setSelectedFormat: React.Dispatch<React.SetStateAction<string>>;
+  onExportClick: () => void;
 }
 
 const ExportDocModal: FC<Props> = ({
@@ -18,6 +19,7 @@ const ExportDocModal: FC<Props> = ({
   setOpenModal,
   selectedFormat,
   setSelectedFormat,
+  onExportClick,
 }) => {
   return (
     <Modal
@@ -89,6 +91,7 @@ const ExportDocModal: FC<Props> = ({
             name="سی اس وی"
           />
           <Button
+            onClick={() => onExportClick()}
             sx={{
               fontFamily: "YekanBakh-Bold",
               color: "#fff",
