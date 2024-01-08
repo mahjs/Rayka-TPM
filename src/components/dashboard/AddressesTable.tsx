@@ -74,6 +74,7 @@ const AddressesTable: FC<Props> = ({
       .then(() => {
         refetchIpAddresses();
         setSelectedAddresses([]);
+        setSelectedAddress(null);
       });
   };
 
@@ -119,27 +120,6 @@ const AddressesTable: FC<Props> = ({
               افزودن
             </Button>
           )}
-          {/* {selectedAddresses.length > 0 && (
-            <Button
-              onClick={handleDeleteIpsFromDomain}
-              sx={{
-                color: "red",
-                fontFamily: "YekanBakh-Regular",
-                display: "flex",
-                alignItems: "center",
-                gap: ".3rem",
-              }}
-            >
-              <RiDeleteBin6Line
-                style={{
-                  width: "15px",
-                  height: "15px",
-                  color: "red",
-                }}
-              />
-              حذف
-            </Button>
-          )} */}
 
           <Box
             sx={{
@@ -276,7 +256,7 @@ const AddressesTable: FC<Props> = ({
                 )
                 .map((address, index) => (
                   <Box
-                    key={index}
+                    key={address}
                     sx={{
                       padding: ".7rem .5rem",
                       paddingBottom: ".25rem",
