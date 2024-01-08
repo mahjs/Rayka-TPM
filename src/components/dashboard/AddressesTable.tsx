@@ -17,6 +17,7 @@ interface Props {
   showData: boolean;
   loading: boolean;
   addressesData: string[] | null;
+
   domainName: string | null;
   refetchIpAddresses: () => void;
 }

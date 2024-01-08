@@ -18,6 +18,9 @@ import api from "../../services";
 interface Props {
   loading: boolean;
   domains: Domain[] | null;
+  domainsDownloadData: Domain[] | null;
+  setDomainsDownloadData: React.Dispatch<React.SetStateAction<Domain[]>>;
+
   refetchDomains: () => void;
   refetchIpAddresses: () => void;
   selectedServiceIndex: number | null;
@@ -31,6 +34,8 @@ const ServicesTable: FC<Props> = ({
   refetchIpAddresses,
   selectedServiceIndex,
   setSelectedServiceIndex,
+  domainsDownloadData,
+  setDomainsDownloadData,
 }) => {
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
@@ -45,10 +50,14 @@ const ServicesTable: FC<Props> = ({
       });
     }
   });
+  useEffect(() => {
+    if (domains) {
+      setDomainsDownloadData(domains);
+    }
+  }, [domains, setDomainsDownloadData]);
 
   const [openAddDomainModal, setOpenAddDomainModal] = useState<boolean>(false);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
-
   const handleSelectDomain = (
     event: React.ChangeEvent<HTMLInputElement>,
     domain: string
@@ -235,6 +244,7 @@ const ServicesTable: FC<Props> = ({
                 }}
               />
             )}
+
             {domains &&
               domains.map((domain, index) => (
                 <Box
