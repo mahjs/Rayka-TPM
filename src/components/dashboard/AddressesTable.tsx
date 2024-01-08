@@ -4,7 +4,9 @@ import {
   Checkbox,
   CircularProgress,
   Divider,
+  MenuItem,
   Pagination,
+  Select,
   Stack,
   Typography,
 } from "@mui/material";
@@ -14,6 +16,7 @@ import AddIpAddressesModal from "./AddIpAddressesModal";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import api from "../../services";
 import ExpressionValue from "./ExpressionValue";
+import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
 
 interface Props {
   showData: boolean;
@@ -129,9 +132,63 @@ const AddressesTable: FC<Props> = ({
               حذف
             </Button>
           )}
+
+          <Box
+            sx={{
+              position: "relative",
+              marginRight: "auto",
+            }}
+          >
+            <IoFilterOutline
+              style={{
+                position: "absolute",
+                top: "40%",
+                left: ".2rem",
+                transform: "translateY(-50%)",
+                width: "25px",
+                height: "25px",
+                color: "gray",
+                zIndex: "-1",
+              }}
+            />
+            <Select
+              IconComponent={IoChevronDown}
+              label="فیلتر سرویس ها"
+              value=""
+              sx={{
+                minWidth: "4rem",
+                height: "2rem",
+                paddingX: ".5rem",
+                ".MuiSelect-icon": {
+                  width: "20px",
+                  height: "20px",
+                  marginTop: "-.20rem",
+                },
+                ".MuiOutlinedInput-notchedOutline": { border: 0 },
+                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    border: 0,
+                  },
+              }}
+            >
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
+                هفتگی
+              </MenuItem>
+              <MenuItem
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="monthly"
+              >
+                ماهانه
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="year">
+                سالانه
+              </MenuItem>
+            </Select>
+          </Box>
         </Stack>
         <Box
           sx={{
+            marginTop: "-1rem",
             display: "flex",
             flexDirection: "column",
             gap: ".2rem",
@@ -148,13 +205,13 @@ const AddressesTable: FC<Props> = ({
               borderRadius: ".5rem",
             }}
           >
-            <Typography fontFamily="YekanBakh-Regular">
+            <Typography fontFamily="YekanBakh-Regular" marginRight="2rem">
               تعداد سشن‌ ها
             </Typography>
             <Typography
               fontFamily="YekanBakh-Regular"
               sx={{
-                marginLeft: "4rem",
+                marginLeft: "3.5rem",
               }}
             >
               آدرس IP
