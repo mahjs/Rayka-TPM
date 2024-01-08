@@ -3,6 +3,7 @@ import {
   Button,
   Checkbox,
   CircularProgress,
+  Divider,
   Pagination,
   Stack,
   Typography,
@@ -12,12 +13,12 @@ import { GoPlus } from "react-icons/go";
 import AddIpAddressesModal from "./AddIpAddressesModal";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import api from "../../services";
+import ExpressionValue from "./ExpressionValue";
 
 interface Props {
   showData: boolean;
   loading: boolean;
   addressesData: string[] | null;
-
   domainName: string | null;
   refetchIpAddresses: () => void;
 }
@@ -70,6 +71,9 @@ const AddressesTable: FC<Props> = ({
       <Box
         sx={{
           width: "50%",
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
         }}
       >
         <Stack direction="row" gap="1rem">
@@ -161,7 +165,7 @@ const AddressesTable: FC<Props> = ({
           <Box
             sx={{
               position: "relative",
-              minHeight: "73dvh",
+              minHeight: "38dvh",
               border: "1px solid #E3E3E3",
               borderRadius: ".5rem",
               display: "flex",
@@ -183,17 +187,15 @@ const AddressesTable: FC<Props> = ({
               addressesData &&
               addressesData
                 .slice(
-                  (addressTablePage - 1) * 10,
-                  Math.min(
-                    (addressTablePage - 1) * 10 + 10,
-                    addressesData.length
-                  )
+                  (addressTablePage - 1) * 5,
+                  Math.min((addressTablePage - 1) * 5 + 5, addressesData.length)
                 )
                 .map((address, index) => (
                   <Box
                     key={index}
                     sx={{
                       padding: ".7rem .5rem",
+                      paddingBottom: "0",
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
@@ -256,7 +258,7 @@ const AddressesTable: FC<Props> = ({
                 color="primary"
                 onChange={handleChangePage}
                 count={Math.ceil(
-                  (addressesData && addressesData.length / 10) || 0
+                  (addressesData && addressesData.length / 5) || 0
                 )}
                 variant="outlined"
                 shape="rounded"
@@ -277,6 +279,46 @@ const AddressesTable: FC<Props> = ({
               Rayka
             </span>
           </Typography> */}
+        </Box>
+        <Box
+          sx={{
+            width: "100%",
+            height: "100%",
+            border: "1px solid #E3E3E3",
+            borderRadius: ".5rem",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "1rem",
+          }}
+        >
+          <ExpressionValue
+            title="Volume"
+            expression="حجم داده مصرفی"
+            value={1532}
+            unit="mb"
+          />
+          <Divider
+            sx={{
+              width: "50%",
+            }}
+          />
+          <ExpressionValue
+            title="Sessions"
+            expression="تعداد نشست‌ها"
+            value={1532}
+          />
+          <Divider
+            sx={{
+              width: "50%",
+            }}
+          />
+          <ExpressionValue
+            title="Connections"
+            expression="تعداد نشست‌های موفق"
+            value={1532}
+          />
         </Box>
       </Box>
       <AddIpAddressesModal

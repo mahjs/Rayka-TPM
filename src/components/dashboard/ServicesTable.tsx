@@ -18,7 +18,6 @@ import api from "../../services";
 interface Props {
   loading: boolean;
   domains: Domain[] | null;
-  domainsDownloadData: Domain[] | null;
   setDomainsDownloadData: React.Dispatch<React.SetStateAction<Domain[]>>;
 
   refetchDomains: () => void;
@@ -26,7 +25,6 @@ interface Props {
   selectedServiceIndex: number | null;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }
-
 const ServicesTable: FC<Props> = ({
   loading,
   domains,
@@ -34,7 +32,6 @@ const ServicesTable: FC<Props> = ({
   refetchIpAddresses,
   selectedServiceIndex,
   setSelectedServiceIndex,
-  domainsDownloadData,
   setDomainsDownloadData,
 }) => {
   // Scroll to selected service

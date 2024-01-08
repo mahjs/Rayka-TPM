@@ -1,4 +1,11 @@
-import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
 import {
   ResponsiveContainer,
   Tooltip,
@@ -12,9 +19,9 @@ import {
 import { FC, useEffect, useRef, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import { BsCalendar2DateFill } from "react-icons/bs";
-import zIndex from "@mui/material/styles/zIndex";
 import html2canvas from "html2canvas";
 import RangeDatePicker from "./DatePicker";
+import TitledValue from "./TitledValue";
 
 interface Props {
   selectedServiceIndex: number | null;
@@ -170,7 +177,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
   useEffect(() => {});
 
   return (
-    <Box position="relative">
+    <Box>
       <Box
         sx={{
           display: "flex",
@@ -337,6 +344,25 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
           position: "relative",
         }}
       >
+        <Stack
+          direction="row"
+          sx={{
+            gap: "1rem",
+            position: "absolute",
+            bottom: "2.5rem",
+            left: "52%",
+            transform: "translateX(-50%)",
+            background: "#fff",
+            zIndex: "40",
+            padding: ".5rem",
+            border: "1px solid #707070",
+            borderRadius: ".5rem",
+          }}
+        >
+          <TitledValue color="red" title="Min" value={min} />
+          <TitledValue color="green" title="Max" value={max} />
+          <TitledValue color="blue" title="Avg" value={avg} />
+        </Stack>
         <ResponsiveContainer
           width="100%"
           height="100%"
