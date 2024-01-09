@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Modal, Box, Stack, Typography, Button } from "@mui/material";
 import CheckBoxRow from "./CheckBoxRow";
 import ExcelIcon from "../../assets/images/excel.svg";
-import CSVIcon from "../../assets/images/csv.svg";
+import Png from "../../assets/images/png.svg";
 import Cross from "../../assets/images/cross.svg";
 import PDFIcon from "../../assets/images/pdf.svg";
 
@@ -86,9 +86,9 @@ const ExportDocModal: FC<Props> = ({
           <CheckBoxRow
             selectedFormat={selectedFormat}
             setSelectedFormat={setSelectedFormat}
-            icon={CSVIcon}
-            format="csv"
-            name="سی اس وی"
+            icon={Png}
+            format="png"
+            name="عکس"
           />
           <Button
             onClick={() => onExportClick()}

@@ -22,7 +22,7 @@ import { Domain } from "../services/domain";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import html2canvas from "html2canvas";
+import * as domtoimage from "dom-to-image";
 
 export interface DomainData {
   name: string;
@@ -241,26 +241,43 @@ const Dashboard: FC = () => {
   };
 
   const exportToPDF = () => {
-    const domainData = prepareDataForExport();
     const doc = new jsPDF();
 
-    domainData.forEach((domain) => {
-      doc.text(domain.name, 10, 10);
-      autoTable(doc, {
-        startY: 20,
-        head: [["IP Address"]],
-        body: domain.ips.map((ip: string) => [ip]),
-        margin: { top: 10 },
-      });
+    // Capture TreeMap as an image
+    const treeMapElement = treeMapRef.current;
+    if (treeMapElement) {
+      domtoimage
+        .toPng(treeMapElement, {
+          style: {
+            marginTop: "3rem",
+          },
+        })
+        .then((dataUrl) => {
+          doc.text(`Total IPs: ${totalIps.length}`, 10, 30);
+          doc.text(`total Domains: ${domainDownloadData.length}`, 143, 30);
+          doc.addImage(dataUrl, "PNG", 10, 10, 180, 160);
 
-      // Add a page break if not the last domain
-      if (domain !== domainData[domainData.length - 1]) {
-        doc.addPage();
-      }
-    });
+          const domainData = prepareDataForExport();
+          domainData.forEach((domain, index) => {
+            // Add new page for each domain
+            doc.addPage();
+            doc.text(domain.name, 10, 10); // Position the domain name text
+            autoTable(doc, {
+              startY: 20,
+              head: [["IP Address"]],
+              body: domain.ips.map((ip) => [ip]),
+              margin: { top: 10 },
+            });
+          });
 
-    doc.save("Domains_and_IPs.pdf");
+          doc.save("Domains_and_IPs.pdf");
+        })
+        .catch((error) => {
+          console.error("Error capturing TreeMap screenshot", error);
+        });
+    }
   };
+
   const onExportClick = () => {
     if (selectedFormat === "excel") {
       exportToExcel();
@@ -273,31 +290,54 @@ const Dashboard: FC = () => {
   const captureScreenshotTreeChart = () => {
     const treeMapElement = treeMapRef.current;
     if (treeMapElement) {
-      html2canvas(treeMapElement).then((canvas) => {
-        const image = canvas.toDataURL("image/png", 5.0);
-
-        // Download the image
-        const link = document.createElement("a");
-        link.download = "tree-map-screenshot.png";
-        link.href = image;
-        link.click();
-      });
+      domtoimage
+        .toPng(treeMapElement, {
+          style: {
+            backgroundColor: "white",
+          },
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "tree-map-screenshot.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error: any) => {
+          console.error("Error capturing screenshot", error);
+        });
     }
   };
+
   const dashboardScreenshot = () => {
     const dashboardElement = dashboardRef.current;
     if (dashboardElement) {
-      html2canvas(dashboardElement).then((canvas) => {
-        const image = canvas.toDataURL("image/png", 5.0);
-
-        // Download the image
-        const link = document.createElement("a");
-        link.download = "dashboard.png";
-        link.href = image;
-        link.click();
-      });
+      domtoimage
+        .toPng(dashboardElement, {
+          style: {
+            backgroundColor: "white",
+          },
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "dashboard.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error: any) => {
+          console.error("Error capturing screenshot", error);
+        });
     }
   };
+  const [isAllDataLoaded, setIsAllDataLoaded] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Assuming 'loadingData', 'loadingDomains', and 'loadingAddresses' are the states
+    // that indicate if the respective data is still being fetched.
+    // Update 'isDataLoaded' based on these loading states.
+    if (!loadingData && !loadingDomains && !loadingAddresses) {
+      setIsAllDataLoaded(true);
+    }
+  }, [loadingData, loadingDomains, loadingAddresses]);
 
   return (
     <>
@@ -345,24 +385,28 @@ const Dashboard: FC = () => {
               >
                 سهم سرویس ها
               </Typography>
-              <Button
-                onClick={captureScreenshotTreeChart}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: ".3rem",
-                  background: "#0F6CBD",
-                  color: "#fff",
-                  fontFamily: "YekanBakh-Regular",
-                  borderRadius: ".5rem",
-                  ":hover": {
+              {isAllDataLoaded ? (
+                <Button
+                  onClick={captureScreenshotTreeChart}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: ".3rem",
                     background: "#0F6CBD",
                     color: "#fff",
-                  },
-                }}
-              >
-                دریافت خروجی
-              </Button>
+                    fontFamily: "YekanBakh-Regular",
+                    borderRadius: ".5rem",
+                    ":hover": {
+                      background: "#0F6CBD",
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  دریافت خروجی
+                </Button>
+              ) : (
+                <CircularProgress />
+              )}
             </Stack>
 
             <Box
@@ -407,7 +451,10 @@ const Dashboard: FC = () => {
               marginTop: "auto",
             }}
           >
-            <AreaChart selectedServiceIndex={selectedServiceIndex} />
+            <AreaChart
+              selectedServiceIndex={selectedServiceIndex}
+              isAllDataLoaded={isAllDataLoaded}
+            />
           </Box>
         </Box>
 
@@ -432,30 +479,33 @@ const Dashboard: FC = () => {
               setSearchInput={setSearchInput}
               handleSubmit={handleSubmit}
             />
-
-            <Button
-              onClick={() => setOpenExportModal(true)}
-              sx={{
-                fontFamily: "YekanBakh-Bold",
-                color: "#fff",
-                paddingRight: ".5rem",
-                display: "flex",
-                background: "#0F6CBD",
-                alignItems: "center",
-                paddingX: "1rem",
-                paddingY: ".75rem",
-                gap: ".5rem",
-                borderRadius: ".5rem",
-                zIndex: "5",
-                height: "fit-content",
-                ":hover": {
-                  color: "#0F6CBD",
-                  background: "#0F6CBD33",
-                },
-              }}
-            >
-              دریافت خروجی
-            </Button>
+            {isAllDataLoaded ? (
+              <Button
+                onClick={() => setOpenExportModal(true)}
+                sx={{
+                  fontFamily: "YekanBakh-Bold",
+                  color: "#fff",
+                  paddingRight: ".5rem",
+                  display: "flex",
+                  background: "#0F6CBD",
+                  alignItems: "center",
+                  paddingX: "1rem",
+                  paddingY: ".75rem",
+                  gap: ".5rem",
+                  borderRadius: ".5rem",
+                  zIndex: "5",
+                  height: "fit-content",
+                  ":hover": {
+                    color: "#0F6CBD",
+                    background: "#0F6CBD33",
+                  },
+                }}
+              >
+                دریافت خروجی
+              </Button>
+            ) : (
+              <CircularProgress />
+            )}
           </Box>
           <Box
             sx={{
