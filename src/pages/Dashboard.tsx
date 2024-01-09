@@ -22,7 +22,7 @@ import { Domain } from "../services/domain";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import html2canvas from "html2canvas";
+import * as domtoimage from "dom-to-image";
 
 export interface DomainData {
   name: string;
@@ -246,29 +246,42 @@ const Dashboard: React.FC = () => {
   const captureScreenshotTreeChart = () => {
     const treeMapElement = treeMapRef.current;
     if (treeMapElement) {
-      html2canvas(treeMapElement).then((canvas) => {
-        const image = canvas.toDataURL("image/png", 5.0);
-
-        // Download the image
-        let link = document.createElement("a");
-        link.download = "tree-map-screenshot.png";
-        link.href = image;
-        link.click();
-      });
+      domtoimage
+        .toPng(treeMapElement, {
+          style: {
+            backgroundColor: "white", // Add this to ensure white background
+          },
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "tree-map-screenshot.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error: any) => {
+          console.error("Error capturing screenshot", error);
+        });
     }
   };
+
   const dashboardScreenshot = () => {
     const dashboardElement = dashboardRef.current;
     if (dashboardElement) {
-      html2canvas(dashboardElement).then((canvas) => {
-        const image = canvas.toDataURL("image/png", 5.0);
-
-        // Download the image
-        let link = document.createElement("a");
-        link.download = "dashboard.png";
-        link.href = image;
-        link.click();
-      });
+      domtoimage
+        .toPng(dashboardElement, {
+          style: {
+            backgroundColor: "white", // Add this to ensure white background
+          },
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "dashboard.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error: any) => {
+          console.error("Error capturing screenshot", error);
+        });
     }
   };
 
