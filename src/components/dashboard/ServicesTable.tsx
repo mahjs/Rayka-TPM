@@ -3,34 +3,38 @@ import {
   Button,
   Checkbox,
   CircularProgress,
-  MenuItem,
-  Select,
   Typography,
 } from "@mui/material";
 import { GoPlus } from "react-icons/go";
 import { useRef, useEffect, FC, useState } from "react";
-import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
 import { Domain } from "../../services/domain";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import AddDomainModal from "./AddDomainModal";
 import api from "../../services";
+import { MapData } from "../../hooks/useTreeMapData";
 
 interface Props {
   loading: boolean;
+  mapData: MapData[];
+  loadingMapData: boolean;
   domains: Domain[] | null;
+  setDomainsDownloadData: React.Dispatch<React.SetStateAction<Domain[]>>;
+
   refetchDomains: () => void;
   refetchIpAddresses: () => void;
   selectedServiceIndex: number | null;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }
-
 const ServicesTable: FC<Props> = ({
   loading,
   domains,
+  mapData,
+  loadingMapData,
   refetchDomains,
   refetchIpAddresses,
   selectedServiceIndex,
   setSelectedServiceIndex,
+  setDomainsDownloadData,
 }) => {
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
@@ -45,10 +49,14 @@ const ServicesTable: FC<Props> = ({
       });
     }
   });
+  useEffect(() => {
+    if (domains) {
+      setDomainsDownloadData(domains);
+    }
+  }, [domains, setDomainsDownloadData]);
 
   const [openAddDomainModal, setOpenAddDomainModal] = useState<boolean>(false);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
-
   const handleSelectDomain = (
     event: React.ChangeEvent<HTMLInputElement>,
     domain: string
@@ -133,60 +141,6 @@ const ServicesTable: FC<Props> = ({
               حذف
             </Button>
           )}
-
-          <Box
-            sx={{
-              position: "relative",
-              marginRight: "auto",
-              marginLeft: "1rem",
-            }}
-          >
-            <Select
-              IconComponent={IoChevronDown}
-              label="فیلتر سرویس ها"
-              value=""
-              sx={{
-                minWidth: "4rem",
-                height: "2rem",
-                paddingX: ".5rem",
-                ".MuiSelect-icon": {
-                  width: "20px",
-                  height: "20px",
-                  marginTop: "-.20rem",
-                },
-                ".MuiOutlinedInput-notchedOutline": { border: 0 },
-                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                  {
-                    border: 0,
-                  },
-              }}
-            >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
-                هفتگی
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="monthly"
-              >
-                ماهانه
-              </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="year">
-                سالانه
-              </MenuItem>
-            </Select>
-            <IoFilterOutline
-              style={{
-                position: "absolute",
-                top: "40%",
-                left: ".2rem",
-                transform: "translateY(-50%)",
-                width: "25px",
-                height: "25px",
-                color: "gray",
-                zIndex: "-1",
-              }}
-            />
-          </Box>
         </Box>
         <Box
           sx={{
@@ -206,13 +160,13 @@ const ServicesTable: FC<Props> = ({
               borderRadius: ".5rem",
             }}
           >
-            <Typography fontFamily="YekanBakh-Regular">
-              تعداد سشن‌ ها
+            <Typography fontFamily="YekanBakh-Regular" marginRight="2.5rem">
+              تعداد IP{" "}
             </Typography>
             <Typography
               fontFamily="YekanBakh-Regular"
               sx={{
-                marginLeft: "4rem",
+                marginLeft: "2.5rem",
               }}
             >
               نام وبسایت
@@ -235,6 +189,7 @@ const ServicesTable: FC<Props> = ({
                 }}
               />
             )}
+
             {domains &&
               domains.map((domain, index) => (
                 <Box
@@ -284,6 +239,7 @@ const ServicesTable: FC<Props> = ({
                       zIndex: "100",
                       padding: ".1rem",
                       background: "#fff",
+                      borderRadius: ".2rem",
                       ":hover": {
                         background: "#fff",
                       },
@@ -294,7 +250,12 @@ const ServicesTable: FC<Props> = ({
                     marginRight="1.5rem"
                     fontFamily="SegoeUI"
                   >
-                    5254
+                    {loadingMapData ? (
+                      <CircularProgress size={15} />
+                    ) : (
+                      mapData.find((data) => data.name === domain.name)?.ips
+                        .length || 0
+                    )}
                   </Typography>
                   <Typography
                     sx={{

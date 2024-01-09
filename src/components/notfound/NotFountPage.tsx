@@ -1,5 +1,4 @@
-import { Typography, Box, Button } from "@mui/material";
-import { keyframes } from "@mui/system";
+import { Typography, Box, Button, keyframes } from "@mui/material";
 
 // Keyframes for animations
 const colorSlide = keyframes`

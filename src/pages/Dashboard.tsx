@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +19,15 @@ import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
 import useTreeMapData from "../hooks/useTreeMapData";
 import { Domain } from "../services/domain";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import html2canvas from "html2canvas";
 
+export interface DomainData {
+  name: string;
+  ips?: string[];
+}
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isLogin } = useAuth();
@@ -32,17 +46,22 @@ const Dashboard: React.FC = () => {
     // For now, we'll just log the input to the console
     console.log(`Search for: ${searchInput}`);
   };
-
-  // Function to handle submission of the search
+  const treeMapRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
+  const dashboardRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     handleSearch();
   };
 
-  // State for Selecting a service
+  // State for Selecting a service & an address
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
     number | null
   >(null);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedAddress(null);
+  }, [selectedServiceIndex]);
 
   // State for SquareCharts
   const { loadingData, treeMapData, totalIps } = useTreeMapData();
@@ -156,9 +175,108 @@ const Dashboard: React.FC = () => {
   const [openExportModal, setOpenExportModal] = useState<boolean>(false);
   const [selectedFormat, setSelectedFormat] = useState<string>("pdf");
 
+  const [domainDownloadData, setDomainDownloadData] = useState<DomainData[]>(
+    []
+  );
+  const prepareDataForExport = () => {
+    // Create an array to hold the data for each domain
+    const domainExportData: { name: string; ips: string[] }[] = [];
+    // Iterate over each domain to prepare its data
+    domainDownloadData.forEach((domain) => {
+      const domainIps: string[] =
+        treeMapData.find((data) => data.name === domain.name)?.ips || [];
+
+      // Add an object for each domain with its name and associated IPs
+      domainExportData.push({ name: domain.name, ips: domainIps });
+    });
+
+    return domainExportData;
+  };
+
+  const exportToExcel = () => {
+    const domainData = prepareDataForExport();
+    const wb = XLSX.utils.book_new();
+
+    domainData.forEach((domain) => {
+      // Convert each domain's IP list to a format suitable for Excel sheet
+      const ipData = domain.ips.map((ip: string) => ({ IP: ip }));
+      const ws = XLSX.utils.json_to_sheet(ipData);
+      ws["!cols"] = [{ wch: 20 }];
+      // Append a new sheet for each domain
+      XLSX.utils.book_append_sheet(wb, ws, domain.name);
+    });
+
+    // Write the Excel file if there are sheets
+    if (wb.SheetNames.length > 0) {
+      XLSX.writeFile(wb, "Domains_and_IPs.xlsx");
+    } else {
+      console.error("No data to export.");
+    }
+  };
+
+  const exportToPDF = () => {
+    const domainData = prepareDataForExport();
+    const doc = new jsPDF();
+
+    domainData.forEach((domain) => {
+      doc.text(domain.name, 10, 10);
+      autoTable(doc, {
+        startY: 20,
+        head: [["IP Address"]],
+        body: domain.ips.map((ip: string) => [ip]),
+        margin: { top: 10 },
+      });
+
+      // Add a page break if not the last domain
+      if (domain !== domainData[domainData.length - 1]) {
+        doc.addPage();
+      }
+    });
+
+    doc.save("Domains_and_IPs.pdf");
+  };
+  const onExportClick = () => {
+    if (selectedFormat === "excel") {
+      exportToExcel();
+    } else if (selectedFormat === "pdf") {
+      exportToPDF();
+    } else if (selectedFormat === "csv") {
+      dashboardScreenshot();
+    }
+  };
+  const captureScreenshotTreeChart = () => {
+    const treeMapElement = treeMapRef.current;
+    if (treeMapElement) {
+      html2canvas(treeMapElement).then((canvas) => {
+        const image = canvas.toDataURL("image/png", 5.0);
+
+        // Download the image
+        let link = document.createElement("a");
+        link.download = "tree-map-screenshot.png";
+        link.href = image;
+        link.click();
+      });
+    }
+  };
+  const dashboardScreenshot = () => {
+    const dashboardElement = dashboardRef.current;
+    if (dashboardElement) {
+      html2canvas(dashboardElement).then((canvas) => {
+        const image = canvas.toDataURL("image/png", 5.0);
+
+        // Download the image
+        let link = document.createElement("a");
+        link.download = "dashboard.png";
+        link.href = image;
+        link.click();
+      });
+    }
+  };
+
   return (
     <>
       <Box
+        ref={dashboardRef}
         component="main"
         sx={{
           padding: "2rem 1.5rem",
@@ -181,22 +299,46 @@ const Dashboard: React.FC = () => {
             totalDomains={domains?.length || 0}
           />
           <Box
+            ref={treeMapRef}
             sx={{
               display: "flex",
               flexDirection: "column",
               gap: "1rem",
               height: "35vh",
+              padding: "1rem",
             }}
           >
-            <Typography
-              fontFamily="YekanBakh-Medium"
-              component="h2"
-              sx={{
-                fontSize: "1.5rem",
-              }}
-            >
-              سهم سرویس ها
-            </Typography>
+            <Stack direction="row" justifyContent="space-between">
+              {" "}
+              <Typography
+                fontFamily="YekanBakh-Medium"
+                component="h2"
+                sx={{
+                  fontSize: "1.5rem",
+                }}
+              >
+                سهم سرویس ها
+              </Typography>
+              <Button
+                onClick={captureScreenshotTreeChart}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: ".3rem",
+                  background: "#0F6CBD",
+                  color: "#fff",
+                  fontFamily: "YekanBakh-Regular",
+                  borderRadius: ".5rem",
+                  ":hover": {
+                    background: "#0F6CBD",
+                    color: "#fff",
+                  },
+                }}
+              >
+                دریافت خروجی
+              </Button>
+            </Stack>
+
             <Box
               sx={{
                 border: "1px solid #707070",
@@ -298,12 +440,16 @@ const Dashboard: React.FC = () => {
             {/* Services Table*/}
             <ServicesTable
               refetchDomains={reFetchDomains}
+              mapData={treeMapData}
+              loadingMapData={loadingData}
               refetchIpAddresses={reFetchAddresses}
               loading={loadingDomains}
               domains={filteredDomains}
               selectedServiceIndex={selectedServiceIndex}
               setSelectedServiceIndex={setSelectedServiceIndex}
+              setDomainsDownloadData={setDomainDownloadData}
             />
+
             <AddressesTable
               refetchIpAddresses={reFetchAddresses}
               domainName={
@@ -322,6 +468,8 @@ const Dashboard: React.FC = () => {
                   ? selectedServiceIndex !== null
                   : true
               }
+              selectedAddress={selectedAddress}
+              setSelectedAddress={setSelectedAddress}
             />
           </Box>
         </Box>
@@ -331,6 +479,7 @@ const Dashboard: React.FC = () => {
         setOpenModal={setOpenExportModal}
         selectedFormat={selectedFormat}
         setSelectedFormat={setSelectedFormat}
+        onExportClick={onExportClick}
       />
     </>
   );

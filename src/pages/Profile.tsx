@@ -7,6 +7,7 @@ import formatPersianDateTime from "../utils/formatPersianDateTime";
 import { useState } from "react";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 const mockData = [
   {
@@ -47,7 +48,7 @@ const Profile = () => {
         display: "flex",
       }}
     >
-      <Box
+      {/* <Box
         sx={{
           padding: "2rem",
           width: "30%",
@@ -121,18 +122,34 @@ const Profile = () => {
             خروج از حساب کاربری
           </Button>
         </Box>
-      </Box>
+      </Box> */}
       <Box
         sx={{
-          width: "70%",
+          width: "100%",
           height: "85%",
           overflowY: "auto",
           background: "#E9F1F4",
           paddingX: "8rem",
           paddingY: "5rem",
           marginBottom: "5rem",
+          position: "relative",
         }}
       >
+        <Button
+          sx={{
+            position: "absolute",
+            right: "1rem",
+            top: "1rem",
+            color: "#00000088",
+            display: "flex",
+            gap: ".2rem",
+            alignItems: "center",
+          }}
+          onClick={() => navigate(-1)}
+        >
+          <FaArrowRightLong />
+          <Typography>بازگشت</Typography>
+        </Button>
         <Box
           sx={{
             display: "flex",
@@ -145,6 +162,7 @@ const Profile = () => {
             sx={{
               fontSize: "1.2rem",
               fontWeight: "700",
+              marginLeft: "auto",
             }}
           >
             سوابق فعالیت های کاربر

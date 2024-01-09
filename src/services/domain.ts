@@ -2,9 +2,9 @@ import ClientApi from "./clientApi";
 import config from "./config";
 
 const axios = new ClientApi();
-
 export interface Domain {
   name: string;
+  ips?: string[]; // Optional property
 }
 
 interface IpAddressReturnType {
