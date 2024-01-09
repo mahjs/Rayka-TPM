@@ -12,6 +12,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { RiHistoryLine } from "react-icons/ri";
 import { FC, useState } from "react";
 import Icon from "../../assets/images/icon.svg";
+import { useAuth } from "../../contexts/authContext";
+import storage from "../../services/storage";
+import config from "../../services/config";
 
 interface Props {
   totalDomains?: number;
@@ -30,6 +33,8 @@ const ProfileInfo: FC<Props> = ({
   const { pathname } = useLocation();
 
   const [openLogout, setOpenLogout] = useState(false);
+
+  const { logout, isAdmin } = useAuth();
   return (
     <Box
       sx={{
@@ -103,6 +108,7 @@ const ProfileInfo: FC<Props> = ({
               sx={{
                 color: "red",
               }}
+              onClick={logout}
             >
               Logout
             </Button>
@@ -150,10 +156,10 @@ const ProfileInfo: FC<Props> = ({
               paddingRight: ".5rem",
             }}
           >
-            {"احمد مهرانفر"}
+            {storage.get(config.userName) || "-"}
           </Typography>
         </Box>
-        {pathname === "/" && (
+        {pathname === "/" && isAdmin && (
           <>
             <Box
               sx={{

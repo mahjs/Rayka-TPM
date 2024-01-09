@@ -12,6 +12,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import AddDomainModal from "./AddDomainModal";
 import api from "../../services";
 import { MapData } from "../../hooks/useTreeMapData";
+import { useAuth } from "../../contexts/authContext";
 
 interface Props {
   loading: boolean;
@@ -36,6 +37,8 @@ const ServicesTable: FC<Props> = ({
   setSelectedServiceIndex,
   setDomainsDownloadData,
 }) => {
+  const { isAdmin } = useAuth();
+
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
@@ -100,27 +103,29 @@ const ServicesTable: FC<Props> = ({
           >
             سرویس ها
           </Typography>
-          <Button
-            onClick={() => setOpenAddDomainModal(true)}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: ".3rem",
-              background: "#0F6CBD",
-              color: "#fff",
-              fontFamily: "YekanBakh-Regular",
-              borderRadius: ".5rem",
-              ":hover": {
+          {isAdmin && (
+            <Button
+              onClick={() => setOpenAddDomainModal(true)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: ".3rem",
                 background: "#0F6CBD",
                 color: "#fff",
-              },
-            }}
-          >
-            <GoPlus style={{ width: "20px", height: "20px" }} />
-            افزودن
-          </Button>
+                fontFamily: "YekanBakh-Regular",
+                borderRadius: ".5rem",
+                ":hover": {
+                  background: "#0F6CBD",
+                  color: "#fff",
+                },
+              }}
+            >
+              <GoPlus style={{ width: "20px", height: "20px" }} />
+              افزودن
+            </Button>
+          )}
 
-          {selectedDomains.length > 0 && (
+          {selectedDomains.length > 0 && isAdmin && (
             <Button
               onClick={handleDeleteDomains}
               sx={{

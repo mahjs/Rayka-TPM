@@ -5,6 +5,8 @@ import Logo from "../assets/images/logo.svg";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
 import api from "../services";
+import storage from "../services/storage";
+import config from "../services/config";
 
 const Login = () => {
   const { login, isLogin } = useAuth();
@@ -24,6 +26,8 @@ const Login = () => {
       });
     else
       api.auth.verifyCode(mobileNumber, verifyCode).then((res) => {
+        storage.set(config.isAdmin, res.role === "Admin");
+        storage.set(config.userName, res.name);
         login();
         navigate("/");
       });

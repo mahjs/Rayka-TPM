@@ -17,6 +17,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import api from "../../services";
 import ExpressionValue from "./ExpressionValue";
 import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
+import { useAuth } from "../../contexts/authContext";
 
 interface Props {
   showData: boolean;
@@ -37,6 +38,8 @@ const AddressesTable: FC<Props> = ({
   selectedAddress,
   setSelectedAddress,
 }) => {
+  const { isAdmin } = useAuth();
+
   const [selectedFilter, setSelectedFilter] = useState<
     "All_IPs" | "CDN" | "Host"
   >("All_IPs");
@@ -99,7 +102,7 @@ const AddressesTable: FC<Props> = ({
             آدرس‌های IP
           </Typography>
 
-          {showData !== null && (
+          {showData !== null && isAdmin && (
             <Button
               onClick={() => setOpenAddDomainModal(true)}
               sx={{
@@ -188,7 +191,7 @@ const AddressesTable: FC<Props> = ({
             {/* <Typography fontFamily="YekanBakh-Regular" marginRight="2rem">
               تعداد سشن‌ ها
             </Typography> */}
-            {selectedAddresses.length > 0 && (
+            {selectedAddresses.length > 0 && isAdmin && (
               <Button
                 onClick={handleDeleteIpsFromDomain}
                 sx={{
