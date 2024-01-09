@@ -46,6 +46,7 @@ const Dashboard: React.FC = () => {
 
   // State for SquareCharts
   const { loadingData, treeMapData, totalIps } = useTreeMapData();
+
   const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
 
   useEffect(() => {
