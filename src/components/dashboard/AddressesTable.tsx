@@ -22,6 +22,7 @@ import { useAuth } from "../../contexts/authContext";
 interface Props {
   showData: boolean;
   loading: boolean;
+  showAddButton: boolean;
   addressesData: string[] | null;
   domainName: string | null;
   refetchIpAddresses: () => void;
@@ -32,6 +33,7 @@ interface Props {
 const AddressesTable: FC<Props> = ({
   showData,
   loading,
+  showAddButton,
   addressesData,
   domainName,
   refetchIpAddresses,
@@ -102,7 +104,7 @@ const AddressesTable: FC<Props> = ({
             آدرس‌های IP
           </Typography>
 
-          {showData !== null && isAdmin && (
+          {showAddButton && isAdmin && (
             <Button
               onClick={() => setOpenAddDomainModal(true)}
               sx={{
@@ -202,7 +204,7 @@ const AddressesTable: FC<Props> = ({
                   gap: ".3rem",
                   position: "absolute",
                   top: "50%",
-                  left: "35%",
+                  right: "0",
                   transform: "translate(0, -50%)",
                 }}
               >
@@ -363,18 +365,6 @@ const AddressesTable: FC<Props> = ({
               />
             )}
           </Box>
-          {/* <Typography
-            fontFamily="YekanBakh-Light"
-            sx={{
-              textAlign: "left",
-              color: "gray",
-            }}
-          >
-            Powered By{" "}
-            <span style={{ color: "black", fontFamily: "YekanBakh-Bold" }}>
-              Rayka
-            </span>
-          </Typography> */}
         </Box>
         <Box
           sx={{
@@ -418,18 +408,6 @@ const AddressesTable: FC<Props> = ({
               value={1532}
             />
           </>
-          {/* )} */}
-          {/* {!selectedAddress && (
-            <Typography
-              fontFamily="YekanBakh-Regular"
-              sx={{
-                textAlign: "center",
-                color: "gray",
-              }}
-            >
-              برای مشاهده جزئیات یک آدرس را از لیست انتخاب کنید.
-            </Typography>
-          )} */}
         </Box>
       </Box>
       <AddIpAddressesModal

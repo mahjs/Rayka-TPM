@@ -544,6 +544,7 @@ const Dashboard: FC = () => {
                   ? selectedServiceIndex !== null
                   : true
               }
+              showAddButton={selectedServiceIndex !== null}
               selectedAddress={selectedAddress}
               setSelectedAddress={setSelectedAddress}
             />
