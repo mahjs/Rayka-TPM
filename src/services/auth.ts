@@ -9,7 +9,10 @@ export const sendCode = async (mobile: string) =>
     mobile,
   });
 
-export const verifyCode = async (mobile: string, code: string) =>
+export const verifyCode = async (
+  mobile: string,
+  code: string
+): Promise<{ token: string; name: string; role: string }> =>
   await axios.http.post(ROOT_ADDRESS + "/verify", {
     mobile,
     code,

@@ -5,13 +5,11 @@ import {
   Typography,
   Button,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import { FC, useState } from "react";
-import { GoPlus } from "react-icons/go";
 import { RxCross2 } from "react-icons/rx";
 import api from "../../services";
-import convertToPersianWordNumber from "../../utils/convertToPersianWordNumber";
-import Input from "../login/Input";
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -29,15 +27,7 @@ const AddIpAddressesModal: FC<Props> = ({
   refetchIpAddresses,
   domainName,
 }) => {
-  const [ipAddressCountForAdding, setIpAddressCountForAdding] = useState(1);
-  const [ipAddresses, setIpAddresses] = useState<string[]>([]);
   const [bulkIpInput, setBulkIpInput] = useState("");
-
-  // const parseBulkInput = () => {
-  //   const parsedIps = bulkIpInput.split(/,|\n/).map(ip => ip.trim());
-  //   setIpAddresses(prev => [...prev, ...parsedIps.filter(ip => ip)]);
-  //   setBulkIpInput("");
-  // };
 
   const isValidIp = (ip: string) => {
     const ipPattern =
@@ -45,30 +35,32 @@ const AddIpAddressesModal: FC<Props> = ({
     return ipPattern.test(ip);
   };
 
+  const [addLoading, setAddLoading] = useState<boolean>(false);
   const handleSubmit = () => {
-    const parsedIps = bulkIpInput.split(/,|\n/).map(ip => ip.trim());
-    setIpAddresses(prev => [...prev, ...parsedIps.filter(ip => ip)]);
+    const parsedIps = bulkIpInput.split(/,|\n/).map((ip) => ip.trim());
+
     setBulkIpInput("");
-    console.log(ipAddresses);
     if (
-      ipAddresses.length === 0 ||
-      ipAddresses.some((ip) => ip.length === 0 || !isValidIp(ip)) ||
+      parsedIps.length === 0 ||
+      parsedIps.some((ip) => ip.length === 0 || !isValidIp(ip)) ||
       !domainName
     ) {
       toast.error("Please enter a valid IP address and domain name.");
       return;
     }
 
+    setAddLoading(true);
     api.domain
-      .addIpAddressesToDomain(domainName, ipAddresses)
+      .addIpAddressesToDomain(domainName, parsedIps)
       .then(() => {
         refetchIpAddresses();
         setOpenModal(false);
-        setIpAddresses([]);
         toast.success("IP address added successfully.");
+        setAddLoading(false);
       })
       .catch((error) => {
         toast.error(`Error adding IP address: ${error.message}`);
+        setAddLoading(false);
       });
   };
 
@@ -88,7 +80,7 @@ const AddIpAddressesModal: FC<Props> = ({
       }}
     >
       <>
-        <ToastContainer position="top-center"/>
+        <ToastContainer position="top-center" />
         <Box
           sx={{
             border: "1px solid #97B5CE",
@@ -122,7 +114,6 @@ const AddIpAddressesModal: FC<Props> = ({
               </Typography>
               <Button
                 onClick={() => {
-                  setIpAddressCountForAdding(1);
                   setBulkIpInput("");
                   setOpenModal(false);
                 }}
@@ -134,18 +125,6 @@ const AddIpAddressesModal: FC<Props> = ({
                 <RxCross2 style={{ marginTop: "-.2rem " }} />
               </Button>
             </Stack>
-          </Box>
-          <Box>
-            <TextField
-              label="افزودن IP به صورت گروهی"
-              multiline
-              rows={4}
-              value={bulkIpInput}
-              onChange={(e) => setBulkIpInput(e.target.value)}
-              placeholder="Enter IP addresses separated by commas or new lines"
-              fullWidth
-            />
-            {/* <Button onClick={parseBulkInput}>افزودن</Button> */}
           </Box>
           <Box
             onSubmit={(e) => {
@@ -159,38 +138,17 @@ const AddIpAddressesModal: FC<Props> = ({
               gap: "1rem",
             }}
           >
-            {Array(ipAddressCountForAdding)
-              .fill(null)
-              .map((_, index) => (
-                <Input
-                  value={ipAddresses[index]}
-                  onChange={(value) => {
-                    if (isValidIp(value)) {
-                      setIpAddresses((prev) => {
-                        const newIpAddresses = [...prev];
-                        newIpAddresses[index] = value;
-                        return newIpAddresses;
-                      });
-                    }
-                  }}
-                  key={index}
-                  name="domain_name"
-                  title={
-                    "آدرس IP " +
-                    convertToPersianWordNumber(ipAddressCountForAdding)
-                  }
-                />
-              ))}
+            <TextField
+              label="افزودن IP به صورت گروهی"
+              multiline
+              rows={4}
+              value={bulkIpInput}
+              onChange={(e) => setBulkIpInput(e.target.value)}
+              placeholder="Enter IP addresses separated by commas or new lines"
+              fullWidth
+            />
             <Button
-              sx={{
-                marginLeft: "auto",
-              }}
-              onClick={() => setIpAddressCountForAdding((prev) => (prev += 1))}
-            >
-              <GoPlus />
-              افزودن آدرس IP بیشتر
-            </Button>
-            <Button
+              disabled={addLoading}
               type="submit"
               sx={{
                 background: "#0F6CBD",
@@ -202,7 +160,11 @@ const AddIpAddressesModal: FC<Props> = ({
                 },
               }}
             >
-              افزودن
+              {addLoading ? (
+                <CircularProgress color="inherit" size={25} />
+              ) : (
+                "افزودن"
+              )}
             </Button>
           </Box>
         </Box>

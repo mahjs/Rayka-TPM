@@ -17,10 +17,12 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import api from "../../services";
 import ExpressionValue from "./ExpressionValue";
 import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
+import { useAuth } from "../../contexts/authContext";
 
 interface Props {
   showData: boolean;
   loading: boolean;
+  showAddButton: boolean;
   addressesData: string[] | null;
   domainName: string | null;
   refetchIpAddresses: () => void;
@@ -31,12 +33,15 @@ interface Props {
 const AddressesTable: FC<Props> = ({
   showData,
   loading,
+  showAddButton,
   addressesData,
   domainName,
   refetchIpAddresses,
   selectedAddress,
   setSelectedAddress,
 }) => {
+  const { isAdmin } = useAuth();
+
   const [selectedFilter, setSelectedFilter] = useState<
     "All_IPs" | "CDN" | "Host"
   >("All_IPs");
@@ -99,7 +104,7 @@ const AddressesTable: FC<Props> = ({
             آدرس‌های IP
           </Typography>
 
-          {showData !== null && (
+          {showAddButton && isAdmin && (
             <Button
               onClick={() => setOpenAddDomainModal(true)}
               sx={{
@@ -188,7 +193,7 @@ const AddressesTable: FC<Props> = ({
             {/* <Typography fontFamily="YekanBakh-Regular" marginRight="2rem">
               تعداد سشن‌ ها
             </Typography> */}
-            {selectedAddresses.length > 0 && (
+            {selectedAddresses.length > 0 && isAdmin && (
               <Button
                 onClick={handleDeleteIpsFromDomain}
                 sx={{
@@ -199,7 +204,7 @@ const AddressesTable: FC<Props> = ({
                   gap: ".3rem",
                   position: "absolute",
                   top: "50%",
-                  left: "35%",
+                  right: "0",
                   transform: "translate(0, -50%)",
                 }}
               >
@@ -360,18 +365,6 @@ const AddressesTable: FC<Props> = ({
               />
             )}
           </Box>
-          {/* <Typography
-            fontFamily="YekanBakh-Light"
-            sx={{
-              textAlign: "left",
-              color: "gray",
-            }}
-          >
-            Powered By{" "}
-            <span style={{ color: "black", fontFamily: "YekanBakh-Bold" }}>
-              Rayka
-            </span>
-          </Typography> */}
         </Box>
         <Box
           sx={{
@@ -415,18 +408,6 @@ const AddressesTable: FC<Props> = ({
               value={1532}
             />
           </>
-          {/* )} */}
-          {/* {!selectedAddress && (
-            <Typography
-              fontFamily="YekanBakh-Regular"
-              sx={{
-                textAlign: "center",
-                color: "gray",
-              }}
-            >
-              برای مشاهده جزئیات یک آدرس را از لیست انتخاب کنید.
-            </Typography>
-          )} */}
         </Box>
       </Box>
       <AddIpAddressesModal
