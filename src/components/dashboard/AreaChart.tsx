@@ -19,9 +19,9 @@ import {
 import { FC, useEffect, useRef, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import { BsCalendar2DateFill } from "react-icons/bs";
-import html2canvas from "html2canvas";
 import RangeDatePicker from "./DatePicker";
 import TitledValue from "./TitledValue";
+import * as domtoimage from "dom-to-image";
 
 interface Props {
   selectedServiceIndex: number | null;
@@ -165,32 +165,31 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
   useEffect(() => {});
 
   const chartRef = useRef(null);
-  const downloadImage = (blob: string, fileName: string) => {
-    const fakeLink = window.document.createElement("a");
-    fakeLink.href = blob;
-    fakeLink.download = fileName;
-
-    document.body.appendChild(fakeLink);
-    fakeLink.click();
-    document.body.removeChild(fakeLink);
-    fakeLink.remove();
-  };
-  // Function to capture screenshot
 
   const captureScreenshot = () => {
     const chartElement = chartRef.current;
     if (chartElement) {
-      html2canvas(chartElement).then((canvas) => {
-        const image = canvas.toDataURL("image/png", 5.0);
-
-        // Download the image
-        let link = document.createElement("a");
-        link.download = "chart-screenshot.png";
-        link.href = image;
-        link.click();
-      });
+      domtoimage
+        .toPng(chartElement, {
+          style: {
+            backgroundColor: "white",
+          },
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "chart-screenshot.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error: any) => {
+          console.error(
+            "Something went wrong with capturing the screenshot",
+            error
+          );
+        });
     }
   };
+
   return (
     <Box position="relative" padding="1rem" ref={chartRef}>
       <Box
