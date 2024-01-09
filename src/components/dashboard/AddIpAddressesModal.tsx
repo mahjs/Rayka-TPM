@@ -10,6 +10,7 @@ import {
 import { FC, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
 import api from "../../services";
+import axios from 'axios';
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -36,9 +37,11 @@ const AddIpAddressesModal: FC<Props> = ({
   };
 
   const [addLoading, setAddLoading] = useState<boolean>(false);
+
   const handleSubmit = () => {
     const parsedIps = bulkIpInput.split(/,|\n/).map((ip) => ip.trim());
-
+  
+    // Clear the input field
     setBulkIpInput("");
     if (
       parsedIps.length === 0 ||
@@ -48,19 +51,37 @@ const AddIpAddressesModal: FC<Props> = ({
       toast.error("Please enter a valid IP address and domain name.");
       return;
     }
-
-    setAddLoading(true);
-    api.domain
-      .addIpAddressesToDomain(domainName, parsedIps)
-      .then(() => {
-        refetchIpAddresses();
-        setOpenModal(false);
-        toast.success("IP address added successfully.");
-        setAddLoading(false);
+  
+    // Prepare the payload
+    const payload = {
+      ips: parsedIps.filter(isValidIp)
+    };
+  
+    // Send the valid IPs to the server
+    axios.post("http://10.201.228.64:7000/get-ip", payload)
+      .then(response => {
+        console.log('IPs sent to server successfully:', response.data);
+        
+        // Proceed with adding IP addresses to the domain
+        setAddLoading(true);
+        api.domain
+          .addIpAddressesToDomain(domainName, parsedIps)
+          .then(() => {
+            refetchIpAddresses();
+            setOpenModal(false);
+            toast.success("IP address added successfully.");
+            setAddLoading(false);
+          })
+          .catch((error) => {
+            toast.error(`Error adding IP address: ${error.message}`);
+            setAddLoading(false);
+          });
       })
-      .catch((error) => {
-        toast.error(`Error adding IP address: ${error.message}`);
-        setAddLoading(false);
+      .catch(error => {
+        console.error('Error sending IPs to server:', error);
+        toast.error('Failed to send IPs to the server.');
+        // Decide whether to proceed with adding the IPs to the domain
+        // if the server call is critical, you might want to stop the process here
       });
   };
 
