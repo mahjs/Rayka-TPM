@@ -13,6 +13,11 @@ const useTreeMapData = () => {
   const [treeMapData, setTreeMapData] = useState<MapData[]>([]);
   const [totalIps, setTotalIps] = useState<string[]>([]);
   const [loadingData, setLoadingData] = useState<boolean>(true);
+  const [refetchData, setRefetchData] = useState<boolean>(false);
+
+  const refetch = () => {
+    setRefetchData((prev) => !prev);
+  };
 
   useEffect(() => {
     if (loadingData) return;
@@ -34,12 +39,13 @@ const useTreeMapData = () => {
       setTreeMapData(res);
       setLoadingData(false);
     });
-  }, [domains, loadingDomains]);
+  }, [domains, loadingDomains, refetchData]);
 
   return {
     loadingData,
     treeMapData,
     totalIps,
+    refetch,
   };
 };
 
