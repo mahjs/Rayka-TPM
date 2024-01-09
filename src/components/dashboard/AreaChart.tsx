@@ -23,6 +23,7 @@ import { BsCalendar2DateFill } from "react-icons/bs";
 import RangeDatePicker from "./DatePicker";
 import TitledValue from "./TitledValue";
 import * as domtoimage from "dom-to-image";
+import api from "../../services";
 
 interface Props {
   selectedServiceIndex: number | null;
@@ -164,7 +165,11 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
-  useEffect(() => {});
+  useEffect(() => {
+    api.chart.getReceiveHourlyData().then((res) => {
+      console.log(res);
+    });
+  }, []);
 
   const chartRef = useRef(null);
 
