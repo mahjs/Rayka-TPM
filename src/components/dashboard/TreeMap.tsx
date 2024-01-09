@@ -80,6 +80,15 @@ const CustomizedContent = (props: any) => {
     100
   ).toFixed(1);
 
+  const fontSize = (percent: number) => {
+    if (percent < 2) return percent / 1.3 + "rem";
+    if (percent < 5) return percent / 2.2 + "rem";
+    if (percent < 10) return percent / 4.5 + "rem";
+    if (percent < 20) return percent / 5.1 + "rem";
+    if (percent < 30) return percent / 5.8 + "rem";
+    else return percent / 7.5 + "rem";
+  };
+
   return (
     <g
       onClick={() => {
@@ -107,14 +116,15 @@ const CustomizedContent = (props: any) => {
       >
         <title style={{ color: "white" }}>Tooltip text goes here</title>
       </rect>
-      {percent > 0.6 && (
+      {percent > 0.3 && (
         <text
-          fontSize={percent / 3.8 + "rem"}
+          fontSize={fontSize(percent)}
           opacity=".8"
           x={x + width / 2}
           y={y + height / 2}
           textAnchor="middle"
           dominantBaseline="middle"
+          transform={`rotate(70, ${x + width / 2}, ${y + height / 2})`}
         >
           {percent}%
         </text>

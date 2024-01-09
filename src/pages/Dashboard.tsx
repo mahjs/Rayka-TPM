@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -28,7 +28,7 @@ export interface DomainData {
   name: string;
   ips?: string[];
 }
-const Dashboard: React.FC = () => {
+const Dashboard: FC = () => {
   const navigate = useNavigate();
   const { isLogin } = useAuth();
   useEffect(() => {
@@ -64,7 +64,13 @@ const Dashboard: React.FC = () => {
   }, [selectedServiceIndex]);
 
   // State for SquareCharts
-  const { loadingData, treeMapData, totalIps } = useTreeMapData();
+  const {
+    loadingData,
+    treeMapData,
+    totalIps,
+    refetch: refetchAllData,
+  } = useTreeMapData();
+
   const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
 
   useEffect(() => {
@@ -83,10 +89,21 @@ const Dashboard: React.FC = () => {
   }, [searchInput, selectedServiceIndex]);
 
   // State for getting all domains
-  const { loadingDomains, domains, reFetchDomains } = useDomains();
+  const {
+    loadingDomains,
+    domains,
+    reFetchDomains: refetchDomainData,
+  } = useDomains();
   const [filteredDomains, setFilteredDomains] = useState<Domain[]>(
     domains || []
   );
+
+  const refetchDomains = () => {
+    refetchDomainData();
+    setTimeout(() => {
+      refetchAllData();
+    }, 500);
+  };
 
   // Filter functionality
   useEffect(() => {
@@ -117,11 +134,21 @@ const Dashboard: React.FC = () => {
   }, [searchInput, domains, treeMapData]);
 
   // State for getting the ip addresses
-  const { ipAddressesForDomain, loadingAddresses, reFetchAddresses } =
-    useIpAddresses(
-      domains ? filteredDomains![selectedServiceIndex!]?.name : null
-    );
+  const {
+    ipAddressesForDomain,
+    loadingAddresses,
+    reFetchAddresses: reFetchAddressesData,
+  } = useIpAddresses(
+    domains ? filteredDomains![selectedServiceIndex!]?.name : null
+  );
   const [filteredIpAddresses, setFilteredIpAddresses] = useState<string[]>([]);
+
+  const reFetchAddresses = () => {
+    reFetchAddressesData();
+    setTimeout(() => {
+      refetchAllData();
+    }, 500);
+  };
 
   useEffect(() => {
     if (!ipAddressesForDomain) return;
@@ -250,7 +277,7 @@ const Dashboard: React.FC = () => {
         const image = canvas.toDataURL("image/png", 5.0);
 
         // Download the image
-        let link = document.createElement("a");
+        const link = document.createElement("a");
         link.download = "tree-map-screenshot.png";
         link.href = image;
         link.click();
@@ -264,7 +291,7 @@ const Dashboard: React.FC = () => {
         const image = canvas.toDataURL("image/png", 5.0);
 
         // Download the image
-        let link = document.createElement("a");
+        const link = document.createElement("a");
         link.download = "dashboard.png";
         link.href = image;
         link.click();
@@ -438,7 +465,7 @@ const Dashboard: React.FC = () => {
           >
             {/* Services Table*/}
             <ServicesTable
-              refetchDomains={reFetchDomains}
+              refetchDomains={refetchDomains}
               mapData={treeMapData}
               loadingMapData={loadingData}
               refetchIpAddresses={reFetchAddresses}
