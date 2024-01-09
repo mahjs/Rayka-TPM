@@ -5,6 +5,7 @@ import {
   Select,
   Stack,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import {
   ResponsiveContainer,
@@ -25,6 +26,7 @@ import * as domtoimage from "dom-to-image";
 
 interface Props {
   selectedServiceIndex: number | null;
+  isAllDataLoaded: boolean;
 }
 
 const initialSeasonDataForLineChart = [
@@ -121,7 +123,7 @@ const initialHourlyDataForLineChart = [
   },
 ];
 
-const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
+const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
   const [dataForAreaChart, setDataForAreaChart] = useState(
     initialSeasonDataForLineChart
   );
@@ -335,24 +337,28 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
             </MenuItem>
           </Select>
         </Stack>
-        <Button
-          onClick={captureScreenshot}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: ".3rem",
-            background: "#0F6CBD",
-            color: "#fff",
-            fontFamily: "YekanBakh-Regular",
-            borderRadius: ".5rem",
-            ":hover": {
+        {isAllDataLoaded ? (
+          <Button
+            onClick={captureScreenshot}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: ".3rem",
               background: "#0F6CBD",
               color: "#fff",
-            },
-          }}
-        >
-          دریافت خروجی
-        </Button>
+              fontFamily: "YekanBakh-Regular",
+              borderRadius: ".5rem",
+              ":hover": {
+                background: "#0F6CBD",
+                color: "#fff",
+              },
+            }}
+          >
+            دریافت خروجی
+          </Button>
+        ) : (
+          <CircularProgress />
+        )}
       </Box>
       <Box
         width="100%"

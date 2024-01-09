@@ -179,15 +179,15 @@ const AddressesTable: FC<Props> = ({
               marginTop: ".5rem",
               padding: ".8rem .5rem",
               background: "#E9F1F4",
-              justifyContent: "space-between",
+              justifyContent: "end",
               display: "flex",
               borderRadius: ".5rem",
               position: "relative",
             }}
           >
-            <Typography fontFamily="YekanBakh-Regular" marginRight="2rem">
+            {/* <Typography fontFamily="YekanBakh-Regular" marginRight="2rem">
               تعداد سشن‌ ها
-            </Typography>
+            </Typography> */}
             {selectedAddresses.length > 0 && (
               <Button
                 onClick={handleDeleteIpsFromDomain}
@@ -260,6 +260,7 @@ const AddressesTable: FC<Props> = ({
                     sx={{
                       padding: ".7rem .5rem",
                       paddingBottom: ".25rem",
+                      justifyContent: "space-between",
                       display: "flex",
                       alignItems: "center",
                       background:
@@ -299,14 +300,14 @@ const AddressesTable: FC<Props> = ({
                       }}
                       onChange={(e) => handleSelectIps(e, address)}
                     />
-                    <Typography
+                    {/* <Typography
                       marginLeft="auto"
                       marginRight="2rem"
                       fontFamily="YekanBakh-Regular"
                     >
-                      {/* {address.session} */}
+                      {address.session}
                       5254
-                    </Typography>
+                    </Typography> */}
                     <Typography
                       fontFamily="YekanBakh-Regular"
                       sx={{
@@ -385,37 +386,37 @@ const AddressesTable: FC<Props> = ({
             gap: "1rem",
           }}
         >
-          {selectedAddress && (
-            <>
-              <ExpressionValue
-                title="Volume"
-                expression="حجم داده مصرفی"
-                value={1532}
-                unit="mb"
-              />
-              <Divider
-                sx={{
-                  width: "50%",
-                }}
-              />
-              <ExpressionValue
-                title="Sessions"
-                expression="تعداد نشست‌ها"
-                value={1532}
-              />
-              <Divider
-                sx={{
-                  width: "50%",
-                }}
-              />
-              <ExpressionValue
-                title="Connections"
-                expression="تعداد نشست‌های موفق"
-                value={1532}
-              />
-            </>
-          )}
-          {!selectedAddress && (
+          {/* {selectedAddress && ( */}
+          <>
+            <ExpressionValue
+              title="Volume"
+              expression="حجم داده مصرفی"
+              value={1532}
+              unit="mb"
+            />
+            <Divider
+              sx={{
+                width: "50%",
+              }}
+            />
+            <ExpressionValue
+              title="Sessions"
+              expression="تعداد نشست‌ها"
+              value={1532}
+            />
+            <Divider
+              sx={{
+                width: "50%",
+              }}
+            />
+            <ExpressionValue
+              title="Connections"
+              expression="تعداد نشست‌های موفق"
+              value={1532}
+            />
+          </>
+          {/* )} */}
+          {/* {!selectedAddress && (
             <Typography
               fontFamily="YekanBakh-Regular"
               sx={{
@@ -425,7 +426,7 @@ const AddressesTable: FC<Props> = ({
             >
               برای مشاهده جزئیات یک آدرس را از لیست انتخاب کنید.
             </Typography>
-          )}
+          )} */}
         </Box>
       </Box>
       <AddIpAddressesModal
