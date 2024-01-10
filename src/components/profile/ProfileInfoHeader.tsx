@@ -107,10 +107,11 @@ const ProfileInfo: FC<Props> = ({
               variant="outlined"
               sx={{
                 color: "red",
+                width: "max-content",
               }}
               onClick={logout}
             >
-              Logout
+              خروج از حساب
             </Button>
           </Box>
           <Button

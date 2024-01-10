@@ -269,7 +269,6 @@ const Dashboard: FC = () => {
               margin: { top: 10 },
             });
           });
-
           doc.save("Domains_and_IPs.pdf");
         })
         .catch((error) => {
