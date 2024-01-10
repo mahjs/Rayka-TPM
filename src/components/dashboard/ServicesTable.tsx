@@ -97,12 +97,10 @@ const ServicesTable: FC<Props> = ({
       >
         <Box
           sx={{
-            // marginTop: "-1rem",
             display: "flex",
             alignItems: "center",
             gap: ".3rem",
             justifyContent: "space-between"
-            gap: ".3rem"
           }}
         >
           <Typography
