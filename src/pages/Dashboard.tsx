@@ -23,7 +23,6 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as domtoimage from "dom-to-image";
-import api from "../services";
 
 export interface DomainData {
   name: string;
@@ -40,9 +39,7 @@ const Dashboard: FC = () => {
 
   // State to hold the search input
   const [searchInput, setSearchInput] = useState<string>("");
-  const [selectedFilter, setSelectedFilter] = useState<
-    "All_IPs" | "CDN" | "Host"
-  >("All_IPs");
+
   // Function to handle the search action
   const handleSearch = () => {
     // You would implement your search logic here
@@ -153,91 +150,26 @@ const Dashboard: FC = () => {
     }, 500);
   };
 
-  // useEffect(() => {
-  //   if (!ipAddressesForDomain) return;
-  //   if (isNaN(parseInt(searchInput))) {
-  //     setFilteredIpAddresses(ipAddressesForDomain);
-  //     return;
-  //   }
-  // }, [ipAddressesForDomain, searchInput]);
-
-  // api.domain.getcdn().then((res) => {});
-  // api.domain.Notcdn().then((res) => {});
-
-  // useEffect(() => {
-  //   if (!ipAddressesForDomain) return;
-
-  //   if (selectedFilter === "All_IPs") {
-  //     setFilteredIpAddresses(
-  //       ipAddressesForDomain.filter((ip) =>
-  //         ip.toLowerCase().includes(searchInput.toLowerCase())
-  //       )
-  //     );
-  //   } else if (selectedFilter === "CDN") {
-  //     api.domain.getcdn().then((cdnResponse) => {
-  //       console.log(cdnResponse);
-
-  //       setFilteredIpAddresses(cdnResponse);
-  //     });
-  //   } else {
-  //     api.domain.Notcdn().then((notCdnResponse) => {
-  //       console.log(notCdnResponse);
-
-  //       setFilteredIpAddresses(notCdnResponse);
-  //     });
-  //   }
-  // }, [searchInput, selectedFilter, ipAddressesForDomain]);
+  useEffect(() => {
+    if (!ipAddressesForDomain) return;
+    if (isNaN(parseInt(searchInput))) {
+      setFilteredIpAddresses(ipAddressesForDomain);
+      return;
+    }
+  }, [ipAddressesForDomain, searchInput]);
 
   useEffect(() => {
     if (!ipAddressesForDomain) return;
 
-    const updateAddressesData = (data) => {
-      if (Array.isArray(data)) {
-        // Map through the array and extract only the ip property from each object
-        const ipAddresses = data.map((item) => item.ip);
-        setFilteredIpAddresses(ipAddresses);
-      } else {
-        console.error(
-          "Expected an array of IP address objects, but received:",
-          data
-        );
-        setFilteredIpAddresses([]);
-      }
-    };
-    if (selectedFilter === "All_IPs") {
-      setFilteredIpAddresses(
-        ipAddressesForDomain.filter((ip) =>
-          ip.toLowerCase().includes(searchInput.toLowerCase())
-        )
-      );
-    } else if (selectedFilter === "CDN") {
-      api.domain
-        .getcdn()
-        .then((response) => {
-          console.log("CDN Response:", response);
-          if (response && Array.isArray(response.ips)) {
-            updateAddressesData(response.ips);
-          } else {
-            console.error("No data in CDN response", response);
-            setFilteredIpAddresses([]);
-          }
-        })
-        .catch((error) => console.error("Error fetching CDN data:", error));
-    } else {
-      api.domain
-        .Notcdn()
-        .then((response) => {
-          console.log("CDN Response:", response);
-          if (response && Array.isArray(response.ips)) {
-            updateAddressesData(response.ips);
-          } else {
-            console.error("No data in CDN response", response);
-            setFilteredIpAddresses([]);
-          }
-        })
-        .catch((error) => console.error("Error fetching CDN data:", error));
-    }
-  }, [searchInput, selectedFilter, ipAddressesForDomain]);
+    setFilteredIpAddresses(
+      ipAddressesForDomain.filter((ip) =>
+        isNaN(parseInt(searchInput))
+          ? true
+          : ip.toLowerCase().includes(searchInput.toLowerCase())
+      )
+    );
+  }, [searchInput, selectedServiceIndex, ipAddressesForDomain]);
+
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
@@ -614,8 +546,6 @@ const Dashboard: FC = () => {
               showAddButton={selectedServiceIndex !== null}
               selectedAddress={selectedAddress}
               setSelectedAddress={setSelectedAddress}
-              selectedFilter={selectedFilter}
-              setSelectedFilter={setSelectedFilter}
             />
           </Box>
         </Box>
