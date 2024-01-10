@@ -61,7 +61,13 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
     setStartDate(null);
   }, [selectedTimeForAreaChart]);
 
-  const [dataForChart, setDataForChart] = useState<ChartDataFormat[]>([]);
+  const [dataForChart, setDataForChart] = useState<ChartDataFormat[]>([
+    {
+      receiveValue: 0,
+      sendValue: 0,
+      time: new Date().toLocaleDateString()
+    }
+  ]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const convertDataForAreaChart = (data: [DataForChart[], DataForChart[]]) => {
