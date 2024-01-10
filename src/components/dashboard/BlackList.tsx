@@ -133,7 +133,7 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
             {ipAddress?.map((item, index) => {
               return (
                 <Typography
-                  fontFamily="Tomorrow-SemiBold"
+                  fontFamily="Tomorrow-Regular"
                   fontSize="1rem"
                   textAlign="right"
                   key={index}
@@ -147,7 +147,7 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
             {blacklistedDomains.map((domain, index) => (
               <Typography key={index}
                 textAlign="left"
-                fontFamily="Tomorrow-SemiBold" fontSize="1rem">
+                fontFamily="Tomorrow-Regular" fontSize="1rem">
                 {domain}
               </Typography>
             ))}

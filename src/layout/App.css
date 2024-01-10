@@ -94,9 +94,17 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "Tomorrow-Regular";
+  src: url("../assets/fonts/Tomorrow-Regular.woff") format("woff"),
+    url("../assets/fonts/Tomorrow-Regular.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+}
+
 /* Maybe temporary */
 body {
-  font-family:"YekanBakh-Medium";
+  font-family: "YekanBakh-Medium";
   max-height: 100vh;
   overflow: hidden;
   margin: 0;
