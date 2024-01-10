@@ -15,6 +15,10 @@ interface IpAddressReturnType {
 export interface Blacklist {
   ip_address: string;
 }
+export interface ipCdn {
+  ip: string;
+  provider: string;
+}
 
 export const getAllDomains = async (): Promise<Domain[]> =>
   await axios.http.get(config.rootAddress + "/domains");
@@ -50,4 +54,11 @@ export const deleteIpAddressesFromDomain = async (
 
 export const getblacklist = async (): Promise<Blacklist[]> => {
   return await axios.http.get("http://10.201.228.64:5001/list");
+};
+
+export const getcdn = async (): Promise<ipCdn> => {
+  return await axios.http.get("http://10.201.228.64:7000/list/cdn");
+};
+export const Notcdn = async (): Promise<ipCdn> => {
+  return await axios.http.get("http://10.201.228.64:7000/list/host");
 };

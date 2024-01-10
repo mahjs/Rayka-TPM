@@ -51,11 +51,15 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
             alignItems="center"
             justifyContent="space-between"
           >
-            <Typography>دریافت خروجی</Typography>
+            <Typography fontFamily="Tomorrow-SemiBold" fontSize="1rem">
+              دریافت خروجی
+            </Typography>
             <Button
               onClick={() => setOpenModal(false)}
               sx={{
-                color: "#000"
+                color: "#000",
+                fontFamily: "Tomorrow-SemiBold",
+                fontSize: "1rem"
               }}
             >
               بستن پنجره
@@ -74,9 +78,17 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
                   flexDirection="row-reverse"
                   justifyContent="space-between"
                 >
-                  <Typography>:ip_address </Typography>
+                  <Typography fontFamily="Tomorrow-SemiBold" fontSize="1rem">
+                    :ip_address{" "}
+                  </Typography>
 
-                  <Typography key={index}>{item.ip_address}</Typography>
+                  <Typography
+                    fontFamily="Tomorrow-SemiBold"
+                    fontSize="1rem"
+                    key={index}
+                  >
+                    {item.ip_address}
+                  </Typography>
                 </Box>
               </Box>
             );

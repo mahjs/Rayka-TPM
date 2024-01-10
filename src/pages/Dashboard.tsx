@@ -4,7 +4,7 @@ import {
   Button,
   CircularProgress,
   Stack,
-  Typography,
+  Typography
 } from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
@@ -68,7 +68,7 @@ const Dashboard: FC = () => {
     loadingData,
     treeMapData,
     totalIps,
-    refetch: refetchAllData,
+    refetch: refetchAllData
   } = useTreeMapData();
 
   const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
@@ -92,7 +92,7 @@ const Dashboard: FC = () => {
   const {
     loadingDomains,
     domains,
-    reFetchDomains: refetchDomainData,
+    reFetchDomains: refetchDomainData
   } = useDomains();
   const [filteredDomains, setFilteredDomains] = useState<Domain[]>(
     domains || []
@@ -137,7 +137,7 @@ const Dashboard: FC = () => {
   const {
     ipAddressesForDomain,
     loadingAddresses,
-    reFetchAddresses: reFetchAddressesData,
+    reFetchAddresses: reFetchAddressesData
   } = useIpAddresses(
     domains ? filteredDomains![selectedServiceIndex!]?.name : null
   );
@@ -179,7 +179,7 @@ const Dashboard: FC = () => {
     ) {
       dataRefs.current[selectedServiceIndex].scrollIntoView({
         behavior: "smooth",
-        block: "center",
+        block: "center"
       });
     }
   });
@@ -249,8 +249,8 @@ const Dashboard: FC = () => {
       domtoimage
         .toPng(treeMapElement, {
           style: {
-            marginTop: "3rem",
-          },
+            marginTop: "3rem"
+          }
         })
         .then((dataUrl) => {
           doc.text(`Total IPs: ${totalIps.length}`, 10, 30);
@@ -266,7 +266,7 @@ const Dashboard: FC = () => {
               startY: 20,
               head: [["IP Address"]],
               body: domain.ips.map((ip) => [ip]),
-              margin: { top: 10 },
+              margin: { top: 10 }
             });
           });
           doc.save("Domains_and_IPs.pdf");
@@ -292,8 +292,8 @@ const Dashboard: FC = () => {
       domtoimage
         .toPng(treeMapElement, {
           style: {
-            backgroundColor: "white",
-          },
+            backgroundColor: "white"
+          }
         })
         .then((dataUrl: string) => {
           const link = document.createElement("a");
@@ -313,8 +313,8 @@ const Dashboard: FC = () => {
       domtoimage
         .toPng(dashboardElement, {
           style: {
-            backgroundColor: "white",
-          },
+            backgroundColor: "white"
+          }
         })
         .then((dataUrl: string) => {
           const link = document.createElement("a");
@@ -346,7 +346,7 @@ const Dashboard: FC = () => {
         sx={{
           padding: "2rem 1.5rem",
           display: "flex",
-          gap: "1rem",
+          gap: "1rem"
         }}
       >
         {/* Right side. Charts*/}
@@ -355,7 +355,7 @@ const Dashboard: FC = () => {
             width: "50vw",
             display: "flex",
             flexDirection: "column",
-            gap: "1rem",
+            gap: "1rem"
           }}
         >
           <ProfileInfo
@@ -370,7 +370,7 @@ const Dashboard: FC = () => {
               flexDirection: "column",
               gap: "1rem",
               height: "35vh",
-              padding: "1rem",
+              padding: "1rem"
             }}
           >
             <Stack direction="row" justifyContent="space-between">
@@ -379,7 +379,7 @@ const Dashboard: FC = () => {
                 fontFamily="YekanBakh-Medium"
                 component="h2"
                 sx={{
-                  fontSize: "1.5rem",
+                  fontSize: "1.5rem"
                 }}
               >
                 سهم سرویس ها
@@ -397,8 +397,8 @@ const Dashboard: FC = () => {
                     borderRadius: ".5rem",
                     ":hover": {
                       background: "#0F6CBD",
-                      color: "#fff",
-                    },
+                      color: "#fff"
+                    }
                   }}
                 >
                   دریافت خروجی
@@ -413,7 +413,7 @@ const Dashboard: FC = () => {
                 border: "1px solid #707070",
                 padding: ".2rem",
                 height: "100%",
-                position: "relative",
+                position: "relative"
               }}
             >
               <TreeMap
@@ -438,7 +438,7 @@ const Dashboard: FC = () => {
                     position: "absolute",
                     top: "40%",
                     left: "48%",
-                    transform: "translate(-50% -50%)",
+                    transform: "translate(-50% -50%)"
                   }}
                 />
               )}
@@ -447,7 +447,7 @@ const Dashboard: FC = () => {
           <Box
             sx={{
               position: "relative",
-              marginTop: "auto",
+              marginTop: "auto"
             }}
           >
             <AreaChart
@@ -463,14 +463,14 @@ const Dashboard: FC = () => {
             width: "50%",
             display: "flex",
             flexDirection: "column",
-            gap: "1rem",
+            gap: "1rem"
           }}
         >
           <Box
             sx={{
               height: "5dvh",
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "space-between"
             }}
           >
             <Search
@@ -496,8 +496,8 @@ const Dashboard: FC = () => {
                   height: "fit-content",
                   ":hover": {
                     color: "#0F6CBD",
-                    background: "#0F6CBD33",
-                  },
+                    background: "#0F6CBD33"
+                  }
                 }}
               >
                 دریافت خروجی
@@ -509,7 +509,7 @@ const Dashboard: FC = () => {
           <Box
             sx={{
               display: "flex",
-              gap: "1rem",
+              gap: "1rem"
             }}
           >
             {/* Services Table*/}
