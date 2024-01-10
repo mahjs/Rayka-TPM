@@ -71,7 +71,7 @@ const getSendServerId = (server: string) => {
 
 export const getReceiveData = (time: string, server: string) =>
   axios.post(
-    "http://10.201.228.63/api_jsonrpc.php",
+    "http://185.11.89.120:42069/api/zabbix",
     {
       jsonrpc: "2.0",
       method: "history.get",
@@ -107,7 +107,7 @@ export const getReceiveDataForCustomDate = (
   server: string
 ) =>
   axios.post(
-    "http://10.201.228.63/api_jsonrpc.php",
+    "http://185.11.89.120:42069/api/zabbix",
     {
       jsonrpc: "2.0",
       method: "history.get",
@@ -132,7 +132,7 @@ export const getReceiveDataForCustomDate = (
 
 export const getSendData = (time: string, server: string) =>
   axios.post(
-    "http://10.201.228.63/api_jsonrpc.php",
+    "http://185.11.89.120:42069/api/zabbix",
     {
       jsonrpc: "2.0",
       method: "history.get",
@@ -168,7 +168,7 @@ export const getSendDataForCustomDate = (
   server: string
 ) => {
   return axios.post(
-    "http://10.201.228.63/api_jsonrpc.php",
+    "http://185.11.89.120:42069/api/zabbix",
     {
       jsonrpc: "2.0",
       method: "history.get",
