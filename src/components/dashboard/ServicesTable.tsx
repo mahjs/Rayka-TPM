@@ -102,7 +102,6 @@ const ServicesTable: FC<Props> = ({
             alignItems: "center",
             gap: ".3rem",
             justifyContent: "space-between"
-            gap: ".3rem"
           }}
         >
           <Typography
