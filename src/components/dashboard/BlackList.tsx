@@ -5,22 +5,15 @@ import ExcelIcon from "../../assets/images/excel.svg";
 import Png from "../../assets/images/png.svg";
 import Cross from "../../assets/images/cross.svg";
 import PDFIcon from "../../assets/images/pdf.svg";
+import { Blacklist } from "../../services/domain";
 
 interface Props {
   openModal: boolean;
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedFormat: string;
-  setSelectedFormat: React.Dispatch<React.SetStateAction<string>>;
-  onExportClick: () => void;
+  ipAddress: Blacklist[];
 }
 
-const ExportDocModal: FC<Props> = ({
-  openModal,
-  setOpenModal,
-  selectedFormat,
-  setSelectedFormat,
-  onExportClick
-}) => {
+const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
   return (
     <Modal
       open={openModal}
@@ -66,55 +59,32 @@ const ExportDocModal: FC<Props> = ({
               }}
             >
               بستن پنجره
-              <img src={Cross} />
+              <img alt="cross" src={Cross} />
             </Button>
           </Stack>
-          <CheckBoxRow
-            selectedFormat={selectedFormat}
-            setSelectedFormat={setSelectedFormat}
-            icon={PDFIcon}
-            format="pdf"
-            name="پی دی اف"
-          />
-          <CheckBoxRow
-            selectedFormat={selectedFormat}
-            setSelectedFormat={setSelectedFormat}
-            icon={ExcelIcon}
-            format="excel"
-            name="اکسل"
-          />
-          <CheckBoxRow
-            selectedFormat={selectedFormat}
-            setSelectedFormat={setSelectedFormat}
-            icon={Png}
-            format="png"
-            name="عکس"
-          />
-          <Button
-            onClick={() => onExportClick()}
-            sx={{
-              fontFamily: "YekanBakh-Bold",
-              color: "#fff",
-              paddingRight: ".5rem",
-              display: "flex",
-              background: "#0F6CBD",
-              alignItems: "center",
-              padding: ".5rem",
-              gap: ".5rem",
-              borderRadius: ".5rem",
-              zIndex: "5",
-              ":hover": {
-                color: "#0F6CBD",
-                background: "#0F6CBD33"
-              }
-            }}
-          >
-            دریافت خروجی
-          </Button>
+          {ipAddress?.map((item, index) => {
+            return (
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                flexDirection="column"
+              >
+                <Box
+                  display="flex"
+                  flexDirection="row-reverse"
+                  justifyContent="space-between"
+                >
+                  <Typography>:ip_address </Typography>
+
+                  <Typography key={index}>{item.ip_address}</Typography>
+                </Box>
+              </Box>
+            );
+          })}
         </Box>
       </Box>
     </Modal>
   );
 };
 
-export default ExportDocModal;
+export default BlackList;
