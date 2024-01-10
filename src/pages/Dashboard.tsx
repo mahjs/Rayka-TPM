@@ -29,6 +29,9 @@ export interface DomainData {
   name: string;
   ips?: string[];
 }
+interface IpAddressObject {
+  ip: string;
+}
 const Dashboard: FC = () => {
   const navigate = useNavigate();
   const { isLogin } = useAuth();
@@ -154,7 +157,7 @@ const Dashboard: FC = () => {
   };
 
   useEffect(() => {
-    const updateAddressesData = (data) => {
+    const updateAddressesData = (data: IpAddressObject[]) => {
       if (Array.isArray(data)) {
         const ipAddresses = data
           .map((item) => item.ip)
