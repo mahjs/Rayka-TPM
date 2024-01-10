@@ -51,19 +51,18 @@ const AddIpAddressesModal: FC<Props> = ({
       toast.error("Please enter a valid IP address and domain name.");
       return;
     }
-  
+    
     // Prepare the payload
     const payload = {
       ips: parsedIps.filter(isValidIp)
     };
-  
+    setAddLoading(true);
     // Send the valid IPs to the server
     axios.post("http://10.201.228.64:7000/get-ip", payload)
       .then(response => {
         console.log('IPs sent to server successfully:', response.data);
         
         // Proceed with adding IP addresses to the domain
-        setAddLoading(true);
         api.domain
           .addIpAddressesToDomain(domainName, parsedIps)
           .then(() => {
