@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Modal, Box, Stack, Typography, Button } from "@mui/material";
 import CheckBoxRow from "./CheckBoxRow";
 import ExcelIcon from "../../assets/images/excel.svg";
-import CSVIcon from "../../assets/images/csv.svg";
+import Png from "../../assets/images/png.svg";
 import Cross from "../../assets/images/cross.svg";
 import PDFIcon from "../../assets/images/pdf.svg";
 
@@ -11,6 +11,7 @@ interface Props {
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
   selectedFormat: string;
   setSelectedFormat: React.Dispatch<React.SetStateAction<string>>;
+  onExportClick: () => void;
 }
 
 const ExportDocModal: FC<Props> = ({
@@ -18,6 +19,7 @@ const ExportDocModal: FC<Props> = ({
   setOpenModal,
   selectedFormat,
   setSelectedFormat,
+  onExportClick
 }) => {
   return (
     <Modal
@@ -31,7 +33,7 @@ const ExportDocModal: FC<Props> = ({
         zIndex: "1000",
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
+        alignItems: "center"
       }}
     >
       <Box
@@ -41,14 +43,14 @@ const ExportDocModal: FC<Props> = ({
           borderRadius: "1.5rem",
           width: "400px",
           paddingY: "1rem",
-          paddingX: "2rem",
+          paddingX: "2rem"
         }}
       >
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: ".5rem",
+            gap: ".5rem"
           }}
         >
           <Stack
@@ -60,7 +62,7 @@ const ExportDocModal: FC<Props> = ({
             <Button
               onClick={() => setOpenModal(false)}
               sx={{
-                color: "#000",
+                color: "#000"
               }}
             >
               بستن پنجره
@@ -84,11 +86,12 @@ const ExportDocModal: FC<Props> = ({
           <CheckBoxRow
             selectedFormat={selectedFormat}
             setSelectedFormat={setSelectedFormat}
-            icon={CSVIcon}
-            format="csv"
-            name="سی اس وی"
+            icon={Png}
+            format="png"
+            name="عکس"
           />
           <Button
+            onClick={() => onExportClick()}
             sx={{
               fontFamily: "YekanBakh-Bold",
               color: "#fff",
@@ -102,8 +105,8 @@ const ExportDocModal: FC<Props> = ({
               zIndex: "5",
               ":hover": {
                 color: "#0F6CBD",
-                background: "#0F6CBD33",
-              },
+                background: "#0F6CBD33"
+              }
             }}
           >
             دریافت خروجی

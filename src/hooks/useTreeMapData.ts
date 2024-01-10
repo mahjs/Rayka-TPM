@@ -11,12 +11,17 @@ export interface MapData {
 const useTreeMapData = () => {
   const { domains, loadingDomains } = useDomains();
   const [treeMapData, setTreeMapData] = useState<MapData[]>([]);
-  const [totalIps, setTotalIps] = useState<number>(0);
+  const [totalIps, setTotalIps] = useState<string[]>([]);
   const [loadingData, setLoadingData] = useState<boolean>(true);
+  const [refetchData, setRefetchData] = useState<boolean>(false);
+
+  const refetch = () => {
+    setRefetchData((prev) => !prev);
+  };
 
   useEffect(() => {
     if (loadingData) return;
-    setTotalIps(treeMapData.reduce((acc, cur) => acc + cur.value, 0));
+    setTotalIps(treeMapData.map((data) => data.ips).flat());
   }, [loadingData, treeMapData]);
 
   useEffect(() => {
@@ -34,12 +39,13 @@ const useTreeMapData = () => {
       setTreeMapData(res);
       setLoadingData(false);
     });
-  }, [domains, loadingDomains]);
+  }, [domains, loadingDomains, refetchData]);
 
   return {
     loadingData,
     treeMapData,
     totalIps,
+    refetch,
   };
 };
 

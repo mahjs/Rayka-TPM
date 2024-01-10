@@ -2,14 +2,22 @@ import ClientApi from "./clientApi";
 import config from "./config";
 
 const axios = new ClientApi();
-
 export interface Domain {
   name: string;
+  ips?: string[]; // Optional property
 }
 
 interface IpAddressReturnType {
   domain: string;
   ips: string[];
+}
+
+export interface Blacklist {
+  ip_address: string;
+}
+export interface ipCdn {
+  ip: string;
+  provider: string;
 }
 
 export const getAllDomains = async (): Promise<Domain[]> =>
@@ -22,17 +30,17 @@ export const getIpAddressesForDomain = async (
 
 export const addDomain = async (domains: string[]) =>
   await axios.http.post(config.rootAddress + "/add-domain", {
-    names: domains,
+    names: domains
   });
 export const deleteDomains = async (domains: string[]) =>
   await axios.http.post(config.rootAddress + "/delete-domain", {
-    names: domains,
+    names: domains
   });
 
 export const addIpAddressesToDomain = async (domain: string, ips: string[]) =>
   await axios.http.post(config.rootAddress + "/add-ip", {
     domain,
-    ip_addresses: ips,
+    ip_addresses: ips
   });
 
 export const deleteIpAddressesFromDomain = async (
@@ -41,5 +49,16 @@ export const deleteIpAddressesFromDomain = async (
 ) =>
   await axios.http.post(config.rootAddress + "/delete-ips", {
     domain,
-    ip_addresses,
+    ip_addresses
   });
+
+export const getblacklist = async (): Promise<Blacklist[]> => {
+  return await axios.http.get("http://10.201.228.64:5001/list");
+};
+
+export const getcdn = async (): Promise<ipCdn> => {
+  return await axios.http.get("http://10.201.228.64:7000/list/cdn");
+};
+export const Notcdn = async (): Promise<ipCdn> => {
+  return await axios.http.get("http://10.201.228.64:7000/list/host");
+};

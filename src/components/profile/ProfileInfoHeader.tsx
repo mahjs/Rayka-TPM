@@ -10,8 +10,11 @@ import { BsPerson } from "react-icons/bs";
 import { IoChevronDown } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RiHistoryLine } from "react-icons/ri";
-import { FC } from "react";
+import { FC, useState } from "react";
 import Icon from "../../assets/images/icon.svg";
+import { useAuth } from "../../contexts/authContext";
+import storage from "../../services/storage";
+import config from "../../services/config";
 
 interface Props {
   totalDomains?: number;
@@ -28,6 +31,11 @@ const ProfileInfo: FC<Props> = ({
 }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  const [openLogout, setOpenLogout] = useState(false);
+
+  const { logout, isAdmin } = useAuth();
+  
   return (
     <Box
       sx={{
@@ -82,20 +90,49 @@ const ProfileInfo: FC<Props> = ({
             display: "flex",
             alignItems: "center",
             gap: ".2rem",
+            position: "relative",
           }}
         >
+          <Box
+            sx={{
+              position: "absolute",
+              padding: "1rem",
+              borderRadius: "1rem",
+              bottom: openLogout ? "-110%" : "0",
+              left: "5rem",
+              opacity: openLogout ? "1" : "0",
+              transition: "all .3s ease",
+            }}
+          >
+            <Button
+              variant="outlined"
+              sx={{
+                color: "red",
+                width: "max-content",
+              }}
+              onClick={logout}
+            >
+              خروج از حساب
+            </Button>
+          </Box>
           <Button
             sx={{
               minWidth: "0",
             }}
+            onClick={() => setOpenLogout(!openLogout)}
           >
             <IoChevronDown
               color="gray"
-              style={{ width: "25px", height: "25px" }}
+              style={{
+                width: "25px",
+                height: "25px",
+                transform: openLogout ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "all .3s ease",
+              }}
             />
           </Button>
           <Button
-            onClick={() => navigate("/profile")}
+            // onClick={() => navigate("/profile")}
             sx={{
               minWidth: "0",
               width: "50px",
@@ -121,10 +158,10 @@ const ProfileInfo: FC<Props> = ({
               paddingRight: ".5rem",
             }}
           >
-            {"احمد مهرانفر"}
+            {storage.get(config.userName) || "-"}
           </Typography>
         </Box>
-        {pathname === "/" && (
+        {pathname === "/" && isAdmin && (
           <>
             <Box
               sx={{
@@ -158,7 +195,7 @@ const ProfileInfo: FC<Props> = ({
           }}
         >
           <Stack direction="row" gap=".5rem" justifyContent="space-between">
-            <Typography>تعداد دامین‌ها:</Typography>
+            <Typography whiteSpace="nowrap">تعداد دامین‌ها:</Typography>
             <Typography
               sx={{
                 width: "2rem",
@@ -178,7 +215,7 @@ const ProfileInfo: FC<Props> = ({
             }}
           />
           <Stack direction="row" gap=".5rem" justifyContent="space-between">
-            <Typography>تعداد کل آدرس‌ها:</Typography>
+            <Typography whiteSpace="nowrap">تعداد آدرس‌ها:</Typography>
             <Typography
               sx={{
                 width: "2rem",

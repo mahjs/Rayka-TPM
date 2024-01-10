@@ -3,44 +3,43 @@ import {
   Button,
   Checkbox,
   CircularProgress,
-  MenuItem,
-  Select,
-  Typography,
+  Typography
 } from "@mui/material";
 import { GoPlus } from "react-icons/go";
 import { useRef, useEffect, FC, useState } from "react";
-import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
-import { Domain } from "../../services/domain";
+import { Blacklist, Domain } from "../../services/domain";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import AddDomainModal from "./AddDomainModal";
 import api from "../../services";
+import { MapData } from "../../hooks/useTreeMapData";
+import { useAuth } from "../../contexts/authContext";
+import BlackList from "./BlackList";
 
 interface Props {
   loading: boolean;
+  mapData: MapData[];
+  loadingMapData: boolean;
   domains: Domain[] | null;
+  setDomainsDownloadData: React.Dispatch<React.SetStateAction<Domain[]>>;
+
   refetchDomains: () => void;
   refetchIpAddresses: () => void;
   selectedServiceIndex: number | null;
   setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
-  setDataForAreaChart: React.Dispatch<
-    React.SetStateAction<
-      {
-        name: string;
-        value: number;
-      }[]
-    >
-  >;
 }
-
 const ServicesTable: FC<Props> = ({
   loading,
   domains,
+  mapData,
+  loadingMapData,
   refetchDomains,
   refetchIpAddresses,
   selectedServiceIndex,
-  setDataForAreaChart,
   setSelectedServiceIndex,
+  setDomainsDownloadData
 }) => {
+  const { isAdmin } = useAuth();
+
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
@@ -50,16 +49,22 @@ const ServicesTable: FC<Props> = ({
     ) {
       dataRefs.current[selectedServiceIndex].scrollIntoView({
         behavior: "smooth",
-        block: "center",
+        block: "center"
       });
     }
   });
+  useEffect(() => {
+    if (domains) {
+      setDomainsDownloadData(domains);
+    }
+  }, [domains, setDomainsDownloadData]);
 
   const [openAddDomainModal, setOpenAddDomainModal] = useState<boolean>(false);
+  const [blackListModal, setBlackListModal] = useState<boolean>(false);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
-
+  const [ipAddress, setIpAddress] = useState<Blacklist[]>([]);
   const handleSelectDomain = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    _event: React.ChangeEvent<HTMLInputElement>,
     domain: string
   ) => {
     const prevDomains = [...selectedDomains];
@@ -73,22 +78,29 @@ const ServicesTable: FC<Props> = ({
     api.domain.deleteDomains(selectedDomains).then(() => {
       refetchDomains();
       setSelectedDomains([]);
+      setSelectedServiceIndex(null);
     });
   };
+  useEffect(() => {
+    api.domain.getblacklist().then((res) => {
+      console.log(res);
 
+      setIpAddress(res);
+    });
+  }, []);
   return (
     <>
       <Box
         sx={{
-          width: "50%",
+          width: "50%"
         }}
       >
         <Box
           sx={{
-            // marginTop: "-1rem",
             display: "flex",
             alignItems: "center",
             gap: ".3rem",
+            justifyContent: "space-between"
           }}
         >
           <Typography
@@ -96,13 +108,35 @@ const ServicesTable: FC<Props> = ({
             component="h3"
             sx={{
               fontSize: "1.5rem",
-              whiteSpace: "nowrap",
+              whiteSpace: "nowrap"
             }}
           >
             سرویس ها
           </Typography>
+
+          {isAdmin && (
+            <Button
+              onClick={() => setOpenAddDomainModal(true)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: ".3rem",
+                background: "#0F6CBD",
+                color: "#fff",
+                fontFamily: "YekanBakh-Regular",
+                borderRadius: ".5rem",
+                ":hover": {
+                  background: "#0F6CBD",
+                  color: "#fff"
+                }
+              }}
+            >
+              <GoPlus style={{ width: "20px", height: "20px" }} />
+              افزودن
+            </Button>
+          )}
           <Button
-            onClick={() => setOpenAddDomainModal(true)}
+            onClick={() => setBlackListModal(true)}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -113,15 +147,14 @@ const ServicesTable: FC<Props> = ({
               borderRadius: ".5rem",
               ":hover": {
                 background: "#0F6CBD",
-                color: "#fff",
-              },
+                color: "#fff"
+              }
             }}
           >
-            <GoPlus style={{ width: "20px", height: "20px" }} />
-            افزودن
+            لیست سیاه
           </Button>
 
-          {selectedDomains.length > 0 && (
+          {selectedDomains.length > 0 && isAdmin && (
             <Button
               onClick={handleDeleteDomains}
               sx={{
@@ -129,79 +162,25 @@ const ServicesTable: FC<Props> = ({
                 fontFamily: "YekanBakh-Regular",
                 display: "flex",
                 alignItems: "center",
-                gap: ".3rem",
+                gap: ".3rem"
               }}
             >
               <RiDeleteBin6Line
                 style={{
                   width: "15px",
                   height: "15px",
-                  color: "red",
+                  color: "red"
                 }}
               />
               حذف
             </Button>
           )}
-
-          <Box
-            sx={{
-              position: "relative",
-              marginRight: "auto",
-              marginLeft: "1rem",
-            }}
-          >
-            <Select
-              IconComponent={IoChevronDown}
-              label="فیلتر سرویس ها"
-              value=""
-              sx={{
-                minWidth: "4rem",
-                height: "2rem",
-                paddingX: ".5rem",
-                ".MuiSelect-icon": {
-                  width: "20px",
-                  height: "20px",
-                  marginTop: "-.20rem",
-                },
-                ".MuiOutlinedInput-notchedOutline": { border: 0 },
-                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                  {
-                    border: 0,
-                  },
-              }}
-            >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
-                هفتگی
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="monthly"
-              >
-                ماهانه
-              </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="year">
-                سالانه
-              </MenuItem>
-            </Select>
-            <IoFilterOutline
-              style={{
-                position: "absolute",
-                top: "40%",
-                left: ".2rem",
-                transform: "translateY(-50%)",
-                width: "25px",
-                height: "25px",
-                color: "gray",
-                zIndex: "-1",
-              }}
-            />
-          </Box>
         </Box>
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: ".2rem",
+            gap: ".2rem"
           }}
         >
           {/* Table Header*/}
@@ -212,16 +191,16 @@ const ServicesTable: FC<Props> = ({
               background: "#E9F1F4",
               justifyContent: "space-between",
               display: "flex",
-              borderRadius: ".5rem",
+              borderRadius: ".5rem"
             }}
           >
-            <Typography fontFamily="YekanBakh-Regular">
-              تعداد سشن‌ ها
+            <Typography fontFamily="YekanBakh-Regular" marginRight="2.5rem">
+              تعداد IP{" "}
             </Typography>
             <Typography
               fontFamily="YekanBakh-Regular"
               sx={{
-                marginLeft: "4rem",
+                marginLeft: "2.5rem"
               }}
             >
               نام وبسایت
@@ -233,17 +212,18 @@ const ServicesTable: FC<Props> = ({
               overflow: "auto",
               display: "flex",
               flexDirection: "column",
-              gap: ".2rem",
+              gap: ".2rem"
             }}
           >
             {/* Table Body */}
             {loading && (
               <CircularProgress
                 sx={{
-                  margin: "auto",
+                  margin: "auto"
                 }}
               />
             )}
+
             {domains &&
               domains.map((domain, index) => (
                 <Box
@@ -261,7 +241,7 @@ const ServicesTable: FC<Props> = ({
                     borderRadius: ".5rem",
                     border: "1px solid #E3E3E3",
                     fontFamily: "SegoeUI",
-                    position: "relative",
+                    position: "relative"
                   }}
                 >
                   <Box
@@ -272,16 +252,9 @@ const ServicesTable: FC<Props> = ({
                       left: "0",
                       top: "0",
                       bottom: "0",
-                      borderRadius: "1rem",
+                      borderRadius: "1rem"
                     }}
                     onClick={() => {
-                      // setDataForAreaChart((prevData) =>
-                      //   prevData.map((data) => ({
-                      //     ...data,
-                      //     value: Math.round(Math.random() * 150),
-                      //   }))
-                      // );
-
                       if (selectedServiceIndex === index)
                         setSelectedServiceIndex(null);
                       else setSelectedServiceIndex(index);
@@ -293,9 +266,10 @@ const ServicesTable: FC<Props> = ({
                       zIndex: "100",
                       padding: ".1rem",
                       background: "#fff",
+                      borderRadius: ".2rem",
                       ":hover": {
-                        background: "#fff",
-                      },
+                        background: "#fff"
+                      }
                     }}
                   />
                   <Typography
@@ -303,14 +277,19 @@ const ServicesTable: FC<Props> = ({
                     marginRight="1.5rem"
                     fontFamily="SegoeUI"
                   >
-                    5254
+                    {loadingMapData ? (
+                      <CircularProgress size={15} />
+                    ) : (
+                      mapData.find((data) => data.name === domain.name)?.ips
+                        .length || 0
+                    )}
                   </Typography>
                   <Typography
                     sx={{
                       marginLeft: ".6rem",
                       direction: "ltr",
                       display: "flex",
-                      gap: "1.5rem",
+                      gap: "1.5rem"
                     }}
                   >
                     <span>{index + 1}.</span>
@@ -326,6 +305,11 @@ const ServicesTable: FC<Props> = ({
         setOpenModal={setOpenAddDomainModal}
         refetchDomains={refetchDomains}
         refetchIpAddresses={refetchIpAddresses}
+      />
+      <BlackList
+        openModal={blackListModal}
+        setOpenModal={setBlackListModal}
+        ipAddress={ipAddress}
       />
     </>
   );

@@ -1,4 +1,12 @@
-import { Box, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+  CircularProgress
+} from "@mui/material";
 import {
   ResponsiveContainer,
   Tooltip,
@@ -7,88 +15,397 @@ import {
   Area,
   AreaChart as RechartAreaChart,
   CartesianGrid,
+  ReferenceLine
 } from "recharts";
-import { FC } from "react";
+import { FC, useEffect, useRef, useState } from "react";
+import { IoChevronDown } from "react-icons/io5";
+import { BsCalendar2DateFill } from "react-icons/bs";
+import RangeDatePicker from "./DatePicker";
+import TitledValue from "./TitledValue";
+import * as domtoimage from "dom-to-image";
+import api from "../../services";
+import { DataForChart } from "../../services/chart";
 
 interface Props {
   selectedServiceIndex: number | null;
-  dataForAreaChart: { name: string; value: number }[];
+  isAllDataLoaded: boolean;
+}
+interface ChartDataFormat {
+  receiveValue: number;
+  sendValue: number;
+  time: string;
 }
 
-const AreaChart: FC<Props> = ({ dataForAreaChart, selectedServiceIndex }) => {
-  const max = Math.max(...dataForAreaChart.map((item) => item.value));
-  const min = Math.min(...dataForAreaChart.map((item) => item.value));
-  const avg =
-    dataForAreaChart.reduce((a, b) => a + b.value, 0) / dataForAreaChart.length;
+function formatDate(date: Date) {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are zero-indexed
+  const day = date.getDate().toString().padStart(2, "0");
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
+
+const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
+  const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
+    useState("Hour");
+  const [selectedServerForAreaChart, setSelectedServerForAreaChart] =
+    useState("server1");
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setEndDate(null);
+    setStartDate(null);
+  }, [selectedTimeForAreaChart]);
+
+  const [dataForChart, setDataForChart] = useState<ChartDataFormat[]>([
+    {
+      receiveValue: 0,
+      sendValue: 0,
+      time: new Date().toLocaleDateString()
+    }
+  ]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const convertDataForAreaChart = (data: [DataForChart[], DataForChart[]]) => {
+    const smallerIndex = Math.min(data[0].length, data[1].length);
+    const formattedData: ChartDataFormat[] = [];
+    for (let i = 0; i < smallerIndex; i++) {
+      formattedData.push({
+        receiveValue: +data[0][i].value / (8 * 10 ** 9),
+        sendValue: +data[1][i].value / (8 * 10 ** 9),
+        time: formatDate(new Date(+data[0][i].clock * 1000))
+      });
+    }
+    return formattedData;
+  };
+
+  useEffect(() => {
+    setShowDatePicker(false);
+    if (endDate) {
+      setSelectedTimeForAreaChart("custom");
+    }
+  }, [endDate]);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      startDate && endDate
+        ? api.chart
+            .getReceiveDataForCustomDate(
+              startDate.getTime() / 1000,
+              endDate.getTime() / 1000,
+              selectedServerForAreaChart
+            )
+            .then((res) => res.data.result)
+        : api.chart
+            .getReceiveData(
+              selectedTimeForAreaChart,
+              selectedServerForAreaChart
+            )
+            .then((res) => res.data.result),
+      startDate && endDate
+        ? api.chart
+            .getSendDataForCustomDate(
+              startDate.getTime() / 1000,
+              endDate.getTime() / 1000,
+              selectedServerForAreaChart
+            )
+            .then((res) => res.data.result)
+        : api.chart
+            .getSendData(selectedTimeForAreaChart, selectedServerForAreaChart)
+            .then((res) => res.data.result)
+    ]).then((data) => {
+      setDataForChart(convertDataForAreaChart(data).reverse());
+      setLoading(false);
+    });
+  }, [
+    selectedServerForAreaChart,
+    selectedTimeForAreaChart,
+    startDate,
+    endDate
+  ]);
+
+  const [max, setMax] = useState(0);
+  const [min, setMin] = useState(0);
+  const [avg, setAvg] = useState(0);
+  useEffect(() => {
+    setMax(
+      +Math.max(
+        ...dataForChart.map((data) =>
+          Math.max(data.receiveValue, data.sendValue)
+        )
+      ).toFixed(2)
+    );
+    setMin(
+      +Math.min(
+        ...dataForChart.map((data) =>
+          Math.min(data.receiveValue, data.sendValue)
+        )
+      ).toFixed(2)
+    );
+
+    setAvg(
+      +(
+        dataForChart.reduce(
+          (sum, curr) => (sum += (curr.receiveValue + curr.sendValue) / 2),
+          0
+        ) / dataForChart.length
+      ).toFixed(2)
+    );
+  }, [dataForChart]);
+
+  const chartRef = useRef(null);
+
+  const captureScreenshot = () => {
+    const chartElement = chartRef.current;
+    if (chartElement) {
+      domtoimage
+        .toPng(chartElement, {
+          style: {
+            backgroundColor: "white"
+          }
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "chart-screenshot.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error: any) => {
+          console.error(
+            "Something went wrong with capturing the screenshot",
+            error
+          );
+        });
+    }
+  };
 
   return (
-    <Box position="relative">
-      <Stack
-        direction="row"
+    <Box position="relative" padding="1rem" ref={chartRef}>
+      <Box
         sx={{
+          display: "flex",
           gap: "1rem",
-          zIndex: "-1",
-          position: "absolute",
-          left: "2rem",
-          top: "0",
-          border: "1px solid #ccc",
-          padding: ".5rem",
-          borderRadius: "2rem",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "space-between"
         }}
       >
-        <Stack direction="row" gap=".5rem">
-          <Typography>بیشترین:</Typography>
-          <Typography>{max}</Typography>
+        <Stack direction="row" gap="1rem" alignItems="center">
+          <Typography
+            fontFamily="YekanBakh-Medium"
+            component="h3"
+            sx={{
+              fontSize: "1.5rem"
+            }}
+          >
+            نمودار ترافیک
+          </Typography>
+          <Box
+            sx={{
+              position: "absolute",
+              scale: showDatePicker ? "1" : "0",
+              transformOrigin: "37% 50%",
+              transition: "all .4s ease",
+              right: "1rem",
+              zIndex: "35"
+            }}
+          >
+            <RangeDatePicker
+              key="app"
+              handleClose={setShowDatePicker}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+            />
+          </Box>
+          <Box
+            sx={{
+              position: "relative"
+            }}
+          >
+            <Select
+              IconComponent={IoChevronDown}
+              label="فیلتر سرویس ها"
+              value={selectedTimeForAreaChart}
+              onChange={(e) => setSelectedTimeForAreaChart(e.target.value)}
+              sx={{
+                height: "2rem",
+                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
+                borderRadius: ".5rem",
+                paddingLeft: "1rem",
+                zIndex: "10",
+                ".MuiSelect-icon": {
+                  width: "20px",
+                  height: "20px",
+                  marginTop: "-.25rem"
+                },
+                ".MuiOutlinedInput-notchedOutline": { border: 0 },
+                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    border: 0
+                  }
+              }}
+            >
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Hour">
+                ساعتی
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Day">
+                روزانه
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Week">
+                هفته‌‌ای
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Month">
+                ماهانه
+              </MenuItem>
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Year">
+                سالانه
+              </MenuItem>
+              <MenuItem
+                disabled
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="custom"
+              >
+                انتخابی
+              </MenuItem>
+            </Select>
+            <BsCalendar2DateFill
+              onClick={(e: MouseEvent) => {
+                e.stopPropagation();
+                setShowDatePicker(!showDatePicker);
+              }}
+              style={{
+                position: "absolute",
+                left: "0",
+                top: "50%",
+                transform: "translateY(-50%)",
+                paddingLeft: ".5rem",
+                zIndex: "30",
+                cursor: "pointer"
+              }}
+            />
+          </Box>
+          <Select
+            IconComponent={IoChevronDown}
+            label="فیلتر سرویس ها"
+            value={selectedServerForAreaChart}
+            onChange={(e) => setSelectedServerForAreaChart(e.target.value)}
+            sx={{
+              marginRight: ".5rem",
+              height: "2rem",
+              boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
+              zIndex: "10",
+              ".MuiSelect-icon": {
+                width: "20px",
+                height: "20px",
+                marginTop: "-.25rem"
+              },
+              ".MuiOutlinedInput-notchedOutline": { border: 0 },
+              "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                {
+                  border: 0
+                }
+            }}
+          >
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server1">
+              سرور یک
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server2">
+              سرور دو
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server3">
+              سرور سه
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server4">
+              سرور چهار
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server5">
+              سرور پنچ
+            </MenuItem>
+            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server6">
+              سرور شش
+            </MenuItem>
+            <MenuItem
+              sx={{ fontFamily: "YekanBakh-Regular" }}
+              value="switch_in"
+            >
+              TPM Switch In
+            </MenuItem>
+            <MenuItem
+              sx={{ fontFamily: "YekanBakh-Regular" }}
+              value="switch_out"
+            >
+              TPM Switch Out
+            </MenuItem>
+          </Select>
         </Stack>
-        <Stack direction="row" gap=".5rem">
-          <Typography>کمترین:</Typography>
-          <Typography>{min}</Typography>
-        </Stack>
-        <Stack direction="row" gap=".5rem">
-          <Typography>میانگین:</Typography>
-          <Typography>{avg}</Typography>
-        </Stack>
-      </Stack>
-      <Typography
-        fontFamily="YekanBakh-Medium"
-        component="h3"
-        sx={{
-          fontSize: "1.5rem",
-        }}
-      >
-        نمودار ترافیک
-      </Typography>
+        {isAllDataLoaded ? (
+          <Button
+            onClick={captureScreenshot}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: ".3rem",
+              background: "#0F6CBD",
+              color: "#fff",
+              fontFamily: "YekanBakh-Regular",
+              borderRadius: ".5rem",
+              ":hover": {
+                background: "#0F6CBD",
+                color: "#fff"
+              }
+            }}
+          >
+            دریافت خروجی
+          </Button>
+        ) : (
+          <CircularProgress />
+        )}
+      </Box>
       <Box
         width="100%"
         fontFamily="YekanBakh-Regular"
         sx={{
           direction: "ltr",
           height: "35vh",
-          position: "relative",
+          position: "relative"
         }}
       >
+        <Stack
+          direction="row"
+          sx={{
+            opacity: showDatePicker ? "0" : "1",
+            transition: "opacity .3s ease",
+            gap: "1rem",
+            position: "absolute",
+            top: "1rem",
+            left: "52%",
+            transform: "translateX(-50%)",
+            background: "#fff",
+            zIndex: "40",
+            padding: ".5rem",
+            border: "1px solid #707070",
+            borderRadius: ".5rem"
+          }}
+        >
+          <TitledValue color="red" title="Min" value={min} />
+          <TitledValue color="green" title="Max" value={max} />
+          <TitledValue color="blue" title="Avg" value={avg} />
+        </Stack>
         <ResponsiveContainer
           width="100%"
           height="100%"
           style={{ marginTop: "1rem" }}
         >
-          <RechartAreaChart
-            width={500}
-            data={dataForAreaChart}
-            margin={{
-              top: 10,
-              right: 30,
-              left: 0,
-              bottom: 0,
-            }}
-          >
+          <RechartAreaChart width={500} data={dataForChart}>
             <Tooltip content={<CustomTooltipForAreaChart />} />
             <CartesianGrid strokeDasharray="3 3" />
             <YAxis
-              domain={[1, 40]}
-              ticks={[1, 5, 10, 20, 40]}
+              domain={[1, 20]}
+              ticks={[1, 5, 10, 20]}
               scale="log"
               label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
               tickFormatter={(tick) => {
@@ -98,7 +415,7 @@ const AreaChart: FC<Props> = ({ dataForAreaChart, selectedServiceIndex }) => {
                 return tick; // For other ticks, display their actual value
               }}
             />
-            <XAxis padding={{ left: 50, right: 50 }} dataKey="name" />
+            <XAxis padding={{ left: 50, right: 50 }} dataKey="time" />
             <defs>
               <filter id="glow" x="-70%" y="-70%" width="200%" height="200%">
                 <feOffset result="offOut" in="SourceGraphic" dx="0" dy="0" />
@@ -108,29 +425,58 @@ const AreaChart: FC<Props> = ({ dataForAreaChart, selectedServiceIndex }) => {
             </defs>
             <Area
               type="monotone"
-              dataKey="value"
-              stroke={selectedServiceIndex !== null ? "#7160B4" : "#608DB4"}
+              dataKey="receiveValue"
+              stroke={"#608DB4"}
+              fill="#608DB4"
               strokeWidth={3}
-              fill="transparent"
               style={{ filter: "url(#glow)" }}
+            />
+            <Area
+              type="monotone"
+              dataKey="sendValue"
+              stroke={"#B46092"}
+              fill="#B46092"
+              strokeWidth={3}
+              style={{ filter: "url(#glow)" }}
+            />
+            <ReferenceLine
+              y={min}
+              label={{
+                value: "Min",
+                position: "insideRight",
+                stroke: "red",
+                opacity: ".5"
+              }}
+              stroke="red"
+              strokeDasharray="5 5"
+              opacity=".5"
+            />
+            <ReferenceLine
+              y={max}
+              label={{
+                value: "Max",
+                position: "insideRight",
+                stroke: "green",
+                opacity: ".5"
+              }}
+              stroke="green"
+              strokeDasharray="5 5"
+              opacity=".5"
+            />
+            <ReferenceLine
+              y={avg}
+              label={{
+                value: "Avg",
+                position: "insideRight",
+                stroke: "blue",
+                opacity: ".5"
+              }}
+              stroke="blue"
+              strokeDasharray="5 5"
+              opacity=".5"
             />
           </RechartAreaChart>
         </ResponsiveContainer>
-        {/* {selectedServiceIndex === null && (
-          <Typography
-            fontFamily="YekanBakh-Regular"
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              maxWidth: "200px",
-              textAlign: "center",
-            }}
-          >
-            برای نمایش نمودار ترافیک یک سرویس را از منوی سرویس ها انتخاب کنید.
-          </Typography>
-        )} */}
       </Box>
     </Box>
   );
@@ -143,7 +489,7 @@ interface CustomTooltipForAreaChartProps {
 
 const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
   active,
-  payload,
+  payload
 }) => {
   if (active && payload && payload.length) {
     return (
@@ -154,7 +500,7 @@ const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
           boxShadow: "0 0 14px  rgb(0 0 0 / 40%)",
           padding: "1px",
           textAlign: "left",
-          borderRadius: "1rem",
+          borderRadius: "1rem"
         }}
       >
         <div
@@ -163,14 +509,14 @@ const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-end",
-            fontFamily: "YekanBakh-Regular",
+            fontFamily: "YekanBakh-Regular"
           }}
         >
-          {/* <Typography>زمان: {payload[0].payload.name}</Typography> */}
-          <Typography>
-            {`${
-              payload[0].payload.value === 1 ? 0 : payload[0].payload.value
-            } Gbps`}
+          <Typography color="#608DB4">
+            Receive: {`${payload[0].value.toFixed(3)} Gbps`}
+          </Typography>
+          <Typography color="#B46092">
+            Send: {`${payload[1].value.toFixed(3)} Gbps`}
           </Typography>
         </div>
       </div>

@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
   CircularProgress,
-  MenuItem,
-  Select,
-  Typography,
+  Stack,
+  Typography
 } from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
@@ -18,105 +17,18 @@ import ProfileInfo from "../components/profile/ProfileInfoHeader";
 import ExportDocModal from "../components/dashboard/ExportDocModal";
 import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
-import useTreeMapData, { MapData } from "../hooks/useTreeMapData";
-import { IoChevronDown } from "react-icons/io5";
+import useTreeMapData from "../hooks/useTreeMapData";
 import { Domain } from "../services/domain";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as domtoimage from "dom-to-image";
 
-const initialSeasonDataForLineChart = [
-  {
-    name: "بهار",
-    value: 1,
-  },
-  {
-    name: "تابستان",
-    value: 1,
-  },
-  {
-    name: "پاییز",
-    value: 1,
-  },
-  {
-    name: "زمستان",
-    value: 1,
-  },
-];
-const initialMonthDataForLineChart = [
-  {
-    name: "مهر",
-    value: 1,
-  },
-  {
-    name: "آبان",
-    value: 1,
-  },
-  {
-    name: "آذر",
-    value: 1,
-  },
-  {
-    name: "دی",
-    value: 1,
-  },
-];
-
-const initialWeeklyDataForLineChart = [
-  {
-    name: "سه هفته پیش",
-    value: 1,
-  },
-  {
-    name: "دو هفته پیش",
-    value: 1,
-  },
-  {
-    name: "یک هفته قبل",
-    value: 1,
-  },
-  {
-    name: "الان",
-    value: 1,
-  },
-];
-
-const initialDayDataForLineChart = [
-  {
-    name: "سه روز پیش",
-    value: 1,
-  },
-  {
-    name: "دو روز پیش",
-    value: 1,
-  },
-  {
-    name: "دیروز",
-    value: 1,
-  },
-  {
-    name: "امروز",
-    value: 1,
-  },
-];
-
-const initialHourlyDataForLineChart = [
-  {
-    name: "سه ساعت پیش",
-    value: 1,
-  },
-  {
-    name: "دو ساعت پیش",
-    value: 1,
-  },
-  {
-    name: "یک ساعت قبل",
-    value: 1,
-  },
-  {
-    name: "الان",
-    value: 1,
-  },
-];
-
-const Dashboard: React.FC = () => {
+export interface DomainData {
+  name: string;
+  ips?: string[];
+}
+const Dashboard: FC = () => {
   const navigate = useNavigate();
   const { isLogin } = useAuth();
   useEffect(() => {
@@ -134,30 +46,64 @@ const Dashboard: React.FC = () => {
     // For now, we'll just log the input to the console
     console.log(`Search for: ${searchInput}`);
   };
-
-  // Function to handle changes in the search input
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(event.target.value);
-  };
-
-  // Function to handle submission of the search
+  const treeMapRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
+  const dashboardRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     handleSearch();
   };
 
-  // State for SquareCharts
-  const { loadingData, treeMapData, totalIps } = useTreeMapData();
-  // State for Selecting a service
+  // State for Selecting a service & an address
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<
     number | null
   >(null);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedAddress(null);
+  }, [selectedServiceIndex]);
+
+  // State for SquareCharts
+  const {
+    loadingData,
+    treeMapData,
+    totalIps,
+    refetch: refetchAllData
+  } = useTreeMapData();
+
+  const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
+
+  useEffect(() => {
+    if (totalIps.length === 0) return;
+    setFilteredIps(totalIps);
+  }, [totalIps]);
+
+  useEffect(() => {
+    if (isNaN(parseInt(searchInput)) || selectedServiceIndex !== null) return;
+
+    setFilteredIps(
+      totalIps.filter((ip) =>
+        ip.toLowerCase().includes(searchInput.toLowerCase())
+      )
+    );
+  }, [searchInput, selectedServiceIndex]);
 
   // State for getting all domains
-  const { loadingDomains, domains, reFetchDomains } = useDomains();
+  const {
+    loadingDomains,
+    domains,
+    reFetchDomains: refetchDomainData
+  } = useDomains();
   const [filteredDomains, setFilteredDomains] = useState<Domain[]>(
     domains || []
   );
+
+  const refetchDomains = () => {
+    refetchDomainData();
+    setTimeout(() => {
+      refetchAllData();
+    }, 500);
+  };
 
   // Filter functionality
   useEffect(() => {
@@ -166,7 +112,7 @@ const Dashboard: React.FC = () => {
       setFilteredDomains(domains);
       return;
     }
-    setSelectedServiceIndex(null);
+    // setSelectedServiceIndex(null);
     const filteredDomains = treeMapData.filter(
       (data) =>
         data.ips.filter((ip) =>
@@ -186,12 +132,23 @@ const Dashboard: React.FC = () => {
       )
     );
   }, [searchInput, domains, treeMapData]);
+
   // State for getting the ip addresses
-  const { ipAddressesForDomain, loadingAddresses, reFetchAddresses } =
-    useIpAddresses(
-      domains ? filteredDomains![selectedServiceIndex!]?.name : null
-    );
+  const {
+    ipAddressesForDomain,
+    loadingAddresses,
+    reFetchAddresses: reFetchAddressesData
+  } = useIpAddresses(
+    domains ? filteredDomains![selectedServiceIndex!]?.name : null
+  );
   const [filteredIpAddresses, setFilteredIpAddresses] = useState<string[]>([]);
+
+  const reFetchAddresses = () => {
+    reFetchAddressesData();
+    setTimeout(() => {
+      refetchAllData();
+    }, 500);
+  };
 
   useEffect(() => {
     if (!ipAddressesForDomain) return;
@@ -222,53 +179,10 @@ const Dashboard: React.FC = () => {
     ) {
       dataRefs.current[selectedServiceIndex].scrollIntoView({
         behavior: "smooth",
-        block: "center",
+        block: "center"
       });
     }
   });
-
-  // State for Area Chart
-  const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
-    useState("yearly");
-  const [selectedServerForAreaChart, setSelectedServerForAreaChart] =
-    useState("total");
-  const [dataForAreaChart, setDataForAreaChart] = useState(
-    initialSeasonDataForLineChart
-  );
-
-  useEffect(() => {
-    selectedTimeForAreaChart === "yearly"
-      ? setDataForAreaChart(initialSeasonDataForLineChart)
-      : selectedTimeForAreaChart === "monthly"
-      ? setDataForAreaChart(initialMonthDataForLineChart)
-      : selectedTimeForAreaChart === "weekly"
-      ? setDataForAreaChart(initialWeeklyDataForLineChart)
-      : selectedTimeForAreaChart === "daily"
-      ? setDataForAreaChart(initialDayDataForLineChart)
-      : setDataForAreaChart(initialHourlyDataForLineChart);
-
-    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-      prevData.map((data) => ({
-        ...data,
-        value:
-          selectedServerForAreaChart === "total"
-            ? Math.round(Math.random() * 24 + 12)
-            : Math.round(Math.random() * 8 + 1),
-      }))
-    );
-  }, [selectedServerForAreaChart, selectedTimeForAreaChart]);
-
-  useEffect(() => {
-    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-      prevData.map((data) => ({
-        ...data,
-        value:
-          selectedServerForAreaChart === "total"
-            ? Math.round(Math.random() * 24 + 12)
-            : Math.round(Math.random() * 8 + 1),
-      }))
-    );
-  }, [selectedServerForAreaChart]);
 
   // State for Downloading Export file
   const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
@@ -287,14 +201,152 @@ const Dashboard: React.FC = () => {
   const [openExportModal, setOpenExportModal] = useState<boolean>(false);
   const [selectedFormat, setSelectedFormat] = useState<string>("pdf");
 
+  const [domainDownloadData, setDomainDownloadData] = useState<DomainData[]>(
+    []
+  );
+  const prepareDataForExport = () => {
+    // Create an array to hold the data for each domain
+    const domainExportData: { name: string; ips: string[] }[] = [];
+    // Iterate over each domain to prepare its data
+    domainDownloadData.forEach((domain) => {
+      const domainIps: string[] =
+        treeMapData.find((data) => data.name === domain.name)?.ips || [];
+
+      // Add an object for each domain with its name and associated IPs
+      domainExportData.push({ name: domain.name, ips: domainIps });
+    });
+
+    return domainExportData;
+  };
+
+  const exportToExcel = () => {
+    const domainData = prepareDataForExport();
+    const wb = XLSX.utils.book_new();
+
+    domainData.forEach((domain) => {
+      // Convert each domain's IP list to a format suitable for Excel sheet
+      const ipData = domain.ips.map((ip: string) => ({ IP: ip }));
+      const ws = XLSX.utils.json_to_sheet(ipData);
+      ws["!cols"] = [{ wch: 20 }];
+      // Append a new sheet for each domain
+      XLSX.utils.book_append_sheet(wb, ws, domain.name);
+    });
+
+    // Write the Excel file if there are sheets
+    if (wb.SheetNames.length > 0) {
+      XLSX.writeFile(wb, "Domains_and_IPs.xlsx");
+    } else {
+      console.error("No data to export.");
+    }
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+
+    // Capture TreeMap as an image
+    const treeMapElement = treeMapRef.current;
+    if (treeMapElement) {
+      domtoimage
+        .toPng(treeMapElement, {
+          style: {
+            marginTop: "3rem"
+          }
+        })
+        .then((dataUrl) => {
+          doc.text(`Total IPs: ${totalIps.length}`, 10, 30);
+          doc.text(`total Domains: ${domainDownloadData.length}`, 143, 30);
+          doc.addImage(dataUrl, "PNG", 10, 10, 180, 160);
+
+          const domainData = prepareDataForExport();
+          domainData.forEach((domain, index) => {
+            // Add new page for each domain
+            doc.addPage();
+            doc.text(domain.name, 10, 10); // Position the domain name text
+            autoTable(doc, {
+              startY: 20,
+              head: [["IP Address"]],
+              body: domain.ips.map((ip) => [ip]),
+              margin: { top: 10 }
+            });
+          });
+          doc.save("Domains_and_IPs.pdf");
+        })
+        .catch((error) => {
+          console.error("Error capturing TreeMap screenshot", error);
+        });
+    }
+  };
+
+  const onExportClick = () => {
+    if (selectedFormat === "excel") {
+      exportToExcel();
+    } else if (selectedFormat === "pdf") {
+      exportToPDF();
+    } else if (selectedFormat === "csv") {
+      dashboardScreenshot();
+    }
+  };
+  const captureScreenshotTreeChart = () => {
+    const treeMapElement = treeMapRef.current;
+    if (treeMapElement) {
+      domtoimage
+        .toPng(treeMapElement, {
+          style: {
+            backgroundColor: "white"
+          }
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "tree-map-screenshot.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error: any) => {
+          console.error("Error capturing screenshot", error);
+        });
+    }
+  };
+
+  const dashboardScreenshot = () => {
+    const dashboardElement = dashboardRef.current;
+    if (dashboardElement) {
+      domtoimage
+        .toPng(dashboardElement, {
+          style: {
+            backgroundColor: "white"
+          }
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "dashboard.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error: any) => {
+          console.error("Error capturing screenshot", error);
+        });
+    }
+  };
+  const [isAllDataLoaded, setIsAllDataLoaded] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Assuming 'loadingData', 'loadingDomains', and 'loadingAddresses' are the states
+    // that indicate if the respective data is still being fetched.
+    // Update 'isDataLoaded' based on these loading states.
+    if (!loadingData && !loadingDomains && !loadingAddresses) {
+      setIsAllDataLoaded(true);
+    }
+  }, [loadingData, loadingDomains, loadingAddresses]);
+
   return (
     <>
       <Box
+        ref={dashboardRef}
         component="main"
         sx={{
           padding: "2rem 1.5rem",
           display: "flex",
-          gap: "1rem",
+          gap: "1rem"
         }}
       >
         {/* Right side. Charts*/}
@@ -303,37 +355,65 @@ const Dashboard: React.FC = () => {
             width: "50vw",
             display: "flex",
             flexDirection: "column",
-            gap: "2rem",
+            gap: "1rem"
           }}
         >
           <ProfileInfo
             loading={loadingData || loadingDomains}
-            totalAddresses={totalIps}
+            totalAddresses={totalIps.length}
             totalDomains={domains?.length || 0}
           />
           <Box
+            ref={treeMapRef}
             sx={{
               display: "flex",
               flexDirection: "column",
               gap: "1rem",
               height: "35vh",
+              padding: "1rem"
             }}
           >
-            <Typography
-              fontFamily="YekanBakh-Medium"
-              component="h2"
-              sx={{
-                fontSize: "1.5rem",
-              }}
-            >
-              سهم سرویس ها
-            </Typography>
+            <Stack direction="row" justifyContent="space-between">
+              {" "}
+              <Typography
+                fontFamily="YekanBakh-Medium"
+                component="h2"
+                sx={{
+                  fontSize: "1.5rem"
+                }}
+              >
+                سهم سرویس ها
+              </Typography>
+              {isAllDataLoaded ? (
+                <Button
+                  onClick={captureScreenshotTreeChart}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: ".3rem",
+                    background: "#0F6CBD",
+                    color: "#fff",
+                    fontFamily: "YekanBakh-Regular",
+                    borderRadius: ".5rem",
+                    ":hover": {
+                      background: "#0F6CBD",
+                      color: "#fff"
+                    }
+                  }}
+                >
+                  دریافت خروجی
+                </Button>
+              ) : (
+                <CircularProgress />
+              )}
+            </Stack>
+
             <Box
               sx={{
                 border: "1px solid #707070",
                 padding: ".2rem",
                 height: "100%",
-                position: "relative",
+                position: "relative"
               }}
             >
               <TreeMap
@@ -358,7 +438,7 @@ const Dashboard: React.FC = () => {
                     position: "absolute",
                     top: "40%",
                     left: "48%",
-                    transform: "translate(-50% -50%)",
+                    transform: "translate(-50% -50%)"
                   }}
                 />
               )}
@@ -367,121 +447,12 @@ const Dashboard: React.FC = () => {
           <Box
             sx={{
               position: "relative",
+              marginTop: "auto"
             }}
           >
-            <Select
-              IconComponent={IoChevronDown}
-              label="فیلتر سرویس ها"
-              value={selectedTimeForAreaChart}
-              onChange={(e) => setSelectedTimeForAreaChart(e.target.value)}
-              sx={{
-                position: "absolute",
-                height: "2rem",
-                right: "8rem",
-                top: "0",
-                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
-                borderRadius: ".5rem",
-                padding: ".5rem",
-                zIndex: "10",
-                ".MuiSelect-icon": {
-                  width: "20px",
-                  height: "20px",
-                  marginTop: "-.25rem",
-                },
-                ".MuiOutlinedInput-notchedOutline": { border: 0 },
-                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                  {
-                    border: 0,
-                  },
-              }}
-            >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="hourly">
-                ساعتی
-              </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="daily">
-                روزانه
-              </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
-                هفته‌‌ای
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="monthly"
-              >
-                ماهانه
-              </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="yearly">
-                سالانه
-              </MenuItem>
-            </Select>
-            <Select
-              IconComponent={IoChevronDown}
-              label="فیلتر سرویس ها"
-              value={selectedServerForAreaChart}
-              onChange={(e) => setSelectedServerForAreaChart(e.target.value)}
-              sx={{
-                marginRight: ".5rem",
-                position: "absolute",
-                right: "14rem",
-                height: "2rem",
-                top: "0",
-                boxShadow: "0 0 4px  rgb(0 0 0 / 10%)",
-                zIndex: "10",
-                ".MuiSelect-icon": {
-                  width: "20px",
-                  height: "20px",
-                  marginTop: "-.25rem",
-                },
-                ".MuiOutlinedInput-notchedOutline": { border: 0 },
-                "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                  {
-                    border: 0,
-                  },
-              }}
-            >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="total">
-                مجموع ترافیک
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server1"
-              >
-                سرور یک
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server2"
-              >
-                سرور دو
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server3"
-              >
-                سرور سه
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server4"
-              >
-                سرور چهار
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server5"
-              >
-                سرور پنچ
-              </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="server6"
-              >
-                سرور شش
-              </MenuItem>
-            </Select>
             <AreaChart
               selectedServiceIndex={selectedServiceIndex}
-              dataForAreaChart={dataForAreaChart}
+              isAllDataLoaded={isAllDataLoaded}
             />
           </Box>
         </Box>
@@ -492,70 +463,89 @@ const Dashboard: React.FC = () => {
             width: "50%",
             display: "flex",
             flexDirection: "column",
-            gap: "1rem",
+            gap: "1rem"
           }}
         >
           <Box
             sx={{
               height: "5dvh",
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "space-between"
             }}
           >
             <Search
               value={searchInput}
-              onChange={handleChange}
+              setSearchInput={setSearchInput}
               handleSubmit={handleSubmit}
             />
-
-            <Button
-              onClick={() => setOpenExportModal(true)}
-              sx={{
-                fontFamily: "YekanBakh-Bold",
-                color: "#fff",
-                paddingRight: ".5rem",
-                display: "flex",
-                background: "#0F6CBD",
-                alignItems: "center",
-                paddingX: "1rem",
-                paddingY: ".75rem",
-                gap: ".5rem",
-                borderRadius: ".5rem",
-                zIndex: "5",
-                height: "fit-content",
-                ":hover": {
-                  color: "#0F6CBD",
-                  background: "#0F6CBD33",
-                },
-              }}
-            >
-              دریافت خروجی
-            </Button>
+            {isAllDataLoaded ? (
+              <Button
+                onClick={() => setOpenExportModal(true)}
+                sx={{
+                  fontFamily: "YekanBakh-Bold",
+                  color: "#fff",
+                  paddingRight: ".5rem",
+                  display: "flex",
+                  background: "#0F6CBD",
+                  alignItems: "center",
+                  paddingX: "1rem",
+                  paddingY: ".75rem",
+                  gap: ".5rem",
+                  borderRadius: ".5rem",
+                  zIndex: "5",
+                  height: "fit-content",
+                  ":hover": {
+                    color: "#0F6CBD",
+                    background: "#0F6CBD33"
+                  }
+                }}
+              >
+                دریافت خروجی
+              </Button>
+            ) : (
+              <CircularProgress />
+            )}
           </Box>
           <Box
             sx={{
               display: "flex",
-              gap: "1rem",
+              gap: "1rem"
             }}
           >
             {/* Services Table*/}
             <ServicesTable
-              refetchDomains={reFetchDomains}
+              refetchDomains={refetchDomains}
+              mapData={treeMapData}
+              loadingMapData={loadingData}
               refetchIpAddresses={reFetchAddresses}
               loading={loadingDomains}
               domains={filteredDomains}
               selectedServiceIndex={selectedServiceIndex}
-              setDataForAreaChart={setDataForAreaChart}
               setSelectedServiceIndex={setSelectedServiceIndex}
+              setDomainsDownloadData={setDomainDownloadData}
             />
+
             <AddressesTable
               refetchIpAddresses={reFetchAddresses}
               domainName={
                 domains ? filteredDomains![selectedServiceIndex!]?.name : null
               }
               loading={loadingAddresses}
-              addressesData={filteredIpAddresses}
-              selectedServiceIndex={selectedServiceIndex}
+              addressesData={
+                selectedServiceIndex !== null
+                  ? filteredIpAddresses
+                  : !isNaN(parseInt(searchInput))
+                  ? filteredIps
+                  : null
+              }
+              showData={
+                isNaN(parseInt(searchInput))
+                  ? selectedServiceIndex !== null
+                  : true
+              }
+              showAddButton={selectedServiceIndex !== null}
+              selectedAddress={selectedAddress}
+              setSelectedAddress={setSelectedAddress}
             />
           </Box>
         </Box>
@@ -565,6 +555,7 @@ const Dashboard: React.FC = () => {
         setOpenModal={setOpenExportModal}
         selectedFormat={selectedFormat}
         setSelectedFormat={setSelectedFormat}
+        onExportClick={onExportClick}
       />
     </>
   );
