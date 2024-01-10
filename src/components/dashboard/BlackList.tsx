@@ -1,10 +1,6 @@
 import { FC } from "react";
 import { Modal, Box, Stack, Typography, Button } from "@mui/material";
-import CheckBoxRow from "./CheckBoxRow";
-import ExcelIcon from "../../assets/images/excel.svg";
-import Png from "../../assets/images/png.svg";
 import Cross from "../../assets/images/cross.svg";
-import PDFIcon from "../../assets/images/pdf.svg";
 import { Blacklist } from "../../services/domain";
 
 interface Props {
@@ -69,6 +65,7 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
           {ipAddress?.map((item, index) => {
             return (
               <Box
+                key={index}
                 display="flex"
                 justifyContent="space-between"
                 flexDirection="column"

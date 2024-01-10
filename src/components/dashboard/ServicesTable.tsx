@@ -83,8 +83,6 @@ const ServicesTable: FC<Props> = ({
   };
   useEffect(() => {
     api.domain.getblacklist().then((res) => {
-      console.log(res);
-
       setIpAddress(res);
     });
   }, []);
