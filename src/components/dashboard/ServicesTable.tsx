@@ -64,7 +64,7 @@ const ServicesTable: FC<Props> = ({
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
   const [ipAddress, setIpAddress] = useState<Blacklist[]>([]);
   const handleSelectDomain = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    _event: React.ChangeEvent<HTMLInputElement>,
     domain: string
   ) => {
     const prevDomains = [...selectedDomains];
@@ -78,6 +78,7 @@ const ServicesTable: FC<Props> = ({
     api.domain.deleteDomains(selectedDomains).then(() => {
       refetchDomains();
       setSelectedDomains([]);
+      setSelectedServiceIndex(null);
     });
   };
   useEffect(() => {
@@ -101,6 +102,7 @@ const ServicesTable: FC<Props> = ({
             alignItems: "center",
             gap: ".3rem",
             justifyContent: "space-between"
+            gap: ".3rem"
           }}
         >
           <Typography
@@ -255,13 +257,6 @@ const ServicesTable: FC<Props> = ({
                       borderRadius: "1rem"
                     }}
                     onClick={() => {
-                      // setDataForAreaChart((prevData) =>
-                      //   prevData.map((data) => ({
-                      //     ...data,
-                      //     value: Math.round(Math.random() * 150),
-                      //   }))
-                      // );
-
                       if (selectedServiceIndex === index)
                         setSelectedServiceIndex(null);
                       else setSelectedServiceIndex(index);
