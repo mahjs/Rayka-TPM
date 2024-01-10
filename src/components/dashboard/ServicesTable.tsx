@@ -3,7 +3,7 @@ import {
   Button,
   Checkbox,
   CircularProgress,
-  Typography,
+  Typography
 } from "@mui/material";
 import { GoPlus } from "react-icons/go";
 import { useRef, useEffect, FC, useState } from "react";
@@ -35,7 +35,7 @@ const ServicesTable: FC<Props> = ({
   refetchIpAddresses,
   selectedServiceIndex,
   setSelectedServiceIndex,
-  setDomainsDownloadData,
+  setDomainsDownloadData
 }) => {
   const { isAdmin } = useAuth();
 
@@ -48,7 +48,7 @@ const ServicesTable: FC<Props> = ({
     ) {
       dataRefs.current[selectedServiceIndex].scrollIntoView({
         behavior: "smooth",
-        block: "center",
+        block: "center"
       });
     }
   });
@@ -61,7 +61,7 @@ const ServicesTable: FC<Props> = ({
   const [openAddDomainModal, setOpenAddDomainModal] = useState<boolean>(false);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
   const handleSelectDomain = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    _event: React.ChangeEvent<HTMLInputElement>,
     domain: string
   ) => {
     const prevDomains = [...selectedDomains];
@@ -75,6 +75,7 @@ const ServicesTable: FC<Props> = ({
     api.domain.deleteDomains(selectedDomains).then(() => {
       refetchDomains();
       setSelectedDomains([]);
+      setSelectedServiceIndex(null);
     });
   };
 
@@ -82,7 +83,7 @@ const ServicesTable: FC<Props> = ({
     <>
       <Box
         sx={{
-          width: "50%",
+          width: "50%"
         }}
       >
         <Box
@@ -90,7 +91,7 @@ const ServicesTable: FC<Props> = ({
             // marginTop: "-1rem",
             display: "flex",
             alignItems: "center",
-            gap: ".3rem",
+            gap: ".3rem"
           }}
         >
           <Typography
@@ -98,7 +99,7 @@ const ServicesTable: FC<Props> = ({
             component="h3"
             sx={{
               fontSize: "1.5rem",
-              whiteSpace: "nowrap",
+              whiteSpace: "nowrap"
             }}
           >
             سرویس ها
@@ -116,8 +117,8 @@ const ServicesTable: FC<Props> = ({
                 borderRadius: ".5rem",
                 ":hover": {
                   background: "#0F6CBD",
-                  color: "#fff",
-                },
+                  color: "#fff"
+                }
               }}
             >
               <GoPlus style={{ width: "20px", height: "20px" }} />
@@ -133,14 +134,14 @@ const ServicesTable: FC<Props> = ({
                 fontFamily: "YekanBakh-Regular",
                 display: "flex",
                 alignItems: "center",
-                gap: ".3rem",
+                gap: ".3rem"
               }}
             >
               <RiDeleteBin6Line
                 style={{
                   width: "15px",
                   height: "15px",
-                  color: "red",
+                  color: "red"
                 }}
               />
               حذف
@@ -151,7 +152,7 @@ const ServicesTable: FC<Props> = ({
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: ".2rem",
+            gap: ".2rem"
           }}
         >
           {/* Table Header*/}
@@ -162,7 +163,7 @@ const ServicesTable: FC<Props> = ({
               background: "#E9F1F4",
               justifyContent: "space-between",
               display: "flex",
-              borderRadius: ".5rem",
+              borderRadius: ".5rem"
             }}
           >
             <Typography fontFamily="YekanBakh-Regular" marginRight="2.5rem">
@@ -171,7 +172,7 @@ const ServicesTable: FC<Props> = ({
             <Typography
               fontFamily="YekanBakh-Regular"
               sx={{
-                marginLeft: "2.5rem",
+                marginLeft: "2.5rem"
               }}
             >
               نام وبسایت
@@ -183,14 +184,14 @@ const ServicesTable: FC<Props> = ({
               overflow: "auto",
               display: "flex",
               flexDirection: "column",
-              gap: ".2rem",
+              gap: ".2rem"
             }}
           >
             {/* Table Body */}
             {loading && (
               <CircularProgress
                 sx={{
-                  margin: "auto",
+                  margin: "auto"
                 }}
               />
             )}
@@ -212,7 +213,7 @@ const ServicesTable: FC<Props> = ({
                     borderRadius: ".5rem",
                     border: "1px solid #E3E3E3",
                     fontFamily: "SegoeUI",
-                    position: "relative",
+                    position: "relative"
                   }}
                 >
                   <Box
@@ -223,16 +224,9 @@ const ServicesTable: FC<Props> = ({
                       left: "0",
                       top: "0",
                       bottom: "0",
-                      borderRadius: "1rem",
+                      borderRadius: "1rem"
                     }}
                     onClick={() => {
-                      // setDataForAreaChart((prevData) =>
-                      //   prevData.map((data) => ({
-                      //     ...data,
-                      //     value: Math.round(Math.random() * 150),
-                      //   }))
-                      // );
-
                       if (selectedServiceIndex === index)
                         setSelectedServiceIndex(null);
                       else setSelectedServiceIndex(index);
@@ -246,8 +240,8 @@ const ServicesTable: FC<Props> = ({
                       background: "#fff",
                       borderRadius: ".2rem",
                       ":hover": {
-                        background: "#fff",
-                      },
+                        background: "#fff"
+                      }
                     }}
                   />
                   <Typography
@@ -267,7 +261,7 @@ const ServicesTable: FC<Props> = ({
                       marginLeft: ".6rem",
                       direction: "ltr",
                       display: "flex",
-                      gap: "1.5rem",
+                      gap: "1.5rem"
                     }}
                   >
                     <span>{index + 1}.</span>
