@@ -35,6 +35,7 @@ const ProfileInfo: FC<Props> = ({
   const [openLogout, setOpenLogout] = useState(false);
 
   const { logout, isAdmin } = useAuth();
+  
   return (
     <Box
       sx={{

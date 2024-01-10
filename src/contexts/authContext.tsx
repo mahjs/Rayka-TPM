@@ -28,10 +28,35 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   );
   const [isAdmin, setIsAdmin] = useState<boolean>(storage.get(config.isAdmin));
 
+  const sendLogoutLog = async (username: string) => {
+    try {
+      const logData = {
+        name: username,
+        activity: 'خروج از حساب کاربری',
+        description: `خروج کاربر با نام کاربری ${username} از سیستم`
+      };
+  
+      await fetch('http://185.11.89.120:51731/logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(logData),
+      });
+    } catch (error) {
+      console.error('Error sending logout log:', error);
+    }
+  };
+
   const login = () => {
     setIsLogin(true);
   };
-  const logout = () => {
+  const logout = async () => {
+    const username = storage.get(config.userName); // Get the username from storage
+    if (username) {
+      //@ts-ignore
+      await sendLogoutLog(username); // Send logout log
+    }
     storage.remove(config.tokenName);
     storage.remove(config.isAdmin);
     storage.remove(config.userName);
