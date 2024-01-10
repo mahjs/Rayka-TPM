@@ -16,7 +16,7 @@ export interface Blacklist {
   ip_address: string;
 }
 export interface ipCdn {
-  ip: string;
+  ips: string;
   provider: string;
 }
 

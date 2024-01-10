@@ -8,7 +8,7 @@ import {
   Pagination,
   Select,
   Stack,
-  Typography,
+  Typography
 } from "@mui/material";
 import { FC, useEffect, useState } from "react";
 import { GoPlus } from "react-icons/go";
@@ -28,6 +28,10 @@ interface Props {
   refetchIpAddresses: () => void;
   selectedAddress: string | null;
   setSelectedAddress: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedFilter: "All_IPs" | "CDN" | "Host";
+  setSelectedFilter: React.Dispatch<
+    React.SetStateAction<"All_IPs" | "CDN" | "Host">
+  >;
 }
 
 const AddressesTable: FC<Props> = ({
@@ -39,12 +43,10 @@ const AddressesTable: FC<Props> = ({
   refetchIpAddresses,
   selectedAddress,
   setSelectedAddress,
+  selectedFilter,
+  setSelectedFilter
 }) => {
   const { isAdmin } = useAuth();
-
-  const [selectedFilter, setSelectedFilter] = useState<
-    "All_IPs" | "CDN" | "Host"
-  >("All_IPs");
 
   const [addressTablePage, setAddressTablePage] = useState(1);
   const handleChangePage = (
@@ -90,7 +92,7 @@ const AddressesTable: FC<Props> = ({
           width: "50%",
           display: "flex",
           flexDirection: "column",
-          gap: "1rem",
+          gap: "1rem"
         }}
       >
         <Stack direction="row" gap=".25rem">
@@ -98,7 +100,7 @@ const AddressesTable: FC<Props> = ({
             component="h3"
             fontFamily="YekanBakh-Medium"
             sx={{
-              fontSize: "1.5rem",
+              fontSize: "1.5rem"
             }}
           >
             آدرس‌های IP
@@ -117,8 +119,8 @@ const AddressesTable: FC<Props> = ({
                 borderRadius: ".5rem",
                 ":hover": {
                   background: "#0F6CBD",
-                  color: "#fff",
-                },
+                  color: "#fff"
+                }
               }}
             >
               <GoPlus style={{ width: "20px", height: "20px" }} />
@@ -129,7 +131,7 @@ const AddressesTable: FC<Props> = ({
           <Box
             sx={{
               position: "relative",
-              marginRight: "auto",
+              marginRight: "auto"
             }}
           >
             <Select
@@ -146,13 +148,13 @@ const AddressesTable: FC<Props> = ({
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
-                  marginTop: "-.20rem",
+                  marginTop: "-.20rem"
                 },
                 ".MuiOutlinedInput-notchedOutline": { border: 0 },
                 "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                   {
-                    border: 0,
-                  },
+                    border: 0
+                  }
               }}
             >
               <MenuItem
@@ -175,7 +177,7 @@ const AddressesTable: FC<Props> = ({
             marginTop: "-1rem",
             display: "flex",
             flexDirection: "column",
-            gap: ".2rem",
+            gap: ".2rem"
           }}
         >
           {/* Table Header*/}
@@ -187,7 +189,7 @@ const AddressesTable: FC<Props> = ({
               justifyContent: "end",
               display: "flex",
               borderRadius: ".5rem",
-              position: "relative",
+              position: "relative"
             }}
           >
             {/* <Typography fontFamily="YekanBakh-Regular" marginRight="2rem">
@@ -205,14 +207,14 @@ const AddressesTable: FC<Props> = ({
                   position: "absolute",
                   top: "50%",
                   right: "0",
-                  transform: "translate(0, -50%)",
+                  transform: "translate(0, -50%)"
                 }}
               >
                 <RiDeleteBin6Line
                   style={{
                     width: "15px",
                     height: "15px",
-                    color: "red",
+                    color: "red"
                   }}
                 />
                 حذف
@@ -221,7 +223,7 @@ const AddressesTable: FC<Props> = ({
             <Typography
               fontFamily="YekanBakh-Regular"
               sx={{
-                marginLeft: "3rem",
+                marginLeft: "3rem"
               }}
             >
               آدرس IP
@@ -237,7 +239,7 @@ const AddressesTable: FC<Props> = ({
               borderRadius: ".5rem",
               display: "flex",
               flexDirection: "column",
-              gap: ".2rem",
+              gap: ".2rem"
             }}
           >
             {loading && (
@@ -247,7 +249,7 @@ const AddressesTable: FC<Props> = ({
                   top: "40%",
                   left: "45%",
                   transform: "translate(-50% -50%)",
-                  zIndex: 110,
+                  zIndex: 110
                 }}
               />
             )}
@@ -273,7 +275,7 @@ const AddressesTable: FC<Props> = ({
                       color: selectedAddress === address ? "#fff" : "",
                       borderRadius: ".5rem",
                       cursor: "pointer",
-                      position: "relative",
+                      position: "relative"
                     }}
                   >
                     <Box
@@ -284,7 +286,7 @@ const AddressesTable: FC<Props> = ({
                         left: "0",
                         top: "0",
                         bottom: "0",
-                        borderRadius: "1rem",
+                        borderRadius: "1rem"
                       }}
                       onClick={() => {
                         if (selectedAddress === address)
@@ -300,8 +302,8 @@ const AddressesTable: FC<Props> = ({
                         background: "#fff",
                         borderRadius: ".2rem",
                         ":hover": {
-                          background: "#fff",
-                        },
+                          background: "#fff"
+                        }
                       }}
                       onChange={(e) => handleSelectIps(e, address)}
                     />
@@ -319,7 +321,7 @@ const AddressesTable: FC<Props> = ({
                         marginLeft: "1rem",
                         direction: "ltr",
                         display: "flex",
-                        minWidth: "120px",
+                        minWidth: "120px"
                       }}
                     >
                       <span>{index + 1}.</span>
@@ -338,7 +340,7 @@ const AddressesTable: FC<Props> = ({
                   left: "50%",
                   transform: "translate(-50%, -50%)",
                   maxWidth: "200px",
-                  textAlign: "center",
+                  textAlign: "center"
                 }}
               >
                 برای مشاهده آدرس های IP یک سرویس را از منوی سرویس ها انتخاب
@@ -351,7 +353,7 @@ const AddressesTable: FC<Props> = ({
                   direction: "ltr",
                   marginTop: "auto",
                   marginBottom: "1rem",
-                  marginX: "auto",
+                  marginX: "auto"
                 }}
                 color="primary"
                 onChange={handleChangePage}
@@ -376,7 +378,7 @@ const AddressesTable: FC<Props> = ({
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            gap: "1rem",
+            gap: "1rem"
           }}
         >
           {/* {selectedAddress && ( */}
@@ -389,7 +391,7 @@ const AddressesTable: FC<Props> = ({
             />
             <Divider
               sx={{
-                width: "50%",
+                width: "50%"
               }}
             />
             <ExpressionValue
@@ -399,7 +401,7 @@ const AddressesTable: FC<Props> = ({
             />
             <Divider
               sx={{
-                width: "50%",
+                width: "50%"
               }}
             />
             <ExpressionValue
