@@ -23,7 +23,6 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as domtoimage from "dom-to-image";
-import api from "../services";
 
 export interface DomainData {
   name: string;
@@ -40,9 +39,7 @@ const Dashboard: FC = () => {
 
   // State to hold the search input
   const [searchInput, setSearchInput] = useState<string>("");
-  const [selectedFilter, setSelectedFilter] = useState<
-    "All_IPs" | "CDN" | "Host"
-  >("All_IPs");
+
   // Function to handle the search action
   const handleSearch = () => {
     // You would implement your search logic here
@@ -669,8 +666,6 @@ const Dashboard: FC = () => {
               showAddButton={selectedServiceIndex !== null}
               selectedAddress={selectedAddress}
               setSelectedAddress={setSelectedAddress}
-              selectedFilter={selectedFilter}
-              setSelectedFilter={setSelectedFilter}
             />
           </Box>
         </Box>
