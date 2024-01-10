@@ -5,7 +5,7 @@ import {
   Select,
   Stack,
   Typography,
-  CircularProgress,
+  CircularProgress
 } from "@mui/material";
 import {
   ResponsiveContainer,
@@ -15,7 +15,7 @@ import {
   Area,
   AreaChart as RechartAreaChart,
   CartesianGrid,
-  ReferenceLine,
+  ReferenceLine
 } from "recharts";
 import { FC, useEffect, useRef, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
@@ -24,152 +24,133 @@ import RangeDatePicker from "./DatePicker";
 import TitledValue from "./TitledValue";
 import * as domtoimage from "dom-to-image";
 import api from "../../services";
+import { DataForChart } from "../../services/chart";
 
 interface Props {
   selectedServiceIndex: number | null;
   isAllDataLoaded: boolean;
 }
+interface ChartDataFormat {
+  receiveValue: number;
+  sendValue: number;
+  time: string;
+}
 
-const initialSeasonDataForLineChart = [
-  {
-    name: "بهار",
-    value: 1,
-  },
-  {
-    name: "تابستان",
-    value: 1,
-  },
-  {
-    name: "پاییز",
-    value: 1,
-  },
-  {
-    name: "زمستان",
-    value: 1,
-  },
-];
-const initialMonthDataForLineChart = [
-  {
-    name: "مهر",
-    value: 1,
-  },
-  {
-    name: "آبان",
-    value: 1,
-  },
-  {
-    name: "آذر",
-    value: 1,
-  },
-  {
-    name: "دی",
-    value: 1,
-  },
-];
+function formatDate(date: Date) {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are zero-indexed
+  const day = date.getDate().toString().padStart(2, "0");
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
 
-const initialWeeklyDataForLineChart = [
-  {
-    name: "سه هفته پیش",
-    value: 1,
-  },
-  {
-    name: "دو هفته پیش",
-    value: 1,
-  },
-  {
-    name: "یک هفته قبل",
-    value: 1,
-  },
-  {
-    name: "الان",
-    value: 1,
-  },
-];
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
 
-const initialDayDataForLineChart = [
-  {
-    name: "سه روز پیش",
-    value: 1,
-  },
-  {
-    name: "دو روز پیش",
-    value: 1,
-  },
-  {
-    name: "دیروز",
-    value: 1,
-  },
-  {
-    name: "امروز",
-    value: 1,
-  },
-];
-
-const initialHourlyDataForLineChart = [
-  {
-    name: "سه ساعت پیش",
-    value: 1,
-  },
-  {
-    name: "دو ساعت پیش",
-    value: 1,
-  },
-  {
-    name: "یک ساعت قبل",
-    value: 1,
-  },
-  {
-    name: "الان",
-    value: 1,
-  },
-];
-
-const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
-  const [dataForAreaChart, setDataForAreaChart] = useState(
-    initialSeasonDataForLineChart
-  );
-
-  const max = Math.max(...dataForAreaChart.map((item) => item.value));
-  const min = Math.min(...dataForAreaChart.map((item) => item.value));
-  const avg =
-    dataForAreaChart.reduce((a, b) => a + b.value, 0) / dataForAreaChart.length;
-
+const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
   const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
-    useState("yearly");
+    useState("Hour");
   const [selectedServerForAreaChart, setSelectedServerForAreaChart] =
-    useState("total");
-
-  useEffect(() => {
-    selectedTimeForAreaChart === "yearly"
-      ? setDataForAreaChart(initialSeasonDataForLineChart)
-      : selectedTimeForAreaChart === "monthly"
-      ? setDataForAreaChart(initialMonthDataForLineChart)
-      : selectedTimeForAreaChart === "weekly"
-      ? setDataForAreaChart(initialWeeklyDataForLineChart)
-      : selectedTimeForAreaChart === "daily"
-      ? setDataForAreaChart(initialDayDataForLineChart)
-      : setDataForAreaChart(initialHourlyDataForLineChart);
-
-    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-      prevData.map((data) => ({
-        ...data,
-        value:
-          selectedServerForAreaChart === "total"
-            ? Math.round(Math.random() * 24 + 12)
-            : Math.round(Math.random() * 8 + 1),
-      }))
-    );
-  }, [selectedServerForAreaChart, selectedTimeForAreaChart]);
+    useState("server1");
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
-    api.chart.getReceiveHourlyData().then((res) => {
-      console.log(res);
+    setEndDate(null);
+    setStartDate(null);
+  }, [selectedTimeForAreaChart]);
+
+  const [dataForChart, setDataForChart] = useState<ChartDataFormat[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const convertDataForAreaChart = (data: [DataForChart[], DataForChart[]]) => {
+    const smallerIndex = Math.min(data[0].length, data[1].length);
+    const formattedData: ChartDataFormat[] = [];
+    for (let i = 0; i < smallerIndex; i++) {
+      formattedData.push({
+        receiveValue: +data[0][i].value / (8 * 10 ** 9),
+        sendValue: +data[1][i].value / (8 * 10 ** 9),
+        time: formatDate(new Date(+data[0][i].clock * 1000))
+      });
+    }
+    return formattedData;
+  };
+
+  useEffect(() => {
+    setShowDatePicker(false);
+    if (endDate) {
+      setSelectedTimeForAreaChart("custom");
+    }
+  }, [endDate]);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      startDate && endDate
+        ? api.chart
+            .getReceiveDataForCustomDate(
+              startDate.getTime() / 1000,
+              endDate.getTime() / 1000,
+              selectedServerForAreaChart
+            )
+            .then((res) => res.data.result)
+        : api.chart
+            .getReceiveData(
+              selectedTimeForAreaChart,
+              selectedServerForAreaChart
+            )
+            .then((res) => res.data.result),
+      startDate && endDate
+        ? api.chart
+            .getSendDataForCustomDate(
+              startDate.getTime() / 1000,
+              endDate.getTime() / 1000,
+              selectedServerForAreaChart
+            )
+            .then((res) => res.data.result)
+        : api.chart
+            .getSendData(selectedTimeForAreaChart, selectedServerForAreaChart)
+            .then((res) => res.data.result)
+    ]).then((data) => {
+      setDataForChart(convertDataForAreaChart(data).reverse());
+      setLoading(false);
     });
-  }, []);
+  }, [
+    selectedServerForAreaChart,
+    selectedTimeForAreaChart,
+    startDate,
+    endDate
+  ]);
+
+  const [max, setMax] = useState(0);
+  const [min, setMin] = useState(0);
+  const [avg, setAvg] = useState(0);
+  useEffect(() => {
+    setMax(
+      +Math.max(
+        ...dataForChart.map((data) =>
+          Math.max(data.receiveValue, data.sendValue)
+        )
+      ).toFixed(2)
+    );
+    setMin(
+      +Math.min(
+        ...dataForChart.map((data) =>
+          Math.min(data.receiveValue, data.sendValue)
+        )
+      ).toFixed(2)
+    );
+
+    setAvg(
+      +(
+        dataForChart.reduce(
+          (sum, curr) => (sum += (curr.receiveValue + curr.sendValue) / 2),
+          0
+        ) / dataForChart.length
+      ).toFixed(2)
+    );
+  }, [dataForChart]);
 
   const chartRef = useRef(null);
 
@@ -179,8 +160,8 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
       domtoimage
         .toPng(chartElement, {
           style: {
-            backgroundColor: "white",
-          },
+            backgroundColor: "white"
+          }
         })
         .then((dataUrl: string) => {
           const link = document.createElement("a");
@@ -204,7 +185,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
           display: "flex",
           gap: "1rem",
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: "space-between"
         }}
       >
         <Stack direction="row" gap="1rem" alignItems="center">
@@ -212,7 +193,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
             fontFamily="YekanBakh-Medium"
             component="h3"
             sx={{
-              fontSize: "1.5rem",
+              fontSize: "1.5rem"
             }}
           >
             نمودار ترافیک
@@ -224,7 +205,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
               transformOrigin: "37% 50%",
               transition: "all .4s ease",
               right: "1rem",
-              zIndex: "35",
+              zIndex: "35"
             }}
           >
             <RangeDatePicker
@@ -236,7 +217,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
           </Box>
           <Box
             sx={{
-              position: "relative",
+              position: "relative"
             }}
           >
             <Select
@@ -253,32 +234,36 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
-                  marginTop: "-.25rem",
+                  marginTop: "-.25rem"
                 },
                 ".MuiOutlinedInput-notchedOutline": { border: 0 },
                 "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                   {
-                    border: 0,
-                  },
+                    border: 0
+                  }
               }}
             >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="hourly">
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Hour">
                 ساعتی
               </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="daily">
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Day">
                 روزانه
               </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Week">
                 هفته‌‌ای
               </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="monthly"
-              >
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Month">
                 ماهانه
               </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="yearly">
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Year">
                 سالانه
+              </MenuItem>
+              <MenuItem
+                disabled
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="custom"
+              >
+                انتخابی
               </MenuItem>
             </Select>
             <BsCalendar2DateFill
@@ -293,7 +278,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
                 transform: "translateY(-50%)",
                 paddingLeft: ".5rem",
                 zIndex: "30",
-                cursor: "pointer",
+                cursor: "pointer"
               }}
             />
           </Box>
@@ -310,18 +295,15 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
               ".MuiSelect-icon": {
                 width: "20px",
                 height: "20px",
-                marginTop: "-.25rem",
+                marginTop: "-.25rem"
               },
               ".MuiOutlinedInput-notchedOutline": { border: 0 },
               "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                 {
-                  border: 0,
-                },
+                  border: 0
+                }
             }}
           >
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="total">
-              مجموع ترافیک
-            </MenuItem>
             <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server1">
               سرور یک
             </MenuItem>
@@ -340,6 +322,18 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
             <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server6">
               سرور شش
             </MenuItem>
+            <MenuItem
+              sx={{ fontFamily: "YekanBakh-Regular" }}
+              value="switch_in"
+            >
+              TPM Switch In
+            </MenuItem>
+            <MenuItem
+              sx={{ fontFamily: "YekanBakh-Regular" }}
+              value="switch_out"
+            >
+              TPM Switch Out
+            </MenuItem>
           </Select>
         </Stack>
         {isAllDataLoaded ? (
@@ -355,8 +349,8 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
               borderRadius: ".5rem",
               ":hover": {
                 background: "#0F6CBD",
-                color: "#fff",
-              },
+                color: "#fff"
+              }
             }}
           >
             دریافت خروجی
@@ -371,22 +365,24 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
         sx={{
           direction: "ltr",
           height: "35vh",
-          position: "relative",
+          position: "relative"
         }}
       >
         <Stack
           direction="row"
           sx={{
+            opacity: showDatePicker ? "0" : "1",
+            transition: "opacity .3s ease",
             gap: "1rem",
             position: "absolute",
-            bottom: "2.5rem",
+            top: "1rem",
             left: "52%",
             transform: "translateX(-50%)",
             background: "#fff",
             zIndex: "40",
             padding: ".5rem",
             border: "1px solid #707070",
-            borderRadius: ".5rem",
+            borderRadius: ".5rem"
           }}
         >
           <TitledValue color="red" title="Min" value={min} />
@@ -398,21 +394,12 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
           height="100%"
           style={{ marginTop: "1rem" }}
         >
-          <RechartAreaChart
-            width={500}
-            data={dataForAreaChart}
-            margin={{
-              top: 10,
-              right: 30,
-              left: 0,
-              bottom: 0,
-            }}
-          >
+          <RechartAreaChart width={500} data={dataForChart}>
             <Tooltip content={<CustomTooltipForAreaChart />} />
             <CartesianGrid strokeDasharray="3 3" />
             <YAxis
-              domain={[1, 40]}
-              ticks={[1, 5, 10, 20, 40]}
+              domain={[1, 20]}
+              ticks={[1, 5, 10, 20]}
               scale="log"
               label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
               tickFormatter={(tick) => {
@@ -422,7 +409,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
                 return tick; // For other ticks, display their actual value
               }}
             />
-            <XAxis padding={{ left: 50, right: 50 }} dataKey="name" />
+            <XAxis padding={{ left: 50, right: 50 }} dataKey="time" />
             <defs>
               <filter id="glow" x="-70%" y="-70%" width="200%" height="200%">
                 <feOffset result="offOut" in="SourceGraphic" dx="0" dy="0" />
@@ -432,10 +419,18 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
             </defs>
             <Area
               type="monotone"
-              dataKey="value"
-              stroke={selectedServiceIndex !== null ? "#7160B4" : "#608DB4"}
+              dataKey="receiveValue"
+              stroke={"#608DB4"}
+              fill="#608DB4"
               strokeWidth={3}
-              fill="transparent"
+              style={{ filter: "url(#glow)" }}
+            />
+            <Area
+              type="monotone"
+              dataKey="sendValue"
+              stroke={"#B46092"}
+              fill="#B46092"
+              strokeWidth={3}
               style={{ filter: "url(#glow)" }}
             />
             <ReferenceLine
@@ -444,7 +439,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
                 value: "Min",
                 position: "insideRight",
                 stroke: "red",
-                opacity: ".5",
+                opacity: ".5"
               }}
               stroke="red"
               strokeDasharray="5 5"
@@ -456,7 +451,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
                 value: "Max",
                 position: "insideRight",
                 stroke: "green",
-                opacity: ".5",
+                opacity: ".5"
               }}
               stroke="green"
               strokeDasharray="5 5"
@@ -468,7 +463,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex, isAllDataLoaded }) => {
                 value: "Avg",
                 position: "insideRight",
                 stroke: "blue",
-                opacity: ".5",
+                opacity: ".5"
               }}
               stroke="blue"
               strokeDasharray="5 5"
@@ -488,7 +483,7 @@ interface CustomTooltipForAreaChartProps {
 
 const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
   active,
-  payload,
+  payload
 }) => {
   if (active && payload && payload.length) {
     return (
@@ -499,7 +494,7 @@ const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
           boxShadow: "0 0 14px  rgb(0 0 0 / 40%)",
           padding: "1px",
           textAlign: "left",
-          borderRadius: "1rem",
+          borderRadius: "1rem"
         }}
       >
         <div
@@ -508,14 +503,14 @@ const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-end",
-            fontFamily: "YekanBakh-Regular",
+            fontFamily: "YekanBakh-Regular"
           }}
         >
-          {/* <Typography>زمان: {payload[0].payload.name}</Typography> */}
-          <Typography>
-            {`${
-              payload[0].payload.value === 1 ? 0 : payload[0].payload.value
-            } Gbps`}
+          <Typography color="#608DB4">
+            Receive: {`${payload[0].value.toFixed(3)} Gbps`}
+          </Typography>
+          <Typography color="#B46092">
+            Send: {`${payload[1].value.toFixed(3)} Gbps`}
           </Typography>
         </div>
       </div>
