@@ -19,7 +19,7 @@ const ExportDocModal: FC<Props> = ({
   setOpenModal,
   selectedFormat,
   setSelectedFormat,
-  onExportClick,
+  onExportClick
 }) => {
   return (
     <Modal
@@ -33,7 +33,7 @@ const ExportDocModal: FC<Props> = ({
         zIndex: "1000",
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
+        alignItems: "center"
       }}
     >
       <Box
@@ -43,14 +43,14 @@ const ExportDocModal: FC<Props> = ({
           borderRadius: "1.5rem",
           width: "400px",
           paddingY: "1rem",
-          paddingX: "2rem",
+          paddingX: "2rem"
         }}
       >
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: ".5rem",
+            gap: ".5rem"
           }}
         >
           <Stack
@@ -62,7 +62,7 @@ const ExportDocModal: FC<Props> = ({
             <Button
               onClick={() => setOpenModal(false)}
               sx={{
-                color: "#000",
+                color: "#000"
               }}
             >
               بستن پنجره
@@ -105,8 +105,8 @@ const ExportDocModal: FC<Props> = ({
               zIndex: "5",
               ":hover": {
                 color: "#0F6CBD",
-                background: "#0F6CBD33",
-              },
+                background: "#0F6CBD33"
+              }
             }}
           >
             دریافت خروجی

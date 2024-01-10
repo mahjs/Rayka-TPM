@@ -7,12 +7,13 @@ import {
 } from "@mui/material";
 import { GoPlus } from "react-icons/go";
 import { useRef, useEffect, FC, useState } from "react";
-import { Domain } from "../../services/domain";
+import { Blacklist, Domain } from "../../services/domain";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import AddDomainModal from "./AddDomainModal";
 import api from "../../services";
 import { MapData } from "../../hooks/useTreeMapData";
 import { useAuth } from "../../contexts/authContext";
+import BlackList from "./BlackList";
 
 interface Props {
   loading: boolean;
@@ -59,7 +60,9 @@ const ServicesTable: FC<Props> = ({
   }, [domains, setDomainsDownloadData]);
 
   const [openAddDomainModal, setOpenAddDomainModal] = useState<boolean>(false);
+  const [blackListModal, setBlackListModal] = useState<boolean>(false);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
+  const [ipAddress, setIpAddress] = useState<Blacklist[]>([]);
   const handleSelectDomain = (
     _event: React.ChangeEvent<HTMLInputElement>,
     domain: string
@@ -78,7 +81,13 @@ const ServicesTable: FC<Props> = ({
       setSelectedServiceIndex(null);
     });
   };
+  useEffect(() => {
+    api.domain.getblacklist().then((res) => {
+      console.log(res);
 
+      setIpAddress(res);
+    });
+  }, []);
   return (
     <>
       <Box
@@ -91,6 +100,8 @@ const ServicesTable: FC<Props> = ({
             // marginTop: "-1rem",
             display: "flex",
             alignItems: "center",
+            gap: ".3rem",
+            justifyContent: "space-between"
             gap: ".3rem"
           }}
         >
@@ -104,6 +115,7 @@ const ServicesTable: FC<Props> = ({
           >
             سرویس ها
           </Typography>
+
           {isAdmin && (
             <Button
               onClick={() => setOpenAddDomainModal(true)}
@@ -125,6 +137,24 @@ const ServicesTable: FC<Props> = ({
               افزودن
             </Button>
           )}
+          <Button
+            onClick={() => setBlackListModal(true)}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: ".3rem",
+              background: "#0F6CBD",
+              color: "#fff",
+              fontFamily: "YekanBakh-Regular",
+              borderRadius: ".5rem",
+              ":hover": {
+                background: "#0F6CBD",
+                color: "#fff"
+              }
+            }}
+          >
+            لیست سیاه
+          </Button>
 
           {selectedDomains.length > 0 && isAdmin && (
             <Button
@@ -277,6 +307,11 @@ const ServicesTable: FC<Props> = ({
         setOpenModal={setOpenAddDomainModal}
         refetchDomains={refetchDomains}
         refetchIpAddresses={refetchIpAddresses}
+      />
+      <BlackList
+        openModal={blackListModal}
+        setOpenModal={setBlackListModal}
+        ipAddress={ipAddress}
       />
     </>
   );
