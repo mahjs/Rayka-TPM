@@ -9,7 +9,7 @@ interface RangeDatePickerProps {
 const RangeDatePicker: React.FC<RangeDatePickerProps> = ({
   setStartDate,
   setEndDate,
-  handleClose,
+  handleClose
 }) => {
   return (
     <>
@@ -19,7 +19,7 @@ const RangeDatePicker: React.FC<RangeDatePickerProps> = ({
           height: "100vh",
           position: "absolute",
           top: "-80%",
-          right: "-10%",
+          right: "-10%"
         }}
         onClick={() => handleClose(false)}
       />

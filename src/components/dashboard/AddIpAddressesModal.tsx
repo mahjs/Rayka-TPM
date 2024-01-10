@@ -131,7 +131,7 @@ const AddIpAddressesModal: FC<Props> = ({
                   fontWeight: "900",
                 }}
               >
-                افزودن سرویس
+                افزودن آدرس
               </Typography>
               <Button
                 onClick={() => {
