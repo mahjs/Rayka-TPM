@@ -5,8 +5,8 @@ import { Typography } from "@mui/material";
 interface Props {
   loadingData: boolean;
   dataForTreeChart: { name: string; value: number }[];
-  selectedServiceIndex: number | null | undefined;
-  setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  selectedServiceIndexs: number[] | undefined;
+  handleSelectedService: (index: number) => void;
   // setDataForAreaChart: React.Dispatch<
   //   React.SetStateAction<
   //     {
@@ -20,8 +20,8 @@ interface Props {
 const TreeMap: FC<Props> = ({
   loadingData,
   dataForTreeChart,
-  selectedServiceIndex,
-  setSelectedServiceIndex,
+  selectedServiceIndexs,
+  handleSelectedService
 }) => {
   const sumOfTreeChartValues = dataForTreeChart.reduce(
     (sum, data) => (sum += data.value),
@@ -40,8 +40,8 @@ const TreeMap: FC<Props> = ({
             data={dataForTreeChart}
             sumOfData={sumOfTreeChartValues}
             loading={loadingData}
-            selectedIndex={selectedServiceIndex}
-            onClickHandler={setSelectedServiceIndex}
+            selectedIndexs={selectedServiceIndexs}
+            onClickHandler={handleSelectedService}
           />
         }
       >
@@ -65,11 +65,11 @@ const CustomizedContent = (props: any) => {
     width,
     height,
     index,
-    selectedIndex,
+    selectedIndexs,
     onClickHandler,
     loading,
     data,
-    sumOfData,
+    sumOfData
   } = props;
 
   // const hue = (index * 137.508) % 360;
@@ -104,14 +104,16 @@ const CustomizedContent = (props: any) => {
           transition: "all .2s linear",
           fill: loading
             ? "transparent"
-            : selectedIndex !== null
-            ? selectedIndex === index
+            : selectedIndexs?.length > 0
+            ? selectedIndexs.some(
+                (searchingIndex: number) => searchingIndex === index
+              )
               ? "#7160B4"
               : "#B2CADF"
             : "#608DB4",
           stroke: "#fff",
           strokeWidth: 2 / (depth + 1e-10),
-          strokeOpacity: 1 / (depth + 1e-10),
+          strokeOpacity: 1 / (depth + 1e-10)
         }}
       >
         <title style={{ color: "white" }}>Tooltip text goes here</title>
@@ -142,7 +144,7 @@ interface CustomTooltipForTreeChartProps {
 const CustomTooltipForTreeChart: FC<CustomTooltipForTreeChartProps> = ({
   active,
   payload,
-  sumOfData = 1,
+  sumOfData = 1
 }) => {
   if (active && payload && payload.length) {
     return (
@@ -154,7 +156,7 @@ const CustomTooltipForTreeChart: FC<CustomTooltipForTreeChartProps> = ({
           boxShadow: "0 0 14px  rgb(0 0 0 / 40%)",
           padding: "1px",
           textAlign: "left",
-          borderRadius: "1rem",
+          borderRadius: "1rem"
         }}
       >
         <div
@@ -163,7 +165,7 @@ const CustomTooltipForTreeChart: FC<CustomTooltipForTreeChartProps> = ({
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
-            fontFamily: "YekanBakh-Regular",
+            fontFamily: "YekanBakh-Regular"
           }}
         >
           <Typography>نام: {payload[0].payload.name}</Typography>

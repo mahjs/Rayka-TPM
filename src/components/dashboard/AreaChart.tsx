@@ -27,7 +27,6 @@ import api from "../../services";
 import { DataForChart } from "../../services/chart";
 
 interface Props {
-  selectedServiceIndex: number | null;
   isAllDataLoaded: boolean;
 }
 interface ChartDataFormat {

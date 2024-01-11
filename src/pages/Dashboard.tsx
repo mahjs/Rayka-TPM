@@ -46,7 +46,7 @@ const Dashboard: FC = () => {
 
   useEffect(() => {
     if (selectedFilter !== "All_IPs") {
-      setSelectedServiceIndex(null);
+      setSelectedServiceIndexs([]);
     }
   }, [selectedFilter]);
 
@@ -64,14 +64,29 @@ const Dashboard: FC = () => {
   };
 
   // State for Selecting a service & an address
-  const [selectedServiceIndex, setSelectedServiceIndex] = useState<
-    number | null
-  >(null);
+  const [selectedServiceIndexs, setSelectedServiceIndexs] = useState<number[]>(
+    []
+  );
+  console.log(selectedServiceIndexs);
+
+  const handleSelectedServiceIndex = (index: number) => {
+    const findIndex = selectedServiceIndexs?.find(
+      (searchingIndex) => searchingIndex === index
+    );
+
+    if (findIndex === index) {
+      setSelectedServiceIndexs((pre) =>
+        pre.filter((searchingIndex) => searchingIndex !== index)
+      );
+    } else {
+      setSelectedServiceIndexs((pre) => [...pre, index]);
+    }
+  };
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
   useEffect(() => {
     setSelectedAddress(null);
-  }, [selectedServiceIndex]);
+  }, [selectedServiceIndexs]);
 
   // State for SquareCharts
   const {
@@ -89,14 +104,14 @@ const Dashboard: FC = () => {
   }, [totalIps]);
 
   useEffect(() => {
-    if (isNaN(parseInt(searchInput)) || selectedServiceIndex !== null) return;
+    if (isNaN(parseInt(searchInput)) || selectedServiceIndexs !== null) return;
 
     setFilteredIps(
       totalIps.filter((ip) =>
         ip.toLowerCase().includes(searchInput.toLowerCase())
       )
     );
-  }, [searchInput, selectedServiceIndex]);
+  }, [searchInput, selectedServiceIndexs]);
 
   // State for getting all domains
   const {
@@ -149,7 +164,7 @@ const Dashboard: FC = () => {
     loadingAddresses: loadingAllAddresses,
     reFetchAddresses: reFetchAddressesData
   } = useIpAddresses(
-    domains ? filteredDomains![selectedServiceIndex!]?.name : null
+    domains ? filteredDomains![selectedServiceIndexs![0]]?.name : null
   );
   const [filteredIpAddresses, setFilteredIpAddresses] = useState<string[]>([]);
   const [ipsWithProvider, setIpsWithProvider] = useState<IpWithProvider[]>([]);
@@ -229,10 +244,10 @@ const Dashboard: FC = () => {
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
     if (
-      selectedServiceIndex !== null &&
-      dataRefs.current[selectedServiceIndex]
+      selectedServiceIndexs !== null &&
+      dataRefs.current[selectedServiceIndexs[0]]
     ) {
-      dataRefs.current[selectedServiceIndex].scrollIntoView({
+      dataRefs.current[selectedServiceIndexs[0]].scrollIntoView({
         behavior: "smooth",
         block: "center"
       });
@@ -476,16 +491,23 @@ const Dashboard: FC = () => {
                 dataForTreeChart={
                   loadingData ? [{ name: "nothing", value: 100 }] : treeMapData
                 }
-                selectedServiceIndex={
+                selectedServiceIndexs={
                   searchInput === null
-                    ? selectedServiceIndex
-                    : domains?.findIndex(
-                        (domain) =>
-                          domain?.name ===
-                          filteredDomains[selectedServiceIndex!]?.name
-                      )
+                    ? selectedServiceIndexs
+                    : domains?.reduce((indexes: number[], domain, index) => {
+                        if (
+                          selectedServiceIndexs.some(
+                            (selectedIndex) =>
+                              filteredDomains[selectedIndex]?.name ===
+                              domain?.name
+                          )
+                        )
+                          indexes.push(index);
+
+                        return indexes;
+                      }, [])
                 }
-                setSelectedServiceIndex={setSelectedServiceIndex}
+                handleSelectedService={handleSelectedServiceIndex}
               />
               {loadingData && (
                 <CircularProgress
@@ -505,10 +527,7 @@ const Dashboard: FC = () => {
               marginTop: "auto"
             }}
           >
-            <AreaChart
-              selectedServiceIndex={selectedServiceIndex}
-              isAllDataLoaded={isAllDataLoaded}
-            />
+            <AreaChart isAllDataLoaded={isAllDataLoaded} />
           </Box>
         </Box>
 
@@ -575,19 +594,21 @@ const Dashboard: FC = () => {
               refetchIpAddresses={reFetchAddresses}
               loading={loadingDomains}
               domains={filteredDomains}
-              selectedServiceIndex={selectedServiceIndex}
-              setSelectedServiceIndex={setSelectedServiceIndex}
+              selectedServiceIndexs={selectedServiceIndexs}
+              handleSelectedServiceIndex={handleSelectedServiceIndex}
               setDomainsDownloadData={setDomainDownloadData}
             />
 
             <AddressesTable
               refetchIpAddresses={reFetchAddresses}
               domainName={
-                domains ? filteredDomains![selectedServiceIndex!]?.name : null
+                domains && selectedServiceIndexs.length === 1
+                  ? filteredDomains![selectedServiceIndexs[0]]?.name
+                  : null
               }
               loading={loadingAllAddresses || loadingAddresses}
               addressesData={
-                selectedServiceIndex !== null
+                selectedServiceIndexs !== null
                   ? filteredIpAddresses
                   : !isNaN(parseInt(searchInput))
                   ? filteredIps
@@ -595,13 +616,13 @@ const Dashboard: FC = () => {
               }
               showData={
                 isNaN(parseInt(searchInput))
-                  ? selectedServiceIndex !== null ||
+                  ? selectedServiceIndexs !== null ||
                     selectedFilter !== "All_IPs"
                   : true
               }
               isWithProvider={selectedFilter !== "All_IPs"}
               ipsWithProvider={ipsWithProvider}
-              showAddButton={selectedServiceIndex !== null}
+              showAddButton={selectedServiceIndexs !== null}
               selectedAddress={selectedAddress}
               setSelectedAddress={setSelectedAddress}
               selectedFilter={selectedFilter}
