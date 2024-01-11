@@ -545,7 +545,7 @@ const Dashboard: FC = () => {
           <Box
             sx={{
               display: "flex",
-              gap: "1rem"
+              gap: "1.8rem"
             }}
           >
             {/* Services Table*/}

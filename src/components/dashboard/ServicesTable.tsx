@@ -97,28 +97,70 @@ const ServicesTable: FC<Props> = ({
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: ".3rem",
             justifyContent: "space-between"
           }}
         >
-          <Typography
-            fontFamily="YekanBakh-Medium"
-            component="h3"
-            sx={{
-              fontSize: "1.5rem",
-              whiteSpace: "nowrap"
-            }}
-          >
-            سرویس ها
-          </Typography>
+          <Box sx={{ display: 'flex' }}>
+            <Typography
+              fontFamily="YekanBakh-Medium"
+              component="h3"
+              sx={{
+                fontSize: "1.5rem",
+                whiteSpace: "nowrap"
+              }}
+            >
+              سرویس ها
+            </Typography>
 
-          {isAdmin && (
+            {isAdmin && (
+              <Button
+                onClick={() => setOpenAddDomainModal(true)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  background: "#0F6CBD",
+                  color: "#fff",
+                  fontFamily: "YekanBakh-Regular",
+                  borderRadius: ".5rem",
+                  mr: "0.5em",
+                  ":hover": {
+                    background: "#0F6CBD",
+                    color: "#fff"
+                  }
+                }}
+              >
+                <GoPlus style={{ width: "20px", height: "20px" }} />
+                افزودن
+              </Button>
+            )}
+          </Box>
+          <Box sx={{ display: 'flex' }}>
+            {selectedDomains.length > 0 && isAdmin && (
+              <Button
+                onClick={handleDeleteDomains}
+                sx={{
+                  color: "red",
+                  fontFamily: "YekanBakh-Regular",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: ".1rem"
+                }}
+              >
+                <RiDeleteBin6Line
+                  style={{
+                    width: "15px",
+                    height: "15px",
+                    color: "red"
+                  }}
+                />
+                حذف
+              </Button>
+            )}
             <Button
-              onClick={() => setOpenAddDomainModal(true)}
+              onClick={() => setBlackListModal(true)}
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: ".3rem",
                 background: "#0F6CBD",
                 color: "#fff",
                 fontFamily: "YekanBakh-Regular",
@@ -129,50 +171,9 @@ const ServicesTable: FC<Props> = ({
                 }
               }}
             >
-              <GoPlus style={{ width: "20px", height: "20px" }} />
-              افزودن
+              لیست سیاه
             </Button>
-          )}
-          <Button
-            onClick={() => setBlackListModal(true)}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: ".3rem",
-              background: "#0F6CBD",
-              color: "#fff",
-              fontFamily: "YekanBakh-Regular",
-              borderRadius: ".5rem",
-              ":hover": {
-                background: "#0F6CBD",
-                color: "#fff"
-              }
-            }}
-          >
-            لیست سیاه
-          </Button>
-
-          {selectedDomains.length > 0 && isAdmin && (
-            <Button
-              onClick={handleDeleteDomains}
-              sx={{
-                color: "red",
-                fontFamily: "YekanBakh-Regular",
-                display: "flex",
-                alignItems: "center",
-                gap: ".3rem"
-              }}
-            >
-              <RiDeleteBin6Line
-                style={{
-                  width: "15px",
-                  height: "15px",
-                  color: "red"
-                }}
-              />
-              حذف
-            </Button>
-          )}
+          </Box>
         </Box>
         <Box
           sx={{
