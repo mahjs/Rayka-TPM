@@ -23,10 +23,14 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as domtoimage from "dom-to-image";
+import api from "../services";
 
 export interface DomainData {
   name: string;
   ips?: string[];
+}
+interface IpAddressObject {
+  ip: string;
 }
 const Dashboard: FC = () => {
   const navigate = useNavigate();
@@ -39,7 +43,9 @@ const Dashboard: FC = () => {
 
   // State to hold the search input
   const [searchInput, setSearchInput] = useState<string>("");
-
+  const [selectedFilter, setSelectedFilter] = useState<
+    "All_IPs" | "CDN" | "Host"
+  >("All_IPs");
   // Function to handle the search action
   const handleSearch = () => {
     // You would implement your search logic here
@@ -151,25 +157,55 @@ const Dashboard: FC = () => {
   };
 
   useEffect(() => {
-    if (!ipAddressesForDomain) return;
-    if (isNaN(parseInt(searchInput))) {
-      setFilteredIpAddresses(ipAddressesForDomain);
-      return;
+    const updateAddressesData = (data: IpAddressObject[]) => {
+      if (Array.isArray(data)) {
+        const ipAddresses = data
+          .map((item) => item.ip)
+          .filter((ip) => ip.startsWith("172."));
+        setFilteredIpAddresses(ipAddresses);
+      } else {
+        console.error(
+          "Expected an array of IP address objects, but received:",
+          data
+        );
+        setFilteredIpAddresses([]);
+      }
+    };
+
+    if (selectedFilter === "All_IPs" && ipAddressesForDomain) {
+      if (!ipAddressesForDomain) return;
+      if (isNaN(parseInt(searchInput))) {
+        setFilteredIpAddresses(ipAddressesForDomain);
+        return;
+      }
+    } else if (selectedFilter === "CDN") {
+      api.domain
+        .getcdn()
+        .then((response) => {
+          console.log("CDN Response:", response);
+          if (response && response.ips && Array.isArray(response.ips)) {
+            updateAddressesData(response.ips);
+          } else {
+            console.error("No data in CDN response", response);
+            setFilteredIpAddresses([]);
+          }
+        })
+        .catch((error) => console.error("Error fetching CDN data:", error));
+    } else {
+      api.domain
+        .Notcdn()
+        .then((response) => {
+          console.log("hot Response:", response);
+          if (response && response.ips && Array.isArray(response.ips)) {
+            updateAddressesData(response.ips);
+          } else {
+            console.error("No data in CDN response", response);
+            setFilteredIpAddresses([]);
+          }
+        })
+        .catch((error) => console.error("Error fetching CDN data:", error));
     }
-  }, [ipAddressesForDomain, searchInput]);
-
-  useEffect(() => {
-    if (!ipAddressesForDomain) return;
-
-    setFilteredIpAddresses(
-      ipAddressesForDomain.filter((ip) =>
-        isNaN(parseInt(searchInput))
-          ? true
-          : ip.toLowerCase().includes(searchInput.toLowerCase())
-      )
-    );
-  }, [searchInput, selectedServiceIndex, ipAddressesForDomain]);
-
+  }, [searchInput, selectedFilter, ipAddressesForDomain]);
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
@@ -546,6 +582,8 @@ const Dashboard: FC = () => {
               showAddButton={selectedServiceIndex !== null}
               selectedAddress={selectedAddress}
               setSelectedAddress={setSelectedAddress}
+              selectedFilter={selectedFilter}
+              setSelectedFilter={setSelectedFilter}
             />
           </Box>
         </Box>
