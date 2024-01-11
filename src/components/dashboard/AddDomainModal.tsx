@@ -1,4 +1,11 @@
-import { Modal, Box, Stack, Typography, Button } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Stack,
+  Typography,
+  Button,
+  CircularProgress
+} from "@mui/material";
 import { RxCross2 } from "react-icons/rx";
 import { FC, useState } from "react";
 import api from "../../services";
@@ -19,35 +26,45 @@ const AddDomainModal: FC<Props> = ({
   refetchIpAddresses
 }) => {
   const [domainName, setDomainName] = useState<string>("");
+  const [domainAddress, setDomainAddress] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = () => {
-    if (!domainName || domainName.length === 0) return;
-    api.domain.addDomain([domainName]).then(() => {
-      refetchDomains();
-      setOpenModal(false);
-      setDomainName("");
+  const handleSubmit = async () => {
+    if (
+      !domainName ||
+      domainName.length === 0 ||
+      !domainAddress ||
+      domainAddress.length === 0
+    )
       return;
-    });
 
     const addedDomainName = domainName + ".com";
-    axios
-      .post("http://10.201.228.64:5000/get_ipv4", {
-        domains: [
-          {
-            name: domainName + ".com"
-          }
-        ]
-      })
-      .then((res) => {
-        api.domain
-          .addIpAddressesToDomain(domainName, res.data[addedDomainName])
-          .then(() => {
-            refetchIpAddresses();
-            refetchDomains();
-            setOpenModal(false);
-            setDomainName("");
-          });
-      });
+    setLoading(true);
+    api.domain.addDomain([domainName]).then(() => {
+      axios
+        .post("http://10.201.228.64:5000/get_ipv4", {
+          domains: [
+            {
+              name: domainAddress
+            }
+          ]
+        })
+        .then((res) => {
+          api.domain
+            .addIpAddressesToDomain(domainName, res.data[addedDomainName])
+            .then(() => {
+              refetchIpAddresses();
+              setDomainName("");
+              setDomainAddress("");
+              setLoading(false);
+              setTimeout(() => {
+                refetchDomains();
+                setOpenModal(false);
+              }, 300);
+            });
+        });
+      return;
+    });
   };
   return (
     <Modal
@@ -127,6 +144,12 @@ const AddDomainModal: FC<Props> = ({
             name="domain_name"
             title="نام وبسایت"
           />
+          <Input
+            value={domainAddress}
+            onChange={(value) => setDomainAddress(value)}
+            name="domain_name"
+            title="آدرس وبسایت"
+          />
           <Button
             type="submit"
             sx={{
@@ -139,7 +162,11 @@ const AddDomainModal: FC<Props> = ({
               }
             }}
           >
-            افزودن
+            {loading ? (
+              <CircularProgress color="inherit" size={25} />
+            ) : (
+              "افزودن"
+            )}
           </Button>
         </Box>
       </Box>
