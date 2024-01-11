@@ -15,7 +15,8 @@ import {
   Area,
   AreaChart as RechartAreaChart,
   CartesianGrid,
-  ReferenceLine
+  ReferenceLine,
+  Brush
 } from "recharts";
 import { FC, useEffect, useRef, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
@@ -475,6 +476,7 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
               strokeDasharray="5 5"
               opacity=".5"
             />
+            <Brush />
           </RechartAreaChart>
         </ResponsiveContainer>
       </Box>
