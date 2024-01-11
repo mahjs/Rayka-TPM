@@ -18,7 +18,7 @@ import ExportDocModal from "../components/dashboard/ExportDocModal";
 import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
 import useTreeMapData from "../hooks/useTreeMapData";
-import { Domain } from "../services/domain";
+import { Domain, IpWithProvider } from "../services/domain";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -28,9 +28,6 @@ import api from "../services";
 export interface DomainData {
   name: string;
   ips?: string[];
-}
-interface IpAddressObject {
-  ip: string;
 }
 const Dashboard: FC = () => {
   const navigate = useNavigate();
@@ -46,6 +43,13 @@ const Dashboard: FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<
     "All_IPs" | "CDN" | "Host"
   >("All_IPs");
+
+  useEffect(() => {
+    if (selectedFilter !== "All_IPs") {
+      setSelectedServiceIndex(null);
+    }
+  }, [selectedFilter]);
+
   // Function to handle the search action
   const handleSearch = () => {
     // You would implement your search logic here
@@ -142,12 +146,14 @@ const Dashboard: FC = () => {
   // State for getting the ip addresses
   const {
     ipAddressesForDomain,
-    loadingAddresses,
+    loadingAddresses: loadingAllAddresses,
     reFetchAddresses: reFetchAddressesData
   } = useIpAddresses(
     domains ? filteredDomains![selectedServiceIndex!]?.name : null
   );
   const [filteredIpAddresses, setFilteredIpAddresses] = useState<string[]>([]);
+  const [ipsWithProvider, setIpsWithProvider] = useState<IpWithProvider[]>([]);
+  const [loadingAddresses, setLoadingAddresses] = useState<boolean>(false);
 
   const reFetchAddresses = () => {
     reFetchAddressesData();
@@ -157,12 +163,15 @@ const Dashboard: FC = () => {
   };
 
   useEffect(() => {
-    const updateAddressesData = (data: IpAddressObject[]) => {
+    const updateAddressesData = (data: IpWithProvider[]) => {
       if (Array.isArray(data)) {
-        const ipAddresses = data
-          .map((item) => item.ip)
-          .filter((ip) => ip.startsWith("172."));
-        setFilteredIpAddresses(ipAddresses);
+        const filterResults = data.filter((ipWithProvider) =>
+          ipWithProvider.ip.startsWith("172.")
+        );
+        setFilteredIpAddresses(
+          filterResults.map((ipWithProvider) => ipWithProvider.ip)
+        );
+        setIpsWithProvider(filterResults);
       } else {
         console.error(
           "Expected an array of IP address objects, but received:",
@@ -179,21 +188,27 @@ const Dashboard: FC = () => {
         return;
       }
     } else if (selectedFilter === "CDN") {
+      setLoadingAddresses(true);
       api.domain
-        .getcdn()
+        .getCDN()
         .then((response) => {
-          console.log("CDN Response:", response);
+          // setFilteredIpAddresses(response);
           if (response && response.ips && Array.isArray(response.ips)) {
             updateAddressesData(response.ips);
           } else {
             console.error("No data in CDN response", response);
             setFilteredIpAddresses([]);
           }
+          setLoadingAddresses(false);
         })
-        .catch((error) => console.error("Error fetching CDN data:", error));
-    } else {
+        .catch((error) => {
+          console.error("Error fetching CDN data:", error);
+          setLoadingAddresses(false);
+        });
+    } else if (selectedFilter === "Host") {
+      setLoadingAddresses(true);
       api.domain
-        .Notcdn()
+        .getNotCDN()
         .then((response) => {
           console.log("hot Response:", response);
           if (response && response.ips && Array.isArray(response.ips)) {
@@ -202,8 +217,12 @@ const Dashboard: FC = () => {
             console.error("No data in CDN response", response);
             setFilteredIpAddresses([]);
           }
+          setLoadingAddresses(false);
         })
-        .catch((error) => console.error("Error fetching CDN data:", error));
+        .catch((error) => {
+          console.error("Error fetching CDN data:", error);
+          setLoadingAddresses(false);
+        });
     }
   }, [searchInput, selectedFilter, ipAddressesForDomain]);
   // Scroll to selected service
@@ -369,10 +388,10 @@ const Dashboard: FC = () => {
     // Assuming 'loadingData', 'loadingDomains', and 'loadingAddresses' are the states
     // that indicate if the respective data is still being fetched.
     // Update 'isDataLoaded' based on these loading states.
-    if (!loadingData && !loadingDomains && !loadingAddresses) {
+    if (!loadingData && !loadingDomains && !loadingAllAddresses) {
       setIsAllDataLoaded(true);
     }
-  }, [loadingData, loadingDomains, loadingAddresses]);
+  }, [loadingData, loadingDomains, loadingAllAddresses]);
 
   return (
     <>
@@ -566,19 +585,22 @@ const Dashboard: FC = () => {
               domainName={
                 domains ? filteredDomains![selectedServiceIndex!]?.name : null
               }
-              loading={loadingAddresses}
+              loading={loadingAllAddresses || loadingAddresses}
               addressesData={
                 selectedServiceIndex !== null
                   ? filteredIpAddresses
                   : !isNaN(parseInt(searchInput))
                   ? filteredIps
-                  : null
+                  : filteredIpAddresses
               }
               showData={
                 isNaN(parseInt(searchInput))
-                  ? selectedServiceIndex !== null
+                  ? selectedServiceIndex !== null ||
+                    selectedFilter !== "All_IPs"
                   : true
               }
+              isWithProvider={selectedFilter !== "All_IPs"}
+              ipsWithProvider={ipsWithProvider}
               showAddButton={selectedServiceIndex !== null}
               selectedAddress={selectedAddress}
               setSelectedAddress={setSelectedAddress}

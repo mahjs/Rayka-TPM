@@ -18,11 +18,14 @@ import api from "../../services";
 import ExpressionValue from "./ExpressionValue";
 import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
 import { useAuth } from "../../contexts/authContext";
+import { IpWithProvider } from "../../services/domain";
 
 interface Props {
   showData: boolean;
   loading: boolean;
   showAddButton: boolean;
+  isWithProvider?: boolean;
+  ipsWithProvider?: IpWithProvider[];
   addressesData: string[] | null;
   domainName: string | null;
   refetchIpAddresses: () => void;
@@ -36,6 +39,8 @@ interface Props {
 
 const AddressesTable: FC<Props> = ({
   showData,
+  isWithProvider = false,
+  ipsWithProvider = [],
   loading,
   showAddButton,
   addressesData,
@@ -255,6 +260,7 @@ const AddressesTable: FC<Props> = ({
             )}
             {/* Rows for the body */}
             {showData &&
+              !isWithProvider &&
               addressesData &&
               addressesData
                 .slice(
@@ -331,7 +337,96 @@ const AddressesTable: FC<Props> = ({
                     </Typography>
                   </Box>
                 ))}
-            {!showData && (
+            {isWithProvider &&
+              ipsWithProvider &&
+              ipsWithProvider
+                .slice(
+                  (addressTablePage - 1) * 5,
+                  Math.min(
+                    (addressTablePage - 1) * 5 + 5,
+                    ipsWithProvider.length
+                  )
+                )
+                .map((address, index) => (
+                  <Box
+                    key={address.ip}
+                    sx={{
+                      padding: ".7rem .5rem",
+                      paddingBottom: ".25rem",
+                      justifyContent: "space-between",
+                      display: "flex",
+                      alignItems: "center",
+                      background:
+                        selectedAddress === address.ip ? "#5E819F" : "#fff",
+                      color: selectedAddress === address.ip ? "#fff" : "",
+                      borderRadius: ".5rem",
+                      cursor: "pointer",
+                      position: "relative"
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        height: "100%",
+                        width: "85%",
+                        left: "0",
+                        top: "0",
+                        bottom: "0",
+                        borderRadius: "1rem"
+                      }}
+                      onClick={() => {
+                        if (selectedAddress === address.ip)
+                          setSelectedAddress(null);
+                        else setSelectedAddress(address.ip);
+                      }}
+                    />
+                    <Checkbox
+                      sx={{
+                        zIndex: "100",
+                        marginBottom: ".3rem",
+                        padding: ".1rem",
+                        background: "#fff",
+                        borderRadius: ".2rem",
+                        ":hover": {
+                          background: "#fff"
+                        }
+                      }}
+                      onChange={(e) => handleSelectIps(e, address.ip)}
+                    />
+                    {/* <Typography
+                      marginLeft="auto"
+                      marginRight="2rem"
+                      fontFamily="YekanBakh-Regular"
+                    >
+                      {address.session}
+                      5254
+                    </Typography> */}
+                    <Typography
+                      fontFamily="YekanBakh-Regular"
+                      sx={{
+                        marginLeft: "1rem",
+                        direction: "ltr",
+                        display: "flex",
+                        minWidth: "120px"
+                      }}
+                    >
+                      <span>{index + 1}.</span>
+                      <span style={{ textAlign: "left", marginLeft: "1rem" }}>
+                        {address.ip}
+                        <span
+                          style={{
+                            fontSize: ".8rem",
+                            opacity: ".7",
+                            marginLeft: ".2rem"
+                          }}
+                        >
+                          ({address.provider})
+                        </span>
+                      </span>
+                    </Typography>
+                  </Box>
+                ))}
+            {!showData && !isWithProvider && (
               <Typography
                 fontFamily="YekanBakh-Regular"
                 sx={{
