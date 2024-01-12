@@ -15,7 +15,8 @@ import {
   Area,
   AreaChart as RechartAreaChart,
   CartesianGrid,
-  ReferenceLine
+  ReferenceLine,
+  Brush
 } from "recharts";
 import { FC, useEffect, useRef, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
@@ -401,7 +402,7 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
         >
           <RechartAreaChart width={500} data={dataForChart}>
             <Tooltip content={<CustomTooltipForAreaChart />} />
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="2 2" className="w-96" />
             <YAxis
               domain={[1, 20]}
               ticks={[1, 5, 10, 20]}
@@ -409,12 +410,12 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
               label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
               tickFormatter={(tick) => {
                 if (tick === 1) {
-                  return "0"; // Display '0' for the first tick
+                  return "10"; // Display '0' for the first tick
                 }
                 return tick; // For other ticks, display their actual value
               }}
             />
-            <XAxis padding={{ left: 50, right: 50 }} dataKey="time" />
+            <XAxis padding={{ left: 40, right: 60 }} dataKey="time" />
             <defs>
               <filter id="glow" x="-70%" y="-70%" width="200%" height="200%">
                 <feOffset result="offOut" in="SourceGraphic" dx="0" dy="0" />
@@ -474,6 +475,7 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
               strokeDasharray="5 5"
               opacity=".5"
             />
+            <Brush />
           </RechartAreaChart>
         </ResponsiveContainer>
       </Box>
