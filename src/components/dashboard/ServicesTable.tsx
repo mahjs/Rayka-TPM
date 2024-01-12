@@ -24,8 +24,8 @@ interface Props {
 
   refetchDomains: () => void;
   refetchIpAddresses: () => void;
-  selectedServiceIndex: number | null;
-  setSelectedServiceIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  selectedServiceIndexs: number[];
+  handleSelectedServiceIndex: (index: number) => void;
 }
 const ServicesTable: FC<Props> = ({
   loading,
@@ -34,8 +34,8 @@ const ServicesTable: FC<Props> = ({
   loadingMapData,
   refetchDomains,
   refetchIpAddresses,
-  selectedServiceIndex,
-  setSelectedServiceIndex,
+  selectedServiceIndexs,
+  handleSelectedServiceIndex,
   setDomainsDownloadData
 }) => {
   const { isAdmin } = useAuth();
@@ -44,10 +44,10 @@ const ServicesTable: FC<Props> = ({
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
     if (
-      selectedServiceIndex !== null &&
-      dataRefs.current[selectedServiceIndex]
+      selectedServiceIndexs.length > 0 &&
+      dataRefs.current[selectedServiceIndexs[0]]
     ) {
-      dataRefs.current[selectedServiceIndex].scrollIntoView({
+      dataRefs.current[selectedServiceIndexs[0]].scrollIntoView({
         behavior: "smooth",
         block: "center"
       });
@@ -78,11 +78,10 @@ const ServicesTable: FC<Props> = ({
     api.domain.deleteDomains(selectedDomains).then(() => {
       refetchDomains();
       setSelectedDomains([]);
-      setSelectedServiceIndex(null);
     });
   };
   useEffect(() => {
-    api.domain.getblacklist().then((res) => {
+    api.domain.getBlackList().then((res) => {
       setIpAddress(res);
     });
   }, []);
@@ -229,8 +228,16 @@ const ServicesTable: FC<Props> = ({
                   ref={(el: HTMLDivElement) => (dataRefs.current[index] = el)}
                   key={domain.name}
                   sx={{
-                    background: selectedServiceIndex === index ? "#5E819F" : "",
-                    color: selectedServiceIndex === index ? "#fff" : "",
+                    background: selectedServiceIndexs.some(
+                      (searchingIndex) => searchingIndex === index
+                    )
+                      ? "#5E819F"
+                      : "",
+                    color: selectedServiceIndexs.some(
+                      (searchingIndex) => searchingIndex === index
+                    )
+                      ? "#fff"
+                      : "",
                     transition: "all .2s linear",
                     cursor: "pointer",
                     padding: ".8rem .5rem",
@@ -254,9 +261,7 @@ const ServicesTable: FC<Props> = ({
                       borderRadius: "1rem"
                     }}
                     onClick={() => {
-                      if (selectedServiceIndex === index)
-                        setSelectedServiceIndex(null);
-                      else setSelectedServiceIndex(index);
+                      handleSelectedServiceIndex(index);
                     }}
                   />
                   <Checkbox
