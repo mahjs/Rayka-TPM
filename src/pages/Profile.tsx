@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FaArrowRightLong } from "react-icons/fa6";
 import api from "../services";
 import { Log } from "../services/logs";
+import { useAuth } from "../contexts/authContext";
 
 const Profile = () => {
   // const [historyData, setHistoryData] = useState(mockData);
@@ -13,12 +14,19 @@ const Profile = () => {
   const navigate = useNavigate();
   const [logs, setLogs] = useState<Log[]>([]);
 
+  const { isLogin } = useAuth();
+
   useEffect(() => {
     api.logs.getAllLogs().then((res) => {
       setLogs(res.logs);
     });
   }, []);
 
+  useEffect(() => {
+    if (!isLogin) {
+      navigate("/login");
+    }
+  }, []);
   return (
     <Box
       sx={{
