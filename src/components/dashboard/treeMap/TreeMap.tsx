@@ -1,7 +1,7 @@
 import { ResponsiveContainer, Treemap, Tooltip } from "recharts";
 import { FC } from "react";
-import CustomizedContent from "./treeMap/CustomizedContent";
-import CustomTooltip from "./treeMap/CustomTooltip";
+import CustomizedContent from "./CustomizedContent";
+import CustomTooltip from "./CustomTooltip";
 
 interface Props {
   loadingData: boolean;

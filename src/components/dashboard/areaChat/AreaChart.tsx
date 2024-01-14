@@ -21,13 +21,13 @@ import {
 import { FC, useEffect, useRef, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import { BsCalendar2DateFill } from "react-icons/bs";
-import RangeDatePicker from "./DatePicker";
-import TitledValue from "./TitledValue";
+import RangeDatePicker from "../DatePicker";
+import TitledValue from "../TitledValue";
 import * as domtoimage from "dom-to-image";
-import api from "../../services";
-import getFillColorForAreaChart from "../../utils/getFillColorForAreaChart";
-import CustomTooltip from "./areaChat/CustomTooltip";
-import convertDataForAreaChart from "../../utils/convertDateForAreaChart";
+import api from "../../../services";
+import getFillColorForAreaChart from "../../../utils/getFillColorForAreaChart";
+import CustomTooltip from "./CustomTooltip";
+import convertDataForAreaChart from "../../../utils/convertDateForAreaChart";
 
 interface Props {
   isAllDataLoaded: boolean;
@@ -35,6 +35,7 @@ interface Props {
 export interface ChartDataFormat {
   receiveValue: number;
   sendValue: number;
+  date: string;
   time: string;
 }
 
@@ -51,6 +52,7 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
     {
       receiveValue: 0,
       sendValue: 0,
+      date: new Date().toLocaleDateString(),
       time: new Date().toLocaleDateString()
     }
   ]);

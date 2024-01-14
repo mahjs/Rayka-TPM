@@ -34,6 +34,7 @@ const CustomTooltip: FC<Props> = ({ active, payload }) => {
           <Typography color="#B46092">
             Send: {`${payload[1].value.toFixed(3)} Gbps`}
           </Typography>
+          <Typography>Date: {`${payload[1].payload.date}`}</Typography>
         </div>
       </div>
     );

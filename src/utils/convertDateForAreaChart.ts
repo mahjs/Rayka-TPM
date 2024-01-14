@@ -1,4 +1,4 @@
-import { ChartDataFormat } from "../components/dashboard/AreaChart";
+import { ChartDataFormat } from "../components/dashboard/areaChat/AreaChart";
 import { DataForChart } from "../services/chart";
 import formatDateForAreaChart from "./formatDateForAreaChart";
 
@@ -11,7 +11,8 @@ export default function convertDataForAreaChart(
     formattedData.push({
       receiveValue: +data[0][i].value / 10 ** 9,
       sendValue: +data[1][i].value / 10 ** 9,
-      time: formatDateForAreaChart(new Date(+data[0][i].clock * 1000))
+      date: formatDateForAreaChart(new Date(+data[0][i].clock * 1000))[1],
+      time: formatDateForAreaChart(new Date(+data[0][i].clock * 1000))[0]
     });
   }
   return formattedData;
