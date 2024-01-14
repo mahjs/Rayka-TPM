@@ -146,13 +146,12 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
   const [min, setMin] = useState(0);
   const [avg, setAvg] = useState(0);
   useEffect(() => {
-    setMax(
-      +Math.max(
-        ...dataForChart.map((data) =>
-          Math.max(data.receiveValue, data.sendValue)
-        )
-      ).toFixed(2)
+    const rawMax = Math.max(
+      ...dataForChart.map((data) => Math.max(data.receiveValue, data.sendValue))
     );
+    const roundedMax = Math.ceil(rawMax * 1.1);
+    setMax(roundedMax);
+
     setMin(
       +Math.min(
         ...dataForChart.map((data) =>
@@ -417,15 +416,19 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
             <Tooltip content={<CustomTooltipForAreaChart />} />
             <CartesianGrid strokeDasharray="2 2" className="w-96" />
             <YAxis
-              domain={[1, 20]}
-              ticks={[0, 5, 10, 15, 20]}
+              domain={[0, max]}
+              // ticks={[0, 5, 10, 15, 20]}
               scale="linear"
               label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
               tickFormatter={(tick) => {
-                if (tick === 1) {
-                  return "10"; // Display '0' for the first tick
-                }
-                return tick; // For other ticks, display their actual value
+                const tickLabels = {
+                  1: "10",
+                  0.8: "8",
+                  0.6: "6",
+                  0.4: "4",
+                  0.2: "2"
+                };
+                return tickLabels[tick] || tick;
               }}
             />
             <XAxis padding={{ left: 40, right: 60 }} dataKey="time" />
