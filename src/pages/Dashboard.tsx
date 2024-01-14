@@ -308,6 +308,7 @@ const Dashboard: FC = () => {
       console.error("No data to export.");
     }
   };
+  console.log("ddddd", domains);
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -322,22 +323,37 @@ const Dashboard: FC = () => {
           }
         })
         .then((dataUrl) => {
-          doc.text(`Total IPs: ${totalIps.length}`, 10, 30);
-          doc.text(`total Domains: ${domainDownloadData.length}`, 143, 30);
-          doc.addImage(dataUrl, "PNG", 10, 10, 180, 160);
-
           const domainData = prepareDataForExport();
-          domainData.forEach((domain, index) => {
-            // Add new page for each domain
-            doc.addPage();
-            doc.text(domain.name, 10, 10); // Position the domain name text
-            autoTable(doc, {
-              startY: 20,
-              head: [["IP Address"]],
-              body: domain.ips.map((ip) => [ip]),
-              margin: { top: 10 }
-            });
+          doc.addImage(dataUrl, "PNG", 10, 10, 180, 160);
+          console.log(domainData);
+
+          // Prepare the rows for the table
+          let tableRows = domainData.map((domain) => {
+            // For each domain, create a row with the domain name and the number of IPs
+            return [domain.name, domain.ips.length];
           });
+
+          // Add a new page for the table
+          doc.addPage();
+          autoTable(doc, {
+            startY: 20,
+            head: [["Domain Name", "Number of IPs"]],
+            body: tableRows,
+            margin: { top: 10 },
+            styles: {
+              halign: "center", // Center align horizontally
+              valign: "middle" // Center align vertically
+            },
+            headStyles: {
+              halign: "center", // Center align horizontally for header
+              valign: "middle" // Center align vertically for header
+            },
+            bodyStyles: {
+              halign: "center", // Center align horizontally for body
+              valign: "middle" // Center align vertically for body
+            }
+          });
+
           doc.save("Domains_and_IPs.pdf");
         })
         .catch((error) => {
