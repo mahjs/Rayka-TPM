@@ -312,52 +312,42 @@ const Dashboard: FC = () => {
   const exportToPDF = () => {
     const doc = new jsPDF();
 
-    // Capture TreeMap as an image
-    const treeMapElement = treeMapRef.current;
-    if (treeMapElement) {
-      domtoimage
-        .toPng(treeMapElement, {
-          style: {
-            marginTop: "3rem"
-          }
-        })
-        .then((dataUrl) => {
-          const domainData = prepareDataForExport();
-          doc.addImage(dataUrl, "PNG", 10, 10, 180, 160);
+    const domainData = prepareDataForExport();
+    let tableRows = domainData.map((domain) => {
+      return [domain.name, domain.ips.length];
+    });
 
-          // Prepare the rows for the table
-          let tableRows = domainData.map((domain) => {
-            // For each domain, create a row with the domain name and the number of IPs
-            return [domain.name, domain.ips.length];
-          });
+    autoTable(doc, {
+      startY: 20,
+      head: [["Domain Name", "Number of IPs"]],
+      body: tableRows,
+      margin: { top: 10 },
+      styles: {
+        halign: "center",
+        valign: "middle"
+      },
+      headStyles: {
+        halign: "center",
+        valign: "middle"
+      },
+      bodyStyles: {
+        halign: "center",
+        valign: "middle"
+      }
+    });
 
-          // Add a new page for the table
-          doc.addPage();
-          autoTable(doc, {
-            startY: 20,
-            head: [["Domain Name", "Number of IPs"]],
-            body: tableRows,
-            margin: { top: 10 },
-            styles: {
-              halign: "center", // Center align horizontally
-              valign: "middle" // Center align vertically
-            },
-            headStyles: {
-              halign: "center", // Center align horizontally for header
-              valign: "middle" // Center align vertically for header
-            },
-            bodyStyles: {
-              halign: "center", // Center align horizontally for body
-              valign: "middle" // Center align vertically for body
-            }
-          });
+    domainData.forEach((domain, index) => {
+      doc.addPage();
+      doc.text(domain.name, 10, 10);
+      autoTable(doc, {
+        startY: 20,
+        head: [["IP Address"]],
+        body: domain.ips.map((ip) => [ip]),
+        margin: { top: 10 }
+      });
+    });
 
-          doc.save("Domains_and_IPs.pdf");
-        })
-        .catch((error) => {
-          console.error("Error capturing TreeMap screenshot", error);
-        });
-    }
+    doc.save("Domains_and_IPs.pdf");
   };
 
   const onExportClick = () => {
