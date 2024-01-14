@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -38,8 +38,7 @@ const Dashboard: FC = () => {
     }
   });
 
-  // State to hold the search input
-  const [searchInput, setSearchInput] = useState<string>("");
+  // Filter for getting Hosts or CDN
   const [selectedFilter, setSelectedFilter] = useState<
     "All_IPs" | "CDN" | "Host"
   >("All_IPs");
@@ -50,18 +49,8 @@ const Dashboard: FC = () => {
     }
   }, [selectedFilter]);
 
-  // Function to handle the search action
-  const handleSearch = () => {
-    // You would implement your search logic here
-    // For now, we'll just log the input to the console
-    console.log(`Search for: ${searchInput}`);
-  };
   const treeMapRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
   const dashboardRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    handleSearch();
-  };
 
   // State for Selecting a service & an address
   const [selectedServiceIndexs, setSelectedServiceIndexs] = useState<number[]>(
@@ -94,14 +83,26 @@ const Dashboard: FC = () => {
     totalIps,
     refetch: refetchAllData
   } = useTreeMapData();
-
   const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
+  const {
+    loadingDomains,
+    domains,
+    reFetchDomains: refetchDomainData
+  } = useDomains();
+  const [filteredDomains, setFilteredDomains] = useState<Domain[]>(
+    domains || []
+  );
 
   useEffect(() => {
     if (totalIps.length === 0) return;
     setFilteredIps(totalIps);
   }, [totalIps]);
 
+  /////////////////////////////////////////////////////////////////////
+  //////////////////// Filter functionality //////////////////////////
+
+  // Logic for searching with ip addresses.
+  const [searchInput, setSearchInput] = useState<string>("");
   useEffect(() => {
     if (isNaN(parseInt(searchInput)) || selectedServiceIndexs !== null) return;
 
@@ -112,31 +113,13 @@ const Dashboard: FC = () => {
     );
   }, [searchInput, selectedServiceIndexs]);
 
-  // State for getting all domains
-  const {
-    loadingDomains,
-    domains,
-    reFetchDomains: refetchDomainData
-  } = useDomains();
-  const [filteredDomains, setFilteredDomains] = useState<Domain[]>(
-    domains || []
-  );
-
-  const refetchDomains = () => {
-    refetchDomainData();
-    setTimeout(() => {
-      refetchAllData();
-    }, 500);
-  };
-
-  // Filter functionality
   useEffect(() => {
     if (!domains) return;
     if (searchInput === "") {
       setFilteredDomains(domains);
       return;
     }
-    // setSelectedServiceIndex(null);
+
     const filteredDomains = treeMapData.filter(
       (data) =>
         data.ips.filter((ip) =>
@@ -156,6 +139,15 @@ const Dashboard: FC = () => {
       )
     );
   }, [searchInput, domains, treeMapData]);
+  /////////////////////////////////////////////////////////////////////////////
+
+  // Make data updated after changing.
+  const refetchDomains = () => {
+    refetchDomainData();
+    setTimeout(() => {
+      refetchAllData();
+    }, 500);
+  };
 
   // State for getting the ip addresses
   const {
@@ -169,6 +161,7 @@ const Dashboard: FC = () => {
   const [ipsWithProvider, setIpsWithProvider] = useState<IpWithProvider[]>([]);
   const [loadingAddresses, setLoadingAddresses] = useState<boolean>(false);
 
+  // Make data updated after changing.
   const reFetchAddresses = () => {
     reFetchAddressesData();
     setTimeout(() => {
@@ -176,6 +169,7 @@ const Dashboard: FC = () => {
     }, 500);
   };
 
+  // Getting IP Addresses based on selected filters.
   useEffect(() => {
     const updateAddressesData = (data: IpWithProvider[]) => {
       if (Array.isArray(data)) {
@@ -187,16 +181,11 @@ const Dashboard: FC = () => {
         );
         setIpsWithProvider(filterResults);
       } else {
-        console.error(
-          "Expected an array of IP address objects, but received:",
-          data
-        );
         setFilteredIpAddresses([]);
       }
     };
 
     if (selectedFilter === "All_IPs" && ipAddressesForDomain) {
-      if (!ipAddressesForDomain) return;
       if (isNaN(parseInt(searchInput))) {
         setFilteredIpAddresses(ipAddressesForDomain);
         return;
@@ -210,13 +199,11 @@ const Dashboard: FC = () => {
           if (response && response.ips && Array.isArray(response.ips)) {
             updateAddressesData(response.ips);
           } else {
-            console.error("No data in CDN response", response);
             setFilteredIpAddresses([]);
           }
           setLoadingAddresses(false);
         })
-        .catch((error) => {
-          console.error("Error fetching CDN data:", error);
+        .catch(() => {
           setLoadingAddresses(false);
         });
     } else if (selectedFilter === "Host") {
@@ -224,21 +211,19 @@ const Dashboard: FC = () => {
       api.domain
         .getNotCDN()
         .then((response) => {
-          console.log("hot Response:", response);
           if (response && response.ips && Array.isArray(response.ips)) {
             updateAddressesData(response.ips);
           } else {
-            console.error("No data in CDN response", response);
             setFilteredIpAddresses([]);
           }
           setLoadingAddresses(false);
         })
-        .catch((error) => {
-          console.error("Error fetching CDN data:", error);
+        .catch(() => {
           setLoadingAddresses(false);
         });
     }
   }, [searchInput, selectedFilter, ipAddressesForDomain]);
+
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
@@ -252,6 +237,9 @@ const Dashboard: FC = () => {
       });
     }
   });
+
+  ///////////////////////////////////////////////////////////////////////////
+  /////////////////////// Export functionality /////////////////////////////
 
   // State for Downloading Export file
   const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
@@ -304,8 +292,6 @@ const Dashboard: FC = () => {
     // Write the Excel file if there are sheets
     if (wb.SheetNames.length > 0) {
       XLSX.writeFile(wb, "Domains_and_IPs.xlsx");
-    } else {
-      console.error("No data to export.");
     }
   };
 
@@ -340,9 +326,7 @@ const Dashboard: FC = () => {
           });
           doc.save("Domains_and_IPs.pdf");
         })
-        .catch((error) => {
-          console.error("Error capturing TreeMap screenshot", error);
-        });
+        .catch(() => {});
     }
   };
 
@@ -370,9 +354,7 @@ const Dashboard: FC = () => {
           link.href = dataUrl;
           link.click();
         })
-        .catch((error: any) => {
-          console.error("Error capturing screenshot", error);
-        });
+        .catch(() => {});
     }
   };
 
@@ -391,9 +373,7 @@ const Dashboard: FC = () => {
           link.href = dataUrl;
           link.click();
         })
-        .catch((error: any) => {
-          console.error("Error capturing screenshot", error);
-        });
+        .catch(() => {});
     }
   };
   const [isAllDataLoaded, setIsAllDataLoaded] = useState<boolean>(false);
@@ -490,7 +470,7 @@ const Dashboard: FC = () => {
                 dataForTreeChart={
                   loadingData ? [{ name: "nothing", value: 100 }] : treeMapData
                 }
-                selectedServiceIndexs={
+                selectedServiceIndexes={
                   searchInput === null
                     ? selectedServiceIndexs
                     : domains?.reduce((indexes: number[], domain, index) => {
@@ -546,11 +526,7 @@ const Dashboard: FC = () => {
               justifyContent: "space-between"
             }}
           >
-            <Search
-              value={searchInput}
-              setSearchInput={setSearchInput}
-              handleSubmit={handleSubmit}
-            />
+            <Search value={searchInput} setSearchInput={setSearchInput} />
             {isAllDataLoaded ? (
               <Button
                 onClick={() => setOpenExportModal(true)}

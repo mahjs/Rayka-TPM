@@ -25,25 +25,17 @@ import RangeDatePicker from "./DatePicker";
 import TitledValue from "./TitledValue";
 import * as domtoimage from "dom-to-image";
 import api from "../../services";
-import { DataForChart } from "../../services/chart";
+import getFillColorForAreaChart from "../../utils/getFillColorForAreaChart";
+import CustomTooltip from "./areaChat/CustomTooltip";
+import convertDataForAreaChart from "../../utils/convertDateForAreaChart";
 
 interface Props {
   isAllDataLoaded: boolean;
 }
-interface ChartDataFormat {
+export interface ChartDataFormat {
   receiveValue: number;
   sendValue: number;
   time: string;
-}
-
-function formatDate(date: Date) {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are zero-indexed
-  const day = date.getDate().toString().padStart(2, "0");
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-
-  return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
 const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
@@ -55,12 +47,6 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-
-  useEffect(() => {
-    setEndDate(null);
-    setStartDate(null);
-  }, [selectedTimeForAreaChart]);
-
   const [dataForChart, setDataForChart] = useState<ChartDataFormat[]>([
     {
       receiveValue: 0,
@@ -68,20 +54,8 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
       time: new Date().toLocaleDateString()
     }
   ]);
-  const [loading, setLoading] = useState<boolean>(false);
 
-  const convertDataForAreaChart = (data: [DataForChart[], DataForChart[]]) => {
-    const smallerIndex = Math.min(data[0].length, data[1].length);
-    const formattedData: ChartDataFormat[] = [];
-    for (let i = 0; i < smallerIndex; i++) {
-      formattedData.push({
-        receiveValue: +data[0][i].value / ( 10 ** 9),
-        sendValue: +data[1][i].value / ( 10 ** 9),
-        time: formatDate(new Date(+data[0][i].clock * 1000))
-      });
-    }
-    return formattedData;
-  };
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setShowDatePicker(false);
@@ -89,6 +63,11 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
       setSelectedTimeForAreaChart("custom");
     }
   }, [endDate]);
+
+  useEffect(() => {
+    setEndDate(null);
+    setStartDate(null);
+  }, [selectedTimeForAreaChart]);
 
   useEffect(() => {
     setLoading(true);
@@ -401,7 +380,7 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
           style={{ marginTop: "1rem" }}
         >
           <RechartAreaChart width={500} data={dataForChart}>
-            <Tooltip content={<CustomTooltipForAreaChart />} />
+            <Tooltip content={<CustomTooltip />} />
             <CartesianGrid strokeDasharray="2 2" className="w-96" />
             <YAxis
               domain={[1, 20]}
@@ -426,16 +405,16 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
             <Area
               type="monotone"
               dataKey="receiveValue"
-              stroke={"#608DB4"}
-              fill="#608DB4"
+              stroke={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
+              fill={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
               strokeWidth={3}
               style={{ filter: "url(#glow)" }}
             />
             <Area
               type="monotone"
               dataKey="sendValue"
-              stroke={"#B46092"}
-              fill="#B46092"
+              stroke={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
+              fill={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
               strokeWidth={3}
               style={{ filter: "url(#glow)" }}
             />
@@ -481,50 +460,6 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
       </Box>
     </Box>
   );
-};
-
-interface CustomTooltipForAreaChartProps {
-  active?: boolean;
-  payload?: any;
-}
-
-const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
-  active,
-  payload
-}) => {
-  if (active && payload && payload.length) {
-    return (
-      <div
-        style={{
-          background: "#fff",
-          color: "#333",
-          boxShadow: "0 0 14px  rgb(0 0 0 / 40%)",
-          padding: "1px",
-          textAlign: "left",
-          borderRadius: "1rem"
-        }}
-      >
-        <div
-          style={{
-            margin: "13px 19px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            fontFamily: "YekanBakh-Regular"
-          }}
-        >
-          <Typography color="#608DB4">
-            Receive: {`${payload[0].value.toFixed(3)} Gbps`}
-          </Typography>
-          <Typography color="#B46092">
-            Send: {`${payload[1].value.toFixed(3)} Gbps`}
-          </Typography>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
 };
 
 export default AreaChart;

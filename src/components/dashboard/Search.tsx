@@ -6,10 +6,9 @@ import { RxCross2 } from "react-icons/rx";
 interface Props {
   setSearchInput: React.Dispatch<React.SetStateAction<string>>;
   value: string;
-  handleSubmit: React.FormEventHandler<HTMLFormElement> | undefined;
 }
 
-const Search: FC<Props> = ({ setSearchInput, value, handleSubmit }) => {
+const Search: FC<Props> = ({ setSearchInput, value }) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => {
@@ -19,7 +18,6 @@ const Search: FC<Props> = ({ setSearchInput, value, handleSubmit }) => {
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit}
       sx={{
         minWidth: "250px",
         maxHeight: "40px",
@@ -30,7 +28,7 @@ const Search: FC<Props> = ({ setSearchInput, value, handleSubmit }) => {
         position: "relative",
         border: "1px solid #D1D1D1",
         borderBottomColor: "black",
-        borderRadius: "5px",
+        borderRadius: "5px"
       }}
     >
       <Button
@@ -38,14 +36,14 @@ const Search: FC<Props> = ({ setSearchInput, value, handleSubmit }) => {
         sx={{
           padding: ".5rem",
           position: "absolute",
-          left: "-1rem",
+          left: "-1rem"
         }}
       >
         <GoSearch
           style={{
             height: "23px",
             width: "25px",
-            color: "black",
+            color: "black"
           }}
         />
       </Button>
@@ -57,7 +55,7 @@ const Search: FC<Props> = ({ setSearchInput, value, handleSubmit }) => {
         sx={{
           fontFamily: "YekanBakh-Thin",
           padding: ".5rem",
-          border: "none",
+          border: "none"
         }}
       />
       {value && (
@@ -68,7 +66,7 @@ const Search: FC<Props> = ({ setSearchInput, value, handleSubmit }) => {
             left: "20%",
             top: "50%",
             transform: "translateY(-50%)",
-            cursor: "pointer",
+            cursor: "pointer"
           }}
         />
       )}
