@@ -620,7 +620,11 @@ const Dashboard: FC = () => {
               showData={
                 isNaN(parseInt(searchInput))
                   ? selectedServiceIndexs.length > 0 ||
-                    selectedFilter !== "All_IPs"
+                    (selectedFilter !== "All_IPs" &&
+                      !(
+                        selectedServiceIndexs.length === 0 ||
+                        (selectedFilter !== "CDN" && selectedFilter !== "Host")
+                      ))
                   : true
               }
               isWithProvider={selectedFilter !== "All_IPs"}
