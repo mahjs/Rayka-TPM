@@ -415,7 +415,7 @@ const AddressesTable: FC<Props> = ({
                         {address.ip}
                         <span
                           style={{
-                            fontSize: ".8rem",
+                            fontSize: ".95rem",
                             opacity: ".7",
                             marginLeft: ".2rem"
                           }}

@@ -308,7 +308,6 @@ const Dashboard: FC = () => {
       console.error("No data to export.");
     }
   };
-  console.log("ddddd", domains);
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -325,7 +324,6 @@ const Dashboard: FC = () => {
         .then((dataUrl) => {
           const domainData = prepareDataForExport();
           doc.addImage(dataUrl, "PNG", 10, 10, 180, 160);
-          console.log(domainData);
 
           // Prepare the rows for the table
           let tableRows = domainData.map((domain) => {
