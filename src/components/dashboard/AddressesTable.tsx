@@ -264,8 +264,8 @@ const AddressesTable: FC<Props> = ({
               addressesData &&
               addressesData
                 .slice(
-                  (addressTablePage - 1) * 10,
-                  Math.min((addressTablePage - 1) * 10 + 10, addressesData.length)
+                  (addressTablePage - 1) * 5,
+                  Math.min((addressTablePage - 1) * 5 + 5, addressesData.length)
                 )
                 .map((address, index) => (
                   <Box
@@ -453,7 +453,7 @@ const AddressesTable: FC<Props> = ({
                 color="primary"
                 onChange={handleChangePage}
                 count={Math.ceil(
-                  (addressesData && addressesData.length / 10) || 0
+                  (addressesData && addressesData.length / 5) || 0
                 )}
                 variant="outlined"
                 shape="rounded"
