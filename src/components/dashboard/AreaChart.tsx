@@ -55,7 +55,20 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [showProgress, setShowProgress] = useState(false);
+  const [showButton, setShowButton] = useState(false);
 
+  useEffect(() => {
+    setShowProgress(true);
+    setShowButton(false);
+
+    const timer = setTimeout(() => {
+      setShowProgress(false);
+      setShowButton(true);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
   useEffect(() => {
     setEndDate(null);
     setStartDate(null);
@@ -342,7 +355,9 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
             </MenuItem>
           </Select>
         </Stack>
-        {isAllDataLoaded ? (
+        {showProgress && <CircularProgress />}
+
+        {showButton && (
           <Button
             onClick={captureScreenshot}
             sx={{
@@ -361,8 +376,6 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
           >
             دریافت خروجی
           </Button>
-        ) : (
-          <CircularProgress />
         )}
       </Box>
       <Box
