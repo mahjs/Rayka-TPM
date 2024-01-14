@@ -405,8 +405,8 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
             <CartesianGrid strokeDasharray="2 2" className="w-96" />
             <YAxis
               domain={[1, 20]}
-              ticks={[1, 5, 10, 20]}
-              scale="log"
+              ticks={[0, 5, 10, 15, 20]}
+              scale="linear"
               label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
               tickFormatter={(tick) => {
                 if (tick === 1) {
