@@ -338,6 +338,8 @@ const AddressesTable: FC<Props> = ({
                   </Box>
                 ))}
             {isWithProvider &&
+              !loading &&
+              showData &&
               ipsWithProvider &&
               ipsWithProvider
                 .slice(
@@ -426,7 +428,7 @@ const AddressesTable: FC<Props> = ({
                     </Typography>
                   </Box>
                 ))}
-            {!showData && !isWithProvider && (
+            {!showData && !loading && (
               <Typography
                 fontFamily="YekanBakh-Regular"
                 sx={{
