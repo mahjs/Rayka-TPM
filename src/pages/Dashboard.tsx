@@ -67,7 +67,6 @@ const Dashboard: FC = () => {
   const [selectedServiceIndexs, setSelectedServiceIndexs] = useState<number[]>(
     []
   );
-  console.log(selectedServiceIndexs);
 
   const handleSelectedServiceIndex = (index: number) => {
     const findIndex = selectedServiceIndexs?.find(
@@ -616,7 +615,7 @@ const Dashboard: FC = () => {
               }
               showData={
                 isNaN(parseInt(searchInput))
-                  ? selectedServiceIndexs !== null ||
+                  ? selectedServiceIndexs.length > 0 ||
                     selectedFilter !== "All_IPs"
                   : true
               }
