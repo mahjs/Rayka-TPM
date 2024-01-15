@@ -5,12 +5,12 @@ import {
   Typography,
   Button,
   TextField,
-  CircularProgress,
+  CircularProgress
 } from "@mui/material";
 import { FC, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
 import api from "../../services";
-import axios from 'axios';
+import axios from "axios";
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,7 +26,7 @@ const AddIpAddressesModal: FC<Props> = ({
   openModal,
   setOpenModal,
   refetchIpAddresses,
-  domainName,
+  domainName
 }) => {
   const [bulkIpInput, setBulkIpInput] = useState("");
 
@@ -40,7 +40,7 @@ const AddIpAddressesModal: FC<Props> = ({
 
   const handleSubmit = () => {
     const parsedIps = bulkIpInput.split(/,|\n/).map((ip) => ip.trim());
-  
+
     // Clear the input field
     setBulkIpInput("");
     if (
@@ -51,17 +51,16 @@ const AddIpAddressesModal: FC<Props> = ({
       toast.error("Please enter a valid IP address and domain name.");
       return;
     }
-    
+
     // Prepare the payload
     const payload = {
       ips: parsedIps.filter(isValidIp)
     };
     setAddLoading(true);
     // Send the valid IPs to the server
-    axios.post("http://10.201.228.64:7000/get-ip", payload)
-      .then(response => {
-        console.log('IPs sent to server successfully:', response.data);
-        
+    axios
+      .post("http://10.201.228.64:7000/get-ip", payload)
+      .then(() => {
         // Proceed with adding IP addresses to the domain
         api.domain
           .addIpAddressesToDomain(domainName, parsedIps)
@@ -76,9 +75,9 @@ const AddIpAddressesModal: FC<Props> = ({
             setAddLoading(false);
           });
       })
-      .catch(error => {
-        console.error('Error sending IPs to server:', error);
-        toast.error('Failed to send IPs to the server.');
+      .catch((error) => {
+        console.error("Error sending IPs to server:", error);
+        toast.error("Failed to send IPs to the server.");
         // Decide whether to proceed with adding the IPs to the domain
         // if the server call is critical, you might want to stop the process here
       });
@@ -96,7 +95,7 @@ const AddIpAddressesModal: FC<Props> = ({
         zIndex: "1000",
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
+        alignItems: "center"
       }}
     >
       <>
@@ -108,7 +107,7 @@ const AddIpAddressesModal: FC<Props> = ({
             borderRadius: "1.5rem",
             width: "300px",
             paddingY: "1rem",
-            paddingX: "2rem",
+            paddingX: "2rem"
           }}
         >
           <Box
@@ -116,7 +115,7 @@ const AddIpAddressesModal: FC<Props> = ({
               display: "flex",
               flexDirection: "column",
               gap: ".5rem",
-              marginBottom: "1rem",
+              marginBottom: "1rem"
             }}
           >
             <Stack
@@ -127,7 +126,7 @@ const AddIpAddressesModal: FC<Props> = ({
               <Typography
                 sx={{
                   fontSize: "1.4rem",
-                  fontWeight: "900",
+                  fontWeight: "900"
                 }}
               >
                 افزودن آدرس
@@ -138,7 +137,7 @@ const AddIpAddressesModal: FC<Props> = ({
                   setOpenModal(false);
                 }}
                 sx={{
-                  color: "#000",
+                  color: "#000"
                 }}
               >
                 بستن پنجره
@@ -155,7 +154,7 @@ const AddIpAddressesModal: FC<Props> = ({
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: "1rem",
+              gap: "1rem"
             }}
           >
             <TextField
@@ -176,8 +175,8 @@ const AddIpAddressesModal: FC<Props> = ({
                 borderRadius: ".5rem",
                 ":hover": {
                   background: "#0F6CBD",
-                  color: "#fff",
-                },
+                  color: "#fff"
+                }
               }}
             >
               {addLoading ? (
