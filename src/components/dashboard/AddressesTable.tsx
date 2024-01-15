@@ -265,7 +265,10 @@ const AddressesTable: FC<Props> = ({
               addressesData
                 .slice(
                   (addressTablePage - 1) * 10,
-                  Math.min((addressTablePage - 1) * 10 + 10, addressesData.length)
+                  Math.min(
+                    (addressTablePage - 1) * 10 + 10,
+                    addressesData.length
+                  )
                 )
                 .map((address, index) => (
                   <Box

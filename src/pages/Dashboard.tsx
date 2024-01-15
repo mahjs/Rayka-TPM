@@ -44,7 +44,11 @@ const Dashboard: FC = () => {
   >("All_IPs");
 
   useEffect(() => {
-    if (selectedFilter !== "All_IPs") {
+    if (
+      selectedFilter !== "All_IPs" &&
+      selectedFilter !== "CDN" &&
+      selectedFilter !== "Host"
+    ) {
       setSelectedServiceIndexs([]);
     }
   }, [selectedFilter]);
