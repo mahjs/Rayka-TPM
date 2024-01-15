@@ -4,7 +4,7 @@ declare module "dom-to-image" {
     bgcolor?: string;
     width?: number;
     height?: number;
-    style?: {};
+    style?: { [key in string]: string };
     quality?: number;
     imagePlaceholder?: string;
     cacheBust?: boolean;
