@@ -44,7 +44,11 @@ const Dashboard: FC = () => {
   >("All_IPs");
 
   useEffect(() => {
-    if (selectedFilter !== "All_IPs") {
+    if (
+      selectedFilter !== "All_IPs" &&
+      selectedFilter !== "CDN" &&
+      selectedFilter !== "Host"
+    ) {
       setSelectedServiceIndexs([]);
     }
   }, [selectedFilter]);
@@ -298,36 +302,42 @@ const Dashboard: FC = () => {
   const exportToPDF = () => {
     const doc = new jsPDF();
 
-    // Capture TreeMap as an image
-    const treeMapElement = treeMapRef.current;
-    if (treeMapElement) {
-      domtoimage
-        .toPng(treeMapElement, {
-          style: {
-            marginTop: "3rem"
-          }
-        })
-        .then((dataUrl) => {
-          doc.text(`Total IPs: ${totalIps.length}`, 10, 30);
-          doc.text(`total Domains: ${domainDownloadData.length}`, 143, 30);
-          doc.addImage(dataUrl, "PNG", 10, 10, 180, 160);
+    const domainData = prepareDataForExport();
+    let tableRows = domainData.map((domain) => {
+      return [domain.name, domain.ips.length];
+    });
 
-          const domainData = prepareDataForExport();
-          domainData.forEach((domain, index) => {
-            // Add new page for each domain
-            doc.addPage();
-            doc.text(domain.name, 10, 10); // Position the domain name text
-            autoTable(doc, {
-              startY: 20,
-              head: [["IP Address"]],
-              body: domain.ips.map((ip) => [ip]),
-              margin: { top: 10 }
-            });
-          });
-          doc.save("Domains_and_IPs.pdf");
-        })
-        .catch(() => {});
-    }
+    autoTable(doc, {
+      startY: 20,
+      head: [["Domain Name", "Number of IPs"]],
+      body: tableRows,
+      margin: { top: 10 },
+      styles: {
+        halign: "center",
+        valign: "middle"
+      },
+      headStyles: {
+        halign: "center",
+        valign: "middle"
+      },
+      bodyStyles: {
+        halign: "center",
+        valign: "middle"
+      }
+    });
+
+    domainData.forEach((domain, index) => {
+      doc.addPage();
+      doc.text(domain.name, 10, 10);
+      autoTable(doc, {
+        startY: 20,
+        head: [["IP Address"]],
+        body: domain.ips.map((ip) => [ip]),
+        margin: { top: 10 }
+      });
+    });
+
+    doc.save("Domains_and_IPs.pdf");
   };
 
   const onExportClick = () => {
@@ -592,7 +602,11 @@ const Dashboard: FC = () => {
               showData={
                 isNaN(parseInt(searchInput))
                   ? selectedServiceIndexs.length > 0 ||
-                    selectedFilter !== "All_IPs"
+                    (selectedFilter !== "All_IPs" &&
+                      !(
+                        selectedServiceIndexs.length === 0 ||
+                        (selectedFilter !== "CDN" && selectedFilter !== "Host")
+                      ))
                   : true
               }
               isWithProvider={selectedFilter !== "All_IPs"}

@@ -265,7 +265,10 @@ const AddressesTable: FC<Props> = ({
               addressesData
                 .slice(
                   (addressTablePage - 1) * 10,
-                  Math.min((addressTablePage - 1) * 10 + 10, addressesData.length)
+                  Math.min(
+                    (addressTablePage - 1) * 10 + 10,
+                    addressesData.length
+                  )
                 )
                 .map((address, index) => (
                   <Box
@@ -338,6 +341,8 @@ const AddressesTable: FC<Props> = ({
                   </Box>
                 ))}
             {isWithProvider &&
+              !loading &&
+              showData &&
               ipsWithProvider &&
               ipsWithProvider
                 .slice(
@@ -415,7 +420,7 @@ const AddressesTable: FC<Props> = ({
                         {address.ip}
                         <span
                           style={{
-                            fontSize: ".8rem",
+                            fontSize: ".95rem",
                             opacity: ".7",
                             marginLeft: ".2rem"
                           }}
@@ -426,7 +431,7 @@ const AddressesTable: FC<Props> = ({
                     </Typography>
                   </Box>
                 ))}
-            {!showData && !isWithProvider && (
+            {!showData && !loading && (
               <Typography
                 fontFamily="YekanBakh-Regular"
                 sx={{

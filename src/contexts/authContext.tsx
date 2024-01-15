@@ -3,7 +3,7 @@ import {
   PropsWithChildren,
   createContext,
   useContext,
-  useState,
+  useState
 } from "react";
 import storage from "../services/storage";
 import config from "../services/config";
@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   isLogin: false,
   isAdmin: false,
   login: () => {},
-  logout: () => {},
+  logout: () => {}
 });
 
 const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -32,25 +32,29 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     try {
       const logData = {
         name: username,
-        activity: 'خروج از حساب کاربری',
+        activity: "خروج از حساب کاربری",
         description: `خروج کاربر با نام کاربری ${username} از سیستم`
       };
-  
-      await fetch('http://185.11.89.120:51731/logs', {
-        method: 'POST',
+
+      await fetch("http://185.11.89.120:51731/logs", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(logData),
+        body: JSON.stringify(logData)
       });
     } catch (error) {
-      console.error('Error sending logout log:', error);
+      console.error("Error sending logout log:", error);
     }
   };
 
   const login = () => {
     setIsLogin(true);
+    setTimeout(() => {
+      logout();
+    }, 604800000);
   };
+
   const logout = async () => {
     const username = storage.get(config.userName); // Get the username from storage
     if (username) {
