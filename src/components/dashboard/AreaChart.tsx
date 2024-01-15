@@ -75,8 +75,8 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
     const formattedData: ChartDataFormat[] = [];
     for (let i = 0; i < smallerIndex; i++) {
       formattedData.push({
-        receiveValue: +data[0][i].value / (8 * 10 ** 9),
-        sendValue: +data[1][i].value / (8 * 10 ** 9),
+        receiveValue: +data[0][i].value / (10 ** 9),
+        sendValue: +data[1][i].value / (10 ** 9),
         time: formatDate(new Date(+data[0][i].clock * 1000))
       });
     }
@@ -95,29 +95,29 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
     Promise.all([
       startDate && endDate
         ? api.chart
-            .getReceiveDataForCustomDate(
-              startDate.getTime() / 1000,
-              endDate.getTime() / 1000,
-              selectedServerForAreaChart
-            )
-            .then((res) => res.data.result)
+          .getReceiveDataForCustomDate(
+            startDate.getTime() / 1000,
+            endDate.getTime() / 1000,
+            selectedServerForAreaChart
+          )
+          .then((res) => res.data.result)
         : api.chart
-            .getReceiveData(
-              selectedTimeForAreaChart,
-              selectedServerForAreaChart
-            )
-            .then((res) => res.data.result),
+          .getReceiveData(
+            selectedTimeForAreaChart,
+            selectedServerForAreaChart
+          )
+          .then((res) => res.data.result),
       startDate && endDate
         ? api.chart
-            .getSendDataForCustomDate(
-              startDate.getTime() / 1000,
-              endDate.getTime() / 1000,
-              selectedServerForAreaChart
-            )
-            .then((res) => res.data.result)
+          .getSendDataForCustomDate(
+            startDate.getTime() / 1000,
+            endDate.getTime() / 1000,
+            selectedServerForAreaChart
+          )
+          .then((res) => res.data.result)
         : api.chart
-            .getSendData(selectedTimeForAreaChart, selectedServerForAreaChart)
-            .then((res) => res.data.result)
+          .getSendData(selectedTimeForAreaChart, selectedServerForAreaChart)
+          .then((res) => res.data.result)
     ]).then((data) => {
       setDataForChart(convertDataForAreaChart(data).reverse());
       setLoading(false);
@@ -244,9 +244,9 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
                 },
                 ".MuiOutlinedInput-notchedOutline": { border: 0 },
                 "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                  {
-                    border: 0
-                  }
+                {
+                  border: 0
+                }
               }}
             >
               <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Hour">
@@ -305,9 +305,9 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
               },
               ".MuiOutlinedInput-notchedOutline": { border: 0 },
               "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                {
-                  border: 0
-                }
+              {
+                border: 0
+              }
             }}
           >
             <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server1">
