@@ -88,8 +88,8 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
     const formattedData: ChartDataFormat[] = [];
     for (let i = 0; i < smallerIndex; i++) {
       formattedData.push({
-        receiveValue: +data[0][i].value / (8 * 10 ** 9),
-        sendValue: +data[1][i].value / (8 * 10 ** 9),
+        receiveValue: +data[0][i].value / ( 10 ** 9),
+        sendValue: +data[1][i].value / ( 10 ** 9),
         time: formatDate(new Date(+data[0][i].clock * 1000))
       });
     }
