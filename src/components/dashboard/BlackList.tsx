@@ -93,8 +93,10 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal }) => {
     }
   };
 
+  const [loadingAddIp, setLoadingAddIp] = useState<boolean>(false);
   const handleAddIp = () => {
     if (newIp) {
+      setLoadingAddIp(true);
       axios
         .post("http://10.201.228.64:5001/add", {
           ips: [newIp]
@@ -102,15 +104,19 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal }) => {
         .then(() => {
           refetchBlackListIps();
           setNewIp("");
+          setLoadingAddIp(false);
         })
         .catch((error) => {
           console.error("Error adding IP", error);
+          setLoadingAddIp(false);
         });
     }
   };
 
+  const [loadingAddDomain, setLoadingAddDomain] = useState<boolean>(false);
   const handleAddDomain = () => {
     if (newDomain) {
+      setLoadingAddDomain(true);
       axios
         .post("http://10.201.228.64:5000/addblacklist", {
           domains: [{ name: newDomain }]
@@ -118,8 +124,10 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal }) => {
         .then(() => {
           refetchBlackListDomains();
           setNewDomain("");
+          setLoadingAddDomain(false);
         })
         .catch((error) => {
+          setLoadingAddDomain(false);
           console.error("Error adding Domain", error);
         });
     }
@@ -248,6 +256,7 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal }) => {
               sx={{ ml: "6.5em" }}
             />
             <Button
+              disabled={loadingAddIp}
               onClick={handleAddIp}
               sx={{
                 display: "flex",
@@ -284,6 +293,7 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal }) => {
               onChange={(e) => setNewDomain(e.target.value)}
             />
             <Button
+              disabled={loadingAddDomain}
               onClick={handleAddDomain}
               sx={{
                 display: "flex",
