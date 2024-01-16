@@ -62,7 +62,7 @@ const ServicesTable: FC<Props> = ({
   const [openAddDomainModal, setOpenAddDomainModal] = useState<boolean>(false);
   const [blackListModal, setBlackListModal] = useState<boolean>(false);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
-  const [ipAddress, setIpAddress] = useState<Blacklist[]>([]);
+
   const handleSelectDomain = (
     _event: React.ChangeEvent<HTMLInputElement>,
     domain: string
@@ -80,11 +80,7 @@ const ServicesTable: FC<Props> = ({
       setSelectedDomains([]);
     });
   };
-  useEffect(() => {
-    api.domain.getBlackList().then((res) => {
-      setIpAddress(res);
-    });
-  }, []);
+
   return (
     <>
       <Box
@@ -99,7 +95,7 @@ const ServicesTable: FC<Props> = ({
             justifyContent: "space-between"
           }}
         >
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: "flex" }}>
             <Typography
               fontFamily="YekanBakh-Medium"
               component="h3"
@@ -133,7 +129,7 @@ const ServicesTable: FC<Props> = ({
               </Button>
             )}
           </Box>
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: "flex" }}>
             {selectedDomains.length > 0 && isAdmin && (
               <Button
                 onClick={handleDeleteDomains}
@@ -310,11 +306,7 @@ const ServicesTable: FC<Props> = ({
         refetchDomains={refetchDomains}
         refetchIpAddresses={refetchIpAddresses}
       />
-      <BlackList
-        openModal={blackListModal}
-        setOpenModal={setBlackListModal}
-        ipAddress={ipAddress}
-      />
+      <BlackList openModal={blackListModal} setOpenModal={setBlackListModal} />
     </>
   );
 };
