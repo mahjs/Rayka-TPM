@@ -456,7 +456,15 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
               strokeDasharray="5 5"
               opacity=".5"
             />
-            <Brush />
+            <Brush
+              style={{
+                borderRadius: ".5rem"
+              }}
+              height={30}
+              stroke="#0F6CBD"
+              fill="#5E819F88"
+              travellerWidth={15}
+            />
           </RechartAreaChart>
         </ResponsiveContainer>
       </Box>
