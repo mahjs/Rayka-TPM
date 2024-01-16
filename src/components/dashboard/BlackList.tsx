@@ -1,40 +1,48 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useRef, useState } from "react";
 import axios from "axios";
 import * as domtoimage from "dom-to-image";
-import { Modal, Box, Stack, Typography, Button, Checkbox, Input } from "@mui/material";
-import { Blacklist } from "../../services/domain";
+import {
+  Modal,
+  Box,
+  Stack,
+  Typography,
+  Button,
+  Checkbox,
+  Input,
+  Divider,
+  CircularProgress
+} from "@mui/material";
 import Cross from "../../assets/images/cross.svg";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { GoPlus } from "react-icons/go";
+import useBlackListDomains from "../../hooks/useBlackListDomains";
+import useBlackListIps from "../../hooks/useBlackListIps";
 
 interface Props {
   openModal: boolean;
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
-  ipAddress: Blacklist[];
 }
 
-const ariaLabel = { 'aria-label': 'description' };
+const ariaLabel = { "aria-label": "description" };
 
-const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
+const BlackList: FC<Props> = ({ openModal, setOpenModal }) => {
   const chartRef = useRef(null);
-  const [blacklistedDomains, setBlacklistedDomains] = useState<string[]>([]);
-  const [selectedIps, setSelectedIps] = useState<Set<string>>(new Set());
-  const [localIpAddress, setLocalIpAddress] = useState<Blacklist[]>([]);
-  const [newIp, setNewIp] = useState<string>('');
-  const [newDomain, setNewDomain] = useState<string>('');
-  const [ipDomainMapping, setIpDomainMapping] = useState<Map<string, string>>(new Map());
+  const [newIp, setNewIp] = useState<string>("");
+  const [newDomain, setNewDomain] = useState<string>("");
+  const [selectedIps, setSelectedIps] = useState<string[]>([]);
+  const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
 
-  useEffect(() => {
-    axios.get("http://10.201.228.64:5000/blacklist")
-      .then((response) => {
-        if (response.data && response.data.blacklisted_domains) {
-          setBlacklistedDomains(response.data.blacklisted_domains);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, []);
+  const {
+    blackListDomains,
+    loading: loadingBlackListDomians,
+    refetch: refetchBlackListDomains
+  } = useBlackListDomains();
+
+  const {
+    blackListIps,
+    loading: loadingBlackListIps,
+    refetch: refetchBlackListIps
+  } = useBlackListIps();
 
   const captureScreenshot = () => {
     const chartElement = chartRef.current;
@@ -60,98 +68,93 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
     }
   };
 
-  const handleCheckboxChange = (ip: string) => {
-    setSelectedIps((prevSelectedIps) => {
-      const newSelectedIps = new Set(prevSelectedIps);
-      if (newSelectedIps.has(ip)) {
-        newSelectedIps.delete(ip);
-      } else {
-        newSelectedIps.add(ip);
-      }
-      return newSelectedIps;
-    });
+  const handleIpsCheckboxChange = (ip: string) => {
+    const currentIp = selectedIps.find((searchingIp) => searchingIp === ip);
+    console.log(currentIp);
+
+    if (currentIp) {
+      setSelectedIps((prevIps) =>
+        prevIps.filter((searchingIp) => searchingIp !== ip)
+      );
+    } else {
+      setSelectedIps((prevIps) => [...prevIps, ip]);
+    }
   };
-
-
-  useEffect(() => {
-    setLocalIpAddress(ipAddress);
-  }, [ipAddress]);
-
-  const handleDeleteSelectedIps = () => {
-    const ipsToRemove: string[] = [];
-    const domainsToRemove: string[] = [];
-    selectedIps.forEach(ip => {
-      ipsToRemove.push(ip);
-      const domain = ipDomainMapping.get(ip);
-      if (domain) {
-        domainsToRemove.push(domain);
-      }
-    });
-
-    removeFromDatabase(ipsToRemove, domainsToRemove);
-    const newLocalIpAddress = localIpAddress.filter(ipInfo => !ipsToRemove.includes(ipInfo.ip_address));
-    const newBlacklistedDomains = blacklistedDomains.filter(domain => !domainsToRemove.includes(domain));
-    const newIpDomainMapping = new Map(ipDomainMapping);
-    ipsToRemove.forEach(ip => newIpDomainMapping.delete(ip));
-    setLocalIpAddress(newLocalIpAddress);
-    setBlacklistedDomains(newBlacklistedDomains);
-    setIpDomainMapping(newIpDomainMapping);
-    setSelectedIps(new Set());
+  const handleDomainsCheckboxChange = (domain: string) => {
+    const currentDomain = selectedDomains.find(
+      (searchingDomain) => searchingDomain === domain
+    );
+    if (currentDomain) {
+      setSelectedDomains((prevDomains) =>
+        prevDomains.filter((searchingIp) => searchingIp !== domain)
+      );
+    } else {
+      setSelectedDomains((prevDomains) => [...prevDomains, domain]);
+    }
   };
-
 
   const handleAddIp = () => {
     if (newIp) {
-      axios.post("http://10.201.228.64:5001/add", {
-        ips: [newIp]
-      }).then(response => {
-        console.log("IP added successfully", response);
-        setLocalIpAddress(prevIps => [...prevIps, { ip_address: newIp }]);
-        setNewIp('');
-      }).catch(error => {
-        console.error("Error adding IP", error);
-      });
+      axios
+        .post("http://10.201.228.64:5001/add", {
+          ips: [newIp]
+        })
+        .then(() => {
+          refetchBlackListIps();
+          setNewIp("");
+        })
+        .catch((error) => {
+          console.error("Error adding IP", error);
+        });
     }
   };
 
   const handleAddDomain = () => {
     if (newDomain) {
-      axios.post("http://10.201.228.64:5000/addblacklist", {
-        domains: [{ name: newDomain }]
-      }).then(response => {
-        console.log("Domain added successfully", response);
-        setBlacklistedDomains(prevDomains => [...prevDomains, newDomain]);
-        setIpDomainMapping(prevMap => new Map(prevMap.set(newIp, newDomain)));
-        setNewDomain('');
-      }).catch(error => {
-        console.error("Error adding Domain", error);
-      });
+      axios
+        .post("http://10.201.228.64:5000/addblacklist", {
+          domains: [{ name: newDomain }]
+        })
+        .then(() => {
+          refetchBlackListDomains();
+          setNewDomain("");
+        })
+        .catch((error) => {
+          console.error("Error adding Domain", error);
+        });
     }
   };
 
-  const removeFromDatabase = (ipsToRemove: string[], domainsToRemove: string[]) => {
-    if (ipsToRemove.length > 0) {
-      axios.post("http://10.201.228.64:5001/delete", { ips: ipsToRemove })
-        .then(response => {
+  const removeIpsFromDatabase = () => {
+    if (selectedIps.length > 0) {
+      axios
+        .post("http://10.201.228.64:5001/delete", { ips: selectedIps })
+        .then((response) => {
+          refetchBlackListIps();
+          setSelectedIps([]);
           console.log("IPs removed successfully", response);
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error removing IPs", error);
         });
     }
-    if (domainsToRemove.length > 0) {
-      axios.post("http://10.201.228.64:5000/remblacklist", {
-        domains: domainsToRemove.map(domain => ({ name: domain }))
-      })
-        .then(response => {
+  };
+  const removeDomainsFromDatabase = () => {
+    if (selectedDomains.length > 0) {
+      axios
+        .post("http://10.201.228.64:5000/remblacklist", {
+          domains: selectedDomains.map((domain) => ({ name: domain }))
+        })
+        .then((response) => {
+          refetchBlackListDomains();
+          setSelectedDomains([]);
           console.log("Domains removed successfully", response);
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error removing domains", error);
         });
     }
   };
-
 
   return (
     <Modal
@@ -208,25 +211,6 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
             >
               دریافت خروجی
             </Button>
-            <Button
-              onClick={handleDeleteSelectedIps}
-              sx={{
-                color: "red",
-                fontFamily: "YekanBakh-Regular",
-                display: selectedIps.size > 0 ? "flex" : "none",
-                alignItems: "center",
-                gap: ".1rem"
-              }}
-            >
-              <RiDeleteBin6Line
-                style={{
-                  width: "15px",
-                  height: "15px",
-                  color: "red"
-                }}
-              />
-              حذف
-            </Button>
           </Box>
           <Button
             onClick={() => setOpenModal(false)}
@@ -238,13 +222,26 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
             }}
           >
             بستن پنجره
-            <img alt="cross" style={{ marginRight: "0.5em" }} width={18} height={18} src={Cross} />
+            <img
+              alt="cross"
+              style={{ marginRight: "0.5em" }}
+              width={18}
+              height={18}
+              src={Cross}
+            />
           </Button>
         </Stack>
         <Box sx={{ display: "flex" }}>
-          <Box sx={{ my: 2 }}>
+          <Box
+            sx={{ my: 2 }}
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAddIp();
+            }}
+          >
             <Input
-              placeholder="آدرس های IP"
+              placeholder="آدرس جدید"
               inputProps={ariaLabel}
               value={newIp}
               onChange={(e) => setNewIp(e.target.value)}
@@ -272,9 +269,16 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
               افزودن
             </Button>
           </Box>
-          <Box sx={{ my: 2 }}>
+          <Box
+            sx={{ my: 2 }}
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAddDomain();
+            }}
+          >
             <Input
-              placeholder="آدرس های دامنه"
+              placeholder="دامنه جدید"
               inputProps={ariaLabel}
               value={newDomain}
               onChange={(e) => setNewDomain(e.target.value)}
@@ -302,22 +306,52 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
             </Button>
           </Box>
         </Box>
+        <Divider />
         <Box
           sx={{
             display: "flex",
             flexWrap: "wrap",
-            justifyContent: 'space-between',
-            gap: ".5rem",
-            p: '0.5em'
+            gap: "5rem",
+            p: "0.5em"
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-            <Typography sx={{ fontFamily: "YekanBakh-Medium" }}>آدرس های IP</Typography>
-            {localIpAddress.map((ipInfo, index) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+          <Box sx={{ display: "flex", flexDirection: "column", mb: 2 }}>
+            <Stack direction="row" alignItems="center" height="2rem">
+              <Typography sx={{ fontFamily: "YekanBakh-Medium" }}>
+                آدرس های IP
+              </Typography>
+              <Button
+                onClick={removeIpsFromDatabase}
+                sx={{
+                  color: "red",
+                  fontFamily: "YekanBakh-Regular",
+                  display: selectedIps.length > 0 ? "flex" : "none",
+                  alignItems: "center",
+                  gap: ".1rem"
+                }}
+              >
+                <RiDeleteBin6Line
+                  style={{
+                    width: "15px",
+                    height: "15px",
+                    color: "red"
+                  }}
+                />
+                حذف
+              </Button>
+            </Stack>
+            <Divider />
+            {blackListIps.map((ipInfo, index) => (
+              <Box
+                key={index}
+                sx={{ display: "flex", alignItems: "center", gap: ".5rem" }}
+              >
                 <Checkbox
-                  checked={selectedIps.has(ipInfo.ip_address)}
-                  onChange={() => handleCheckboxChange(ipInfo.ip_address)}
+                  checked={
+                    selectedIps.filter((ip) => ip === ipInfo.ip_address)
+                      .length > 0
+                  }
+                  onChange={() => handleIpsCheckboxChange(ipInfo.ip_address)}
                   sx={{
                     padding: ".1rem",
                     background: "#fff",
@@ -327,24 +361,63 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
                     }
                   }}
                 />
-                <Typography fontFamily="Tomorrow-Regular" fontSize="1rem" textAlign="right">
+                <Typography
+                  fontFamily="Tomorrow-Regular"
+                  fontSize="1rem"
+                  textAlign="right"
+                >
                   {ipInfo.ip_address}
                 </Typography>
               </Box>
             ))}
+            {loadingBlackListIps && (
+              <CircularProgress
+                sx={{
+                  marginX: "auto"
+                }}
+              />
+            )}
           </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography sx={{ fontFamily: "YekanBakh-Medium", textAlign: "left" }}>آدرس های دامنه</Typography>
-            {blacklistedDomains.map((domain, index) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
-                <Typography
-                  textAlign="left"
-                  fontFamily="Tomorrow-Regular" fontSize="1rem">
-                  {domain}
-                </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Stack direction="row" alignItems="center" height="2rem">
+              <Typography
+                sx={{ fontFamily: "YekanBakh-Medium", textAlign: "right" }}
+              >
+                آدرس های دامنه
+              </Typography>
+              <Button
+                onClick={removeDomainsFromDatabase}
+                sx={{
+                  color: "red",
+                  fontFamily: "YekanBakh-Regular",
+                  display: selectedDomains.length > 0 ? "flex" : "none",
+                  alignItems: "center",
+                  gap: ".1rem"
+                }}
+              >
+                <RiDeleteBin6Line
+                  style={{
+                    width: "15px",
+                    height: "15px",
+                    color: "red"
+                  }}
+                />
+                حذف
+              </Button>
+            </Stack>
+            <Divider />
+            {blackListDomains.map((domain, index) => (
+              <Box
+                key={index}
+                sx={{ display: "flex", alignItems: "center", gap: ".5rem" }}
+              >
                 <Checkbox
-                  checked={selectedIps.has(domain)}
-                  onChange={() => handleCheckboxChange(domain)}
+                  checked={
+                    selectedDomains.filter(
+                      (searchingDomain) => searchingDomain === domain
+                    ).length > 0
+                  }
+                  onChange={() => handleDomainsCheckboxChange(domain)}
                   sx={{
                     padding: ".1rem",
                     background: "#fff",
@@ -354,10 +427,23 @@ const BlackList: FC<Props> = ({ openModal, setOpenModal, ipAddress }) => {
                     }
                   }}
                 />
+                <Typography
+                  textAlign="left"
+                  fontFamily="Tomorrow-Regular"
+                  fontSize="1rem"
+                >
+                  {domain}
+                </Typography>
               </Box>
             ))}
+            {loadingBlackListDomians && (
+              <CircularProgress
+                sx={{
+                  marginX: "auto"
+                }}
+              />
+            )}
           </Box>
-
         </Box>
       </Box>
     </Modal>

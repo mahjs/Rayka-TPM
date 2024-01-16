@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import ClientApi from "./clientApi";
 import config from "./config";
 
@@ -52,8 +53,14 @@ export const deleteIpAddressesFromDomain = async (
     ip_addresses
   });
 
-export const getBlackList = async (): Promise<Blacklist[]> => {
+export const getBlackListIps = async (): Promise<Blacklist[]> => {
   return await axios.http.get("http://10.201.228.64:5001/list");
+};
+
+export const getBlackListDomains = async (): Promise<{
+  blacklisted_domains: string[];
+}> => {
+  return await axios.http.get("http://10.201.228.64:5000/blacklist");
 };
 
 export const getCDN = async (): Promise<{ ips: IpWithProvider[] }> => {
