@@ -303,7 +303,7 @@ const Dashboard: FC = () => {
     const doc = new jsPDF();
 
     const domainData = prepareDataForExport();
-    let tableRows = domainData.map((domain) => {
+    const tableRows = domainData.map((domain) => {
       return [domain.name, domain.ips.length];
     });
 

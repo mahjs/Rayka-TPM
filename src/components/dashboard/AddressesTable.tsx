@@ -16,7 +16,7 @@ import AddIpAddressesModal from "./AddIpAddressesModal";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import api from "../../services";
 import ExpressionValue from "./ExpressionValue";
-import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
+import { IoChevronDown } from "react-icons/io5";
 import { useAuth } from "../../contexts/authContext";
 import { IpWithProvider } from "../../services/domain";
 
@@ -51,6 +51,10 @@ const AddressesTable: FC<Props> = ({
   selectedFilter,
   setSelectedFilter
 }) => {
+  // Calculate the number of showing address row based on window height.
+  const innerHeight = window.innerHeight * 0.32;
+  const NUMBER_OF_ROWS = Math.floor(innerHeight / 45);
+
   const { isAdmin } = useAuth();
 
   const [addressTablePage, setAddressTablePage] = useState(1);
@@ -97,7 +101,8 @@ const AddressesTable: FC<Props> = ({
           width: "50%",
           display: "flex",
           flexDirection: "column",
-          gap: "1rem"
+          gap: "1rem",
+          transition: "all .2s linear"
         }}
       >
         <Stack direction="row" gap=".25rem">
@@ -239,7 +244,7 @@ const AddressesTable: FC<Props> = ({
           <Box
             sx={{
               position: "relative",
-              minHeight: "38dvh",
+              minHeight: "38vh",
               border: "1px solid #E3E3E3",
               borderRadius: ".5rem",
               display: "flex",
@@ -264,9 +269,9 @@ const AddressesTable: FC<Props> = ({
               addressesData &&
               addressesData
                 .slice(
-                  (addressTablePage - 1) * 10,
+                  (addressTablePage - 1) * NUMBER_OF_ROWS,
                   Math.min(
-                    (addressTablePage - 1) * 10 + 10,
+                    (addressTablePage - 1) * NUMBER_OF_ROWS + NUMBER_OF_ROWS,
                     addressesData.length
                   )
                 )
@@ -458,7 +463,7 @@ const AddressesTable: FC<Props> = ({
                 color="primary"
                 onChange={handleChangePage}
                 count={Math.ceil(
-                  (addressesData && addressesData.length / 10) || 0
+                  (addressesData && addressesData.length / NUMBER_OF_ROWS) || 0
                 )}
                 variant="outlined"
                 shape="rounded"
