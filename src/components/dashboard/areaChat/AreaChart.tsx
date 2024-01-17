@@ -245,13 +245,6 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
               <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Year">
                 سالانه
               </MenuItem>
-              <MenuItem
-                disabled
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="custom"
-              >
-                انتخابی
-              </MenuItem>
             </Select>
             <BsCalendar2DateFill
               onClick={(e: MouseEvent) => {
