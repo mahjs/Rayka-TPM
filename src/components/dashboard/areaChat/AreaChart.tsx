@@ -362,8 +362,8 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
             transition: "opacity .3s ease",
             gap: "1rem",
             position: "absolute",
-            top: "1rem",
-            left: "52%",
+            top: ".3rem",
+            right: "-6.2rem",
             transform: "translateX(-50%)",
             background: "#fff",
             zIndex: "40",
@@ -396,7 +396,16 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
                 return tick; // For other ticks, display their actual value
               }}
             />
-            <XAxis padding={{ left: 40, right: 60 }} dataKey="time" />
+            <XAxis
+              padding={{ left: 40, right: 60 }}
+              dataKey={
+                selectedTimeForAreaChart === "Week" ||
+                selectedTimeForAreaChart === "Year" ||
+                selectedTimeForAreaChart === "Month"
+                  ? "date"
+                  : "time"
+              }
+            />
             <defs>
               <filter id="glow" x="-70%" y="-70%" width="200%" height="200%">
                 <feOffset result="offOut" in="SourceGraphic" dx="0" dy="0" />
