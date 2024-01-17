@@ -49,11 +49,12 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
   useEffect(() => {
     setShowDatePicker(false);
     if (endDate) {
-      setSelectedTimeForAreaChart("custom");
+      setSelectedTimeForAreaChart("Custom");
     }
   }, [endDate]);
 
   useEffect(() => {
+    // if (selectedTimeForAreaChart === "custom") return;
     setEndDate(null);
     setStartDate(null);
   }, [selectedTimeForAreaChart]);
@@ -239,9 +240,9 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
               <MenuItem
                 disabled
                 sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="custom"
+                value="Custom"
               >
-                انتخابی
+                دستی
               </MenuItem>
             </Select>
             <BsCalendar2DateFill
@@ -348,10 +349,11 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
       >
         <CustomizedAreaChart
           showDate={
-            selectedTimeForAreaChart === "Week" ||
-            selectedTimeForAreaChart === "Year" ||
             selectedTimeForAreaChart === "Day" ||
-            selectedTimeForAreaChart === "Month"
+            selectedTimeForAreaChart === "Week" ||
+            selectedTimeForAreaChart === "Month" ||
+            selectedTimeForAreaChart === "Year" ||
+            selectedTimeForAreaChart === "Custom"
           }
           data={dataForChart}
           min={min}

@@ -20,10 +20,10 @@ const CustomizedContent = (props: any) => {
 
   const fontSize = (percent: number) => {
     if (percent < 2) return percent / 1.1 + "rem";
-    if (percent < 5) return percent / 2.5 + "rem";
-    if (percent < 10) return percent / 4.5 + "rem";
-    if (percent < 20) return percent / 5.6 + "rem";
-    if (percent < 30) return percent / 6.0 + "rem";
+    if (percent < 5) return percent / 2.8 + "rem";
+    if (percent < 10) return percent / 4.8 + "rem";
+    if (percent < 20) return percent / 5.9 + "rem";
+    if (percent < 30) return percent / 6.5 + "rem";
     else return percent / 7.5 + "rem";
   };
 
@@ -59,7 +59,7 @@ const CustomizedContent = (props: any) => {
       {percent > 0.3 && (
         <text
           fontSize={fontSize(percent)}
-          opacity=".8"
+          opacity=".4"
           x={x + width / 2}
           y={y + height / 2}
           textAnchor="middle"
