@@ -1,4 +1,3 @@
-import { AxiosResponse } from "axios";
 import ClientApi from "./clientApi";
 import config from "./config";
 

@@ -1,5 +1,4 @@
 import ClientApi from "./clientApi";
-import { AxiosReturnType } from "./config";
 
 const axios = new ClientApi();
 
