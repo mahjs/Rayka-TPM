@@ -368,116 +368,124 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
           <TitledValue color="green" title="Max" value={max} />
           <TitledValue color="blue" title="Avg" value={avg} />
         </Stack>
-        <ResponsiveContainer
-          width="100%"
-          height="100%"
-          style={{ marginTop: "1rem" }}
-        >
-          <RechartAreaChart width={500} data={dataForChart}>
-            <Tooltip content={<CustomTooltip />} />
-            <CartesianGrid strokeDasharray="2 2" className="w-96" />
-            <YAxis
-              domain={[0, max]}
-              scale="linear"
-              label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
-              // tickFormatter={(tick) => {
-              //   if (tick === 1) {
-              //     switch (tick) {
-              //       case 1:
-              //         return "1";
-              //       case 0.8:
-              //         return "8";
-              //       case 0.6:
-              //         return "6";
-              //       case 0.4:
-              //         return "4";
-              //       case 0.2:
-              //         return "2";
-              //     }
-              //   }
-              //   return tick;
-              // }}
-            />
-            <XAxis
-              padding={{ left: 40, right: 60 }}
-              dataKey={
-                selectedTimeForAreaChart === "Week" ||
-                selectedTimeForAreaChart === "Year" ||
-                selectedTimeForAreaChart === "Month"
-                  ? "date"
-                  : "time"
-              }
-            />
-            <defs>
-              <filter id="glow" x="-70%" y="-70%" width="200%" height="200%">
-                <feOffset result="offOut" in="SourceGraphic" dx="0" dy="0" />
-                <feGaussianBlur result="blurOut" in="offOut" stdDeviation="5" />
-                <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
-              </filter>
-            </defs>
-            <Area
-              type="monotone"
-              dataKey="receiveValue"
-              stroke={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
-              fill={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
-              strokeWidth={3}
-              style={{ filter: "url(#glow)" }}
-            />
-            <Area
-              type="monotone"
-              dataKey="sendValue"
-              stroke={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
-              fill={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
-              strokeWidth={3}
-              style={{ filter: "url(#glow)" }}
-            />
-            <ReferenceLine
-              y={min}
-              label={{
-                value: "Min",
-                position: "insideRight",
-                stroke: "red",
-                opacity: ".5"
-              }}
-              stroke="red"
-              strokeDasharray="5 5"
-              opacity=".5"
-            />
-            <ReferenceLine
-              y={max}
-              label={{
-                value: "Max",
-                position: "insideRight",
-                stroke: "green",
-                opacity: ".5"
-              }}
-              stroke="green"
-              strokeDasharray="5 5"
-              opacity=".5"
-            />
-            <ReferenceLine
-              y={avg}
-              label={{
-                value: "Avg",
-                position: "insideRight",
-                stroke: "blue",
-                opacity: ".5"
-              }}
-              stroke="blue"
-              strokeDasharray="5 5"
-              opacity=".5"
-            />
-            <Brush
-              style={{
-                borderRadius: ".5rem"
-              }}
-              height={30}
-              stroke="#0F6CBD"
-              fill="#5E819F88"
-              travellerWidth={15}
-            />
-          </RechartAreaChart>
-        </ResponsiveContainer>
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            style={{ marginTop: "1rem" }}
+          >
+            <RechartAreaChart width={500} data={dataForChart}>
+              <Tooltip content={<CustomTooltip />} />
+              <CartesianGrid strokeDasharray="2 2" className="w-96" />
+              <YAxis
+                domain={[0, max]}
+                scale="linear"
+                label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
+                // tickFormatter={(tick) => {
+                //   if (tick === 1) {
+                //     switch (tick) {
+                //       case 1:
+                //         return "1";
+                //       case 0.8:
+                //         return "8";
+                //       case 0.6:
+                //         return "6";
+                //       case 0.4:
+                //         return "4";
+                //       case 0.2:
+                //         return "2";
+                //     }
+                //   }
+                //   return tick;
+                // }}
+              />
+              <XAxis
+                padding={{ left: 40, right: 60 }}
+                dataKey={
+                  selectedTimeForAreaChart === "Week" ||
+                  selectedTimeForAreaChart === "Year" ||
+                  selectedTimeForAreaChart === "Month"
+                    ? "date"
+                    : "time"
+                }
+              />
+              <defs>
+                <filter id="glow" x="-70%" y="-70%" width="200%" height="200%">
+                  <feOffset result="offOut" in="SourceGraphic" dx="0" dy="0" />
+                  <feGaussianBlur
+                    result="blurOut"
+                    in="offOut"
+                    stdDeviation="5"
+                  />
+                  <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+                </filter>
+              </defs>
+              <Area
+                type="monotone"
+                dataKey="receiveValue"
+                stroke={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
+                fill={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
+                strokeWidth={3}
+                style={{ filter: "url(#glow)" }}
+              />
+              <Area
+                type="monotone"
+                dataKey="sendValue"
+                stroke={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
+                fill={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
+                strokeWidth={3}
+                style={{ filter: "url(#glow)" }}
+              />
+              <ReferenceLine
+                y={min}
+                label={{
+                  value: "Min",
+                  position: "insideRight",
+                  stroke: "red",
+                  opacity: ".5"
+                }}
+                stroke="red"
+                strokeDasharray="5 5"
+                opacity=".5"
+              />
+              <ReferenceLine
+                y={max}
+                label={{
+                  value: "Max",
+                  position: "insideRight",
+                  stroke: "green",
+                  opacity: ".5"
+                }}
+                stroke="green"
+                strokeDasharray="5 5"
+                opacity=".5"
+              />
+              <ReferenceLine
+                y={avg}
+                label={{
+                  value: "Avg",
+                  position: "insideRight",
+                  stroke: "blue",
+                  opacity: ".5"
+                }}
+                stroke="blue"
+                strokeDasharray="5 5"
+                opacity=".5"
+              />
+              <Brush
+                style={{
+                  borderRadius: ".5rem"
+                }}
+                height={30}
+                stroke="#0F6CBD"
+                fill="#5E819F88"
+                travellerWidth={15}
+              />
+            </RechartAreaChart>
+          </ResponsiveContainer>
+        )}
       </Box>
     </Box>
   );

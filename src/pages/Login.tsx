@@ -18,46 +18,48 @@ const Login = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!mobileNumber || mobileNumber.length < 11) return;
-  
+
     const sendLog = async (username: string) => {
       try {
         // Log structure as per your API requirements
         const logData = {
           name: username,
-          activity: 'ورود',
+          activity: "ورود",
           description: `ورود کاربر با نام کاربری ${username} به سیستم`
         };
-  
+
         // Sending log to your server
-        await fetch('http://185.11.89.120:51731/logs', {
-          method: 'POST',
+        await fetch("http://185.11.89.120:51731/logs", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify(logData),
+          body: JSON.stringify(logData)
         });
       } catch (error) {
-        console.error('Error sending log:', error);
+        console.error("Error sending log:", error);
       }
     };
-  
+
     if (!successCodeSend) {
-      api.auth.sendCode(mobileNumber).then((res) => {
+      api.auth.sendCode(mobileNumber).then(() => {
         setSuccessCodeSend(true);
       });
     } else {
-      api.auth.verifyCode(mobileNumber, verifyCode).then(async (res) => {
-        storage.set(config.isAdmin, res.role === "Admin");
-        storage.set(config.userName, res.name);
-        login();
-        await sendLog(res.name); // Send log after successful login
-        navigate("/");
-      }).catch((error) => {
-        console.error('Login error:', error);
-      });
+      api.auth
+        .verifyCode(mobileNumber, verifyCode)
+        .then(async (res) => {
+          storage.set(config.isAdmin, res.role === "Admin");
+          storage.set(config.userName, res.name);
+          login();
+          await sendLog(res.name); // Send log after successful login
+          navigate("/");
+        })
+        .catch((error) => {
+          console.error("Login error:", error);
+        });
     }
   };
-  
 
   useEffect(() => {
     if (isLogin) navigate("/");
@@ -68,7 +70,7 @@ const Login = () => {
       component="main"
       sx={{
         height: "100vh",
-        display: "flex",
+        display: "flex"
       }}
     >
       {/* Form Component */}
@@ -78,7 +80,7 @@ const Login = () => {
           height: "100dvh",
           display: "flex",
           justifyContent: "center",
-          alignItems: "center",
+          alignItems: "center"
         }}
       >
         <Box
@@ -86,7 +88,7 @@ const Login = () => {
             minWidth: "300px",
             display: "flex",
             flexDirection: "column",
-            margin: "auto",
+            margin: "auto"
           }}
         >
           <Typography
@@ -103,7 +105,7 @@ const Login = () => {
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: "1rem",
+              gap: "1rem"
             }}
           >
             <Input
@@ -130,8 +132,8 @@ const Login = () => {
                 fontSize: "1.2rem",
                 fontWeight: "bold",
                 ":hover": {
-                  color: "#000",
-                },
+                  color: "#000"
+                }
               }}
             >
               ورود
@@ -155,7 +157,7 @@ const Login = () => {
       <Box
         sx={{
           width: "50%",
-          height: "100%",
+          height: "100%"
         }}
       >
         <Box
@@ -165,7 +167,7 @@ const Login = () => {
             width: "70%",
             display: "flex",
             justifyContent: "center",
-            alignItems: "center",
+            alignItems: "center"
           }}
         >
           <Box
@@ -181,14 +183,14 @@ const Login = () => {
                 left: "-5%",
                 width: "110%",
                 height: "110%",
-                border: "4px solid #608DB4",
-              },
+                border: "4px solid #608DB4"
+              }
             }}
           >
             <img
               style={{
                 marginTop: "5rem",
-                marginRight: "2rem",
+                marginRight: "2rem"
               }}
               src={Logo}
               alt="Logo"
@@ -203,7 +205,7 @@ const Login = () => {
                 top: "-120px",
                 left: "0",
                 border: "10px solid #fff",
-                zIndex: "10",
+                zIndex: "10"
               }}
             />
             <Box
@@ -215,7 +217,7 @@ const Login = () => {
                 background: "#0F6CBD",
                 top: "-60px",
                 left: "-120px",
-                zIndex: "5",
+                zIndex: "5"
               }}
             />
           </Box>

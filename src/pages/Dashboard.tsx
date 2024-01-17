@@ -326,7 +326,7 @@ const Dashboard: FC = () => {
       }
     });
 
-    domainData.forEach((domain, index) => {
+    domainData.forEach((domain) => {
       doc.addPage();
       doc.text(domain.name, 10, 10);
       autoTable(doc, {
