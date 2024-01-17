@@ -10,12 +10,10 @@ import {
   Legend,
   Filler,
   registerables,
-  Chart,
   ChartOptions
 } from "chart.js";
 ChartJS.register(...registerables);
 
-import "moment";
 import "chartjs-adapter-moment";
 import zoom from "chartjs-plugin-zoom";
 
