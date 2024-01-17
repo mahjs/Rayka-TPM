@@ -44,7 +44,7 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
     receive: []
   });
 
-  const [loading, setLoading] = useState<boolean>(false);
+  // const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setShowDatePicker(false);
@@ -60,7 +60,7 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
   }, [selectedTimeForAreaChart]);
 
   useEffect(() => {
-    setLoading(true);
+    // setLoading(true);
     Promise.all([
       startDate && endDate
         ? api.chart
@@ -88,9 +88,9 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
             .getSendData(selectedTimeForAreaChart, selectedServerForAreaChart)
             .then((res) => res.data.result)
     ]).then((data) => {
-      setDataForChart(convertDataForAreaChart(data)[1]);
+      setDataForChart(convertDataForAreaChart(data));
 
-      setLoading(false);
+      // setLoading(false);
     });
   }, [
     selectedServerForAreaChart,

@@ -96,6 +96,10 @@ const CustomizedAreaChart: FC<Props> = ({
             day: "YYYY-MM-DD"
           }
         }
+      },
+      y: {
+        beginAtZero: true,
+        suggestedMax: max + 1
       }
     }
   };
@@ -131,13 +135,16 @@ const CustomizedAreaChart: FC<Props> = ({
         height: "100%",
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        gap: "1rem"
       }}
     >
       <Line
         style={{
-          maxWidth: "650px",
-          maxHeight: "280px"
+          width: "100%",
+          maxWidth: "45vw",
+          maxHeight: "380px",
+          flexBasis: "100%"
         }}
         ref={chartRef}
         options={options}
