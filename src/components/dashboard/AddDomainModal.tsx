@@ -7,7 +7,7 @@ import {
   CircularProgress
 } from "@mui/material";
 import { RxCross2 } from "react-icons/rx";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import api from "../../services";
 import Input from "../login/Input";
 import axios from "axios";
@@ -66,6 +66,25 @@ const AddDomainModal: FC<Props> = ({
       return;
     });
   };
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (loading) {
+        const message =
+          "آی پی ها هنوز به طور کامل در سایت اضافه نشده. از انتخاب خود مطمئن هستید؟";
+        e.preventDefault(); // Cancel the event as stated by the standard.
+        e.returnValue = message; // Chrome requires returnValue to be set.
+        return message;
+      }
+    };
+
+    if (loading) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [loading]);
   return (
     <Modal
       open={openModal}
