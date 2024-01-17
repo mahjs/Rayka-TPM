@@ -5,6 +5,8 @@ import Logo from "../assets/images/logo.svg";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
 import api from "../services";
+import storage from "../services/storage";
+import config from "../services/config";
 
 const Login = () => {
   const { login, isLogin } = useAuth();
@@ -13,21 +15,49 @@ const Login = () => {
   const [verifyCode, setVerifyCode] = useState("");
   const [successCodeSend, setSuccessCodeSend] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // if (!userName || !password) return;
     if (!mobileNumber || mobileNumber.length < 11) return;
-
-    if (!successCodeSend)
+  
+    const sendLog = async (username: string) => {
+      try {
+        // Log structure as per your API requirements
+        const logData = {
+          name: username,
+          activity: 'ورود',
+          description: `ورود کاربر با نام کاربری ${username} به سیستم`
+        };
+  
+        // Sending log to your server
+        await fetch('http://185.11.89.120:51731/logs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(logData),
+        });
+      } catch (error) {
+        console.error('Error sending log:', error);
+      }
+    };
+  
+    if (!successCodeSend) {
       api.auth.sendCode(mobileNumber).then((res) => {
         setSuccessCodeSend(true);
       });
-    else
-      api.auth.verifyCode(mobileNumber, verifyCode).then((res) => {
+    } else {
+      api.auth.verifyCode(mobileNumber, verifyCode).then(async (res) => {
+        storage.set(config.isAdmin, res.role === "Admin");
+        storage.set(config.userName, res.name);
         login();
+        await sendLog(res.name); // Send log after successful login
         navigate("/");
+      }).catch((error) => {
+        console.error('Login error:', error);
       });
+    }
   };
+  
 
   useEffect(() => {
     if (isLogin) navigate("/");

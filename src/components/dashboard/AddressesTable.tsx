@@ -8,7 +8,7 @@ import {
   Pagination,
   Select,
   Stack,
-  Typography,
+  Typography
 } from "@mui/material";
 import { FC, useEffect, useState } from "react";
 import { GoPlus } from "react-icons/go";
@@ -16,30 +16,46 @@ import AddIpAddressesModal from "./AddIpAddressesModal";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import api from "../../services";
 import ExpressionValue from "./ExpressionValue";
-import { IoChevronDown, IoFilterOutline } from "react-icons/io5";
+import { IoChevronDown } from "react-icons/io5";
+import { useAuth } from "../../contexts/authContext";
+import { IpWithProvider } from "../../services/domain";
 
 interface Props {
   showData: boolean;
   loading: boolean;
+  showAddButton: boolean;
+  isWithProvider?: boolean;
+  ipsWithProvider?: IpWithProvider[];
   addressesData: string[] | null;
   domainName: string | null;
   refetchIpAddresses: () => void;
   selectedAddress: string | null;
   setSelectedAddress: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedFilter: "All_IPs" | "CDN" | "Host";
+  setSelectedFilter: React.Dispatch<
+    React.SetStateAction<"All_IPs" | "CDN" | "Host">
+  >;
 }
 
 const AddressesTable: FC<Props> = ({
   showData,
+  isWithProvider = false,
+  ipsWithProvider = [],
   loading,
+  showAddButton,
   addressesData,
   domainName,
   refetchIpAddresses,
   selectedAddress,
   setSelectedAddress,
+  selectedFilter,
+  setSelectedFilter
 }) => {
-  const [selectedFilter, setSelectedFilter] = useState<
-    "All_IPs" | "CDN" | "Host"
-  >("All_IPs");
+  // Calculate the number of showing address row based on window height.
+  const innerHeight = window.innerHeight * 0.32;
+  const NUMBER_OF_ROWS = Math.floor(innerHeight / 45);
+
+  const { isAdmin } = useAuth();
 
   const [addressTablePage, setAddressTablePage] = useState(1);
   const handleChangePage = (
@@ -86,6 +102,7 @@ const AddressesTable: FC<Props> = ({
           display: "flex",
           flexDirection: "column",
           gap: "1rem",
+          transition: "all .2s linear"
         }}
       >
         <Stack direction="row" gap=".25rem">
@@ -93,13 +110,13 @@ const AddressesTable: FC<Props> = ({
             component="h3"
             fontFamily="YekanBakh-Medium"
             sx={{
-              fontSize: "1.5rem",
+              fontSize: "1.5rem"
             }}
           >
             آدرس‌های IP
           </Typography>
 
-          {showData !== null && (
+          {showAddButton && isAdmin && (
             <Button
               onClick={() => setOpenAddDomainModal(true)}
               sx={{
@@ -112,8 +129,8 @@ const AddressesTable: FC<Props> = ({
                 borderRadius: ".5rem",
                 ":hover": {
                   background: "#0F6CBD",
-                  color: "#fff",
-                },
+                  color: "#fff"
+                }
               }}
             >
               <GoPlus style={{ width: "20px", height: "20px" }} />
@@ -124,7 +141,7 @@ const AddressesTable: FC<Props> = ({
           <Box
             sx={{
               position: "relative",
-              marginRight: "auto",
+              marginRight: "auto"
             }}
           >
             <Select
@@ -141,13 +158,13 @@ const AddressesTable: FC<Props> = ({
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
-                  marginTop: "-.20rem",
+                  marginTop: "-.20rem"
                 },
                 ".MuiOutlinedInput-notchedOutline": { border: 0 },
                 "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                   {
-                    border: 0,
-                  },
+                    border: 0
+                  }
               }}
             >
               <MenuItem
@@ -170,7 +187,7 @@ const AddressesTable: FC<Props> = ({
             marginTop: "-1rem",
             display: "flex",
             flexDirection: "column",
-            gap: ".2rem",
+            gap: ".2rem"
           }}
         >
           {/* Table Header*/}
@@ -179,16 +196,16 @@ const AddressesTable: FC<Props> = ({
               marginTop: ".5rem",
               padding: ".8rem .5rem",
               background: "#E9F1F4",
-              justifyContent: "space-between",
+              justifyContent: "end",
               display: "flex",
               borderRadius: ".5rem",
-              position: "relative",
+              position: "relative"
             }}
           >
-            <Typography fontFamily="YekanBakh-Regular" marginRight="2rem">
+            {/* <Typography fontFamily="YekanBakh-Regular" marginRight="2rem">
               تعداد سشن‌ ها
-            </Typography>
-            {selectedAddresses.length > 0 && (
+            </Typography> */}
+            {selectedAddresses.length > 0 && isAdmin && (
               <Button
                 onClick={handleDeleteIpsFromDomain}
                 sx={{
@@ -199,15 +216,15 @@ const AddressesTable: FC<Props> = ({
                   gap: ".3rem",
                   position: "absolute",
                   top: "50%",
-                  left: "35%",
-                  transform: "translate(0, -50%)",
+                  right: "0",
+                  transform: "translate(0, -50%)"
                 }}
               >
                 <RiDeleteBin6Line
                   style={{
                     width: "15px",
                     height: "15px",
-                    color: "red",
+                    color: "red"
                   }}
                 />
                 حذف
@@ -216,7 +233,7 @@ const AddressesTable: FC<Props> = ({
             <Typography
               fontFamily="YekanBakh-Regular"
               sx={{
-                marginLeft: "3rem",
+                marginLeft: "3rem"
               }}
             >
               آدرس IP
@@ -227,12 +244,12 @@ const AddressesTable: FC<Props> = ({
           <Box
             sx={{
               position: "relative",
-              minHeight: "38dvh",
+              minHeight: "38vh",
               border: "1px solid #E3E3E3",
               borderRadius: ".5rem",
               display: "flex",
               flexDirection: "column",
-              gap: ".2rem",
+              gap: ".2rem"
             }}
           >
             {loading && (
@@ -242,17 +259,21 @@ const AddressesTable: FC<Props> = ({
                   top: "40%",
                   left: "45%",
                   transform: "translate(-50% -50%)",
-                  zIndex: 110,
+                  zIndex: 110
                 }}
               />
             )}
             {/* Rows for the body */}
             {showData &&
+              !isWithProvider &&
               addressesData &&
               addressesData
                 .slice(
-                  (addressTablePage - 1) * 5,
-                  Math.min((addressTablePage - 1) * 5 + 5, addressesData.length)
+                  (addressTablePage - 1) * NUMBER_OF_ROWS,
+                  Math.min(
+                    (addressTablePage - 1) * NUMBER_OF_ROWS + NUMBER_OF_ROWS,
+                    addressesData.length
+                  )
                 )
                 .map((address, index) => (
                   <Box
@@ -260,6 +281,7 @@ const AddressesTable: FC<Props> = ({
                     sx={{
                       padding: ".7rem .5rem",
                       paddingBottom: ".25rem",
+                      justifyContent: "space-between",
                       display: "flex",
                       alignItems: "center",
                       background:
@@ -267,7 +289,7 @@ const AddressesTable: FC<Props> = ({
                       color: selectedAddress === address ? "#fff" : "",
                       borderRadius: ".5rem",
                       cursor: "pointer",
-                      position: "relative",
+                      position: "relative"
                     }}
                   >
                     <Box
@@ -278,7 +300,7 @@ const AddressesTable: FC<Props> = ({
                         left: "0",
                         top: "0",
                         bottom: "0",
-                        borderRadius: "1rem",
+                        borderRadius: "1rem"
                       }}
                       onClick={() => {
                         if (selectedAddress === address)
@@ -294,26 +316,26 @@ const AddressesTable: FC<Props> = ({
                         background: "#fff",
                         borderRadius: ".2rem",
                         ":hover": {
-                          background: "#fff",
-                        },
+                          background: "#fff"
+                        }
                       }}
                       onChange={(e) => handleSelectIps(e, address)}
                     />
-                    <Typography
+                    {/* <Typography
                       marginLeft="auto"
                       marginRight="2rem"
                       fontFamily="YekanBakh-Regular"
                     >
-                      {/* {address.session} */}
+                      {address.session}
                       5254
-                    </Typography>
+                    </Typography> */}
                     <Typography
                       fontFamily="YekanBakh-Regular"
                       sx={{
                         marginLeft: "1rem",
                         direction: "ltr",
                         display: "flex",
-                        minWidth: "120px",
+                        minWidth: "120px"
                       }}
                     >
                       <span>{index + 1}.</span>
@@ -323,7 +345,98 @@ const AddressesTable: FC<Props> = ({
                     </Typography>
                   </Box>
                 ))}
-            {!showData && (
+            {isWithProvider &&
+              !loading &&
+              showData &&
+              ipsWithProvider &&
+              ipsWithProvider
+                .slice(
+                  (addressTablePage - 1) * 5,
+                  Math.min(
+                    (addressTablePage - 1) * 5 + 5,
+                    ipsWithProvider.length
+                  )
+                )
+                .map((address, index) => (
+                  <Box
+                    key={address.ip}
+                    sx={{
+                      padding: ".7rem .5rem",
+                      paddingBottom: ".25rem",
+                      justifyContent: "space-between",
+                      display: "flex",
+                      alignItems: "center",
+                      background:
+                        selectedAddress === address.ip ? "#5E819F" : "#fff",
+                      color: selectedAddress === address.ip ? "#fff" : "",
+                      borderRadius: ".5rem",
+                      cursor: "pointer",
+                      position: "relative"
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        height: "100%",
+                        width: "85%",
+                        left: "0",
+                        top: "0",
+                        bottom: "0",
+                        borderRadius: "1rem"
+                      }}
+                      onClick={() => {
+                        if (selectedAddress === address.ip)
+                          setSelectedAddress(null);
+                        else setSelectedAddress(address.ip);
+                      }}
+                    />
+                    <Checkbox
+                      sx={{
+                        zIndex: "100",
+                        marginBottom: ".3rem",
+                        padding: ".1rem",
+                        background: "#fff",
+                        borderRadius: ".2rem",
+                        ":hover": {
+                          background: "#fff"
+                        }
+                      }}
+                      onChange={(e) => handleSelectIps(e, address.ip)}
+                    />
+                    {/* <Typography
+                      marginLeft="auto"
+                      marginRight="2rem"
+                      fontFamily="YekanBakh-Regular"
+                    >
+                      {address.session}
+                      5254
+                    </Typography> */}
+                    <Typography
+                      fontFamily="YekanBakh-Regular"
+                      sx={{
+                        marginLeft: "1rem",
+                        direction: "ltr",
+                        display: "flex",
+                        minWidth: "120px"
+                      }}
+                    >
+                      <span>{index + 1}.</span>
+                      <span style={{ textAlign: "left", marginLeft: "1rem" }}>
+                        {address.ip}
+                        <span
+                          style={{
+                            fontSize: ".95rem",
+                            opacity: ".7",
+                            marginLeft: ".2rem"
+                          }}
+                        >
+                          ({address.provider})
+                        </span>
+                      </span>
+                    </Typography>
+                  </Box>
+                ))}
+            {!showData && !loading && (
               <Typography
                 fontFamily="YekanBakh-Regular"
                 sx={{
@@ -332,7 +445,7 @@ const AddressesTable: FC<Props> = ({
                   left: "50%",
                   transform: "translate(-50%, -50%)",
                   maxWidth: "200px",
-                  textAlign: "center",
+                  textAlign: "center"
                 }}
               >
                 برای مشاهده آدرس های IP یک سرویس را از منوی سرویس ها انتخاب
@@ -345,12 +458,12 @@ const AddressesTable: FC<Props> = ({
                   direction: "ltr",
                   marginTop: "auto",
                   marginBottom: "1rem",
-                  marginX: "auto",
+                  marginX: "auto"
                 }}
                 color="primary"
                 onChange={handleChangePage}
                 count={Math.ceil(
-                  (addressesData && addressesData.length / 5) || 0
+                  (addressesData && addressesData.length / NUMBER_OF_ROWS) || 0
                 )}
                 variant="outlined"
                 shape="rounded"
@@ -359,18 +472,6 @@ const AddressesTable: FC<Props> = ({
               />
             )}
           </Box>
-          {/* <Typography
-            fontFamily="YekanBakh-Light"
-            sx={{
-              textAlign: "left",
-              color: "gray",
-            }}
-          >
-            Powered By{" "}
-            <span style={{ color: "black", fontFamily: "YekanBakh-Bold" }}>
-              Rayka
-            </span>
-          </Typography> */}
         </Box>
         <Box
           sx={{
@@ -382,50 +483,38 @@ const AddressesTable: FC<Props> = ({
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            gap: "1rem",
+            gap: "1rem"
           }}
         >
-          {selectedAddress && (
-            <>
-              <ExpressionValue
-                title="Volume"
-                expression="حجم داده مصرفی"
-                value={1532}
-                unit="mb"
-              />
-              <Divider
-                sx={{
-                  width: "50%",
-                }}
-              />
-              <ExpressionValue
-                title="Sessions"
-                expression="تعداد نشست‌ها"
-                value={1532}
-              />
-              <Divider
-                sx={{
-                  width: "50%",
-                }}
-              />
-              <ExpressionValue
-                title="Connections"
-                expression="تعداد نشست‌های موفق"
-                value={1532}
-              />
-            </>
-          )}
-          {!selectedAddress && (
-            <Typography
-              fontFamily="YekanBakh-Regular"
+          {/* {selectedAddress && ( */}
+          <>
+            <ExpressionValue
+              title="Volume"
+              expression="حجم داده مصرفی"
+              value={1532}
+              unit="mb"
+            />
+            <Divider
               sx={{
-                textAlign: "center",
-                color: "gray",
+                width: "50%"
               }}
-            >
-              برای مشاهده جزئیات یک آدرس را از لیست انتخاب کنید.
-            </Typography>
-          )}
+            />
+            <ExpressionValue
+              title="Sessions"
+              expression="تعداد نشست‌ها"
+              value={1532}
+            />
+            <Divider
+              sx={{
+                width: "50%"
+              }}
+            />
+            <ExpressionValue
+              title="Connections"
+              expression="تعداد نشست‌های موفق"
+              value={1532}
+            />
+          </>
         </Box>
       </Box>
       <AddIpAddressesModal

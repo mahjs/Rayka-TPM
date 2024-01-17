@@ -1,34 +1,35 @@
-import React, { useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
   CircularProgress,
   Stack,
-  Typography,
+  Typography
 } from "@mui/material";
 import Search from "../components/dashboard/Search";
 import { useAuth } from "../contexts/authContext";
 import { useNavigate } from "react-router-dom";
 import AddressesTable from "../components/dashboard/AddressesTable";
 import ServicesTable from "../components/dashboard/ServicesTable";
-import TreeMap from "../components/dashboard/TreeMap";
-import AreaChart from "../components/dashboard/AreaChart";
+import TreeMap from "../components/dashboard/treeMap/TreeMap";
+import AreaChart from "../components/dashboard/areaChat/AreaChart";
 import ProfileInfo from "../components/profile/ProfileInfoHeader";
 import ExportDocModal from "../components/dashboard/ExportDocModal";
 import useIpAddresses from "../hooks/useIpAddresses";
 import useDomains from "../hooks/useDomains";
 import useTreeMapData from "../hooks/useTreeMapData";
-import { Domain } from "../services/domain";
+import { Domain, IpWithProvider } from "../services/domain";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import html2canvas from "html2canvas";
+import * as domtoimage from "dom-to-image";
+import api from "../services";
 
 export interface DomainData {
   name: string;
   ips?: string[];
 }
-const Dashboard: React.FC = () => {
+const Dashboard: FC = () => {
   const navigate = useNavigate();
   const { isLogin } = useAuth();
   useEffect(() => {
@@ -37,65 +38,92 @@ const Dashboard: React.FC = () => {
     }
   });
 
-  // State to hold the search input
-  const [searchInput, setSearchInput] = useState<string>("");
+  // Filter for getting Hosts or CDN
+  const [selectedFilter, setSelectedFilter] = useState<
+    "All_IPs" | "CDN" | "Host"
+  >("All_IPs");
 
-  // Function to handle the search action
-  const handleSearch = () => {
-    // You would implement your search logic here
-    // For now, we'll just log the input to the console
-    console.log(`Search for: ${searchInput}`);
-  };
+  useEffect(() => {
+    if (
+      selectedFilter !== "All_IPs" &&
+      selectedFilter !== "CDN" &&
+      selectedFilter !== "Host"
+    ) {
+      setSelectedServiceIndexs([]);
+    }
+  }, [selectedFilter]);
+
   const treeMapRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
   const dashboardRef = useRef<HTMLElement | null>(null); // Function to handle submission of the search
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    handleSearch();
-  };
 
   // State for Selecting a service & an address
-  const [selectedServiceIndex, setSelectedServiceIndex] = useState<
-    number | null
-  >(null);
+  const [selectedServiceIndexs, setSelectedServiceIndexs] = useState<number[]>(
+    []
+  );
+
+  const handleSelectedServiceIndex = (index: number) => {
+    const findIndex = selectedServiceIndexs?.find(
+      (searchingIndex) => searchingIndex === index
+    );
+
+    if (findIndex === index) {
+      setSelectedServiceIndexs((pre) =>
+        pre.filter((searchingIndex) => searchingIndex !== index)
+      );
+    } else {
+      setSelectedServiceIndexs((pre) => [...pre, index]);
+    }
+  };
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
   useEffect(() => {
     setSelectedAddress(null);
-  }, [selectedServiceIndex]);
+  }, [selectedServiceIndexs]);
 
   // State for SquareCharts
-  const { loadingData, treeMapData, totalIps } = useTreeMapData();
+  const {
+    loadingData,
+    treeMapData,
+    totalIps,
+    refetch: refetchAllData
+  } = useTreeMapData();
   const [filteredIps, setFilteredIps] = useState<string[]>(totalIps);
+  const {
+    loadingDomains,
+    domains,
+    reFetchDomains: refetchDomainData
+  } = useDomains();
+  const [filteredDomains, setFilteredDomains] = useState<Domain[]>(
+    domains || []
+  );
 
   useEffect(() => {
     if (totalIps.length === 0) return;
     setFilteredIps(totalIps);
   }, [totalIps]);
 
+  /////////////////////////////////////////////////////////////////////
+  //////////////////// Filter functionality //////////////////////////
+
+  // Logic for searching with ip addresses.
+  const [searchInput, setSearchInput] = useState<string>("");
   useEffect(() => {
-    if (isNaN(parseInt(searchInput)) || selectedServiceIndex !== null) return;
+    if (isNaN(parseInt(searchInput)) || selectedServiceIndexs !== null) return;
 
     setFilteredIps(
       totalIps.filter((ip) =>
         ip.toLowerCase().includes(searchInput.toLowerCase())
       )
     );
-  }, [searchInput, selectedServiceIndex]);
+  }, [searchInput, selectedServiceIndexs]);
 
-  // State for getting all domains
-  const { loadingDomains, domains, reFetchDomains } = useDomains();
-  const [filteredDomains, setFilteredDomains] = useState<Domain[]>(
-    domains || []
-  );
-
-  // Filter functionality
   useEffect(() => {
     if (!domains) return;
     if (searchInput === "") {
       setFilteredDomains(domains);
       return;
     }
-    // setSelectedServiceIndex(null);
+
     const filteredDomains = treeMapData.filter(
       (data) =>
         data.ips.filter((ip) =>
@@ -115,47 +143,107 @@ const Dashboard: React.FC = () => {
       )
     );
   }, [searchInput, domains, treeMapData]);
+  /////////////////////////////////////////////////////////////////////////////
+
+  // Make data updated after changing.
+  const refetchDomains = () => {
+    refetchDomainData();
+    setTimeout(() => {
+      refetchAllData();
+    }, 500);
+  };
 
   // State for getting the ip addresses
-  const { ipAddressesForDomain, loadingAddresses, reFetchAddresses } =
-    useIpAddresses(
-      domains ? filteredDomains![selectedServiceIndex!]?.name : null
-    );
+  const {
+    ipAddressesForDomain,
+    loadingAddresses: loadingAllAddresses,
+    reFetchAddresses: reFetchAddressesData
+  } = useIpAddresses(
+    domains ? filteredDomains![selectedServiceIndexs![0]]?.name : null
+  );
   const [filteredIpAddresses, setFilteredIpAddresses] = useState<string[]>([]);
+  const [ipsWithProvider, setIpsWithProvider] = useState<IpWithProvider[]>([]);
+  const [loadingAddresses, setLoadingAddresses] = useState<boolean>(false);
 
+  // Make data updated after changing.
+  const reFetchAddresses = () => {
+    reFetchAddressesData();
+    setTimeout(() => {
+      refetchAllData();
+    }, 500);
+  };
+
+  // Getting IP Addresses based on selected filters.
   useEffect(() => {
-    if (!ipAddressesForDomain) return;
-    if (isNaN(parseInt(searchInput))) {
-      setFilteredIpAddresses(ipAddressesForDomain);
-      return;
+    const updateAddressesData = (data: IpWithProvider[]) => {
+      if (Array.isArray(data)) {
+        const filterResults = data.filter((ipWithProvider) =>
+          ipWithProvider.ip.startsWith("172.")
+        );
+        setFilteredIpAddresses(
+          filterResults.map((ipWithProvider) => ipWithProvider.ip)
+        );
+        setIpsWithProvider(filterResults);
+      } else {
+        setFilteredIpAddresses([]);
+      }
+    };
+
+    if (selectedFilter === "All_IPs" && ipAddressesForDomain) {
+      if (isNaN(parseInt(searchInput))) {
+        setFilteredIpAddresses(ipAddressesForDomain);
+        return;
+      }
+    } else if (selectedFilter === "CDN") {
+      setLoadingAddresses(true);
+      api.domain
+        .getCDN()
+        .then((response) => {
+          // setFilteredIpAddresses(response);
+          if (response && response.ips && Array.isArray(response.ips)) {
+            updateAddressesData(response.ips);
+          } else {
+            setFilteredIpAddresses([]);
+          }
+          setLoadingAddresses(false);
+        })
+        .catch(() => {
+          setLoadingAddresses(false);
+        });
+    } else if (selectedFilter === "Host") {
+      setLoadingAddresses(true);
+      api.domain
+        .getNotCDN()
+        .then((response) => {
+          if (response && response.ips && Array.isArray(response.ips)) {
+            updateAddressesData(response.ips);
+          } else {
+            setFilteredIpAddresses([]);
+          }
+          setLoadingAddresses(false);
+        })
+        .catch(() => {
+          setLoadingAddresses(false);
+        });
     }
-  }, [ipAddressesForDomain, searchInput]);
-
-  useEffect(() => {
-    if (!ipAddressesForDomain) return;
-
-    setFilteredIpAddresses(
-      ipAddressesForDomain.filter((ip) =>
-        isNaN(parseInt(searchInput))
-          ? true
-          : ip.toLowerCase().includes(searchInput.toLowerCase())
-      )
-    );
-  }, [searchInput, selectedServiceIndex, ipAddressesForDomain]);
+  }, [searchInput, selectedFilter, ipAddressesForDomain]);
 
   // Scroll to selected service
   const dataRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
     if (
-      selectedServiceIndex !== null &&
-      dataRefs.current[selectedServiceIndex]
+      selectedServiceIndexs !== null &&
+      dataRefs.current[selectedServiceIndexs[0]]
     ) {
-      dataRefs.current[selectedServiceIndex].scrollIntoView({
+      dataRefs.current[selectedServiceIndexs[0]].scrollIntoView({
         behavior: "smooth",
-        block: "center",
+        block: "center"
       });
     }
   });
+
+  ///////////////////////////////////////////////////////////////////////////
+  /////////////////////// Export functionality /////////////////////////////
 
   // State for Downloading Export file
   const [openDownloadMenu, setOpenDownLoadMenu] = useState<boolean | null>(
@@ -208,32 +296,50 @@ const Dashboard: React.FC = () => {
     // Write the Excel file if there are sheets
     if (wb.SheetNames.length > 0) {
       XLSX.writeFile(wb, "Domains_and_IPs.xlsx");
-    } else {
-      console.error("No data to export.");
     }
   };
 
   const exportToPDF = () => {
-    const domainData = prepareDataForExport();
     const doc = new jsPDF();
 
-    domainData.forEach((domain) => {
+    const domainData = prepareDataForExport();
+    const tableRows = domainData.map((domain) => {
+      return [domain.name, domain.ips.length];
+    });
+
+    autoTable(doc, {
+      startY: 20,
+      head: [["Domain Name", "Number of IPs"]],
+      body: tableRows,
+      margin: { top: 10 },
+      styles: {
+        halign: "center",
+        valign: "middle"
+      },
+      headStyles: {
+        halign: "center",
+        valign: "middle"
+      },
+      bodyStyles: {
+        halign: "center",
+        valign: "middle"
+      }
+    });
+
+    domainData.forEach((domain, index) => {
+      doc.addPage();
       doc.text(domain.name, 10, 10);
       autoTable(doc, {
         startY: 20,
         head: [["IP Address"]],
-        body: domain.ips.map((ip: string) => [ip]),
-        margin: { top: 10 },
+        body: domain.ips.map((ip) => [ip]),
+        margin: { top: 10 }
       });
-
-      // Add a page break if not the last domain
-      if (domain !== domainData[domainData.length - 1]) {
-        doc.addPage();
-      }
     });
 
     doc.save("Domains_and_IPs.pdf");
   };
+
   const onExportClick = () => {
     if (selectedFormat === "excel") {
       exportToExcel();
@@ -246,31 +352,50 @@ const Dashboard: React.FC = () => {
   const captureScreenshotTreeChart = () => {
     const treeMapElement = treeMapRef.current;
     if (treeMapElement) {
-      html2canvas(treeMapElement).then((canvas) => {
-        const image = canvas.toDataURL("image/png", 5.0);
-
-        // Download the image
-        let link = document.createElement("a");
-        link.download = "tree-map-screenshot.png";
-        link.href = image;
-        link.click();
-      });
+      domtoimage
+        .toPng(treeMapElement, {
+          style: {
+            backgroundColor: "white"
+          }
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "tree-map-screenshot.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch(() => {});
     }
   };
+
   const dashboardScreenshot = () => {
     const dashboardElement = dashboardRef.current;
     if (dashboardElement) {
-      html2canvas(dashboardElement).then((canvas) => {
-        const image = canvas.toDataURL("image/png", 5.0);
-
-        // Download the image
-        let link = document.createElement("a");
-        link.download = "dashboard.png";
-        link.href = image;
-        link.click();
-      });
+      domtoimage
+        .toPng(dashboardElement, {
+          style: {
+            backgroundColor: "white"
+          }
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "dashboard.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch(() => {});
     }
   };
+  const [isAllDataLoaded, setIsAllDataLoaded] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Assuming 'loadingData', 'loadingDomains', and 'loadingAddresses' are the states
+    // that indicate if the respective data is still being fetched.
+    // Update 'isDataLoaded' based on these loading states.
+    if (!loadingData && !loadingDomains && !loadingAllAddresses) {
+      setIsAllDataLoaded(true);
+    }
+  }, [loadingData, loadingDomains, loadingAllAddresses]);
 
   return (
     <>
@@ -280,7 +405,7 @@ const Dashboard: React.FC = () => {
         sx={{
           padding: "2rem 1.5rem",
           display: "flex",
-          gap: "1rem",
+          gap: "1rem"
         }}
       >
         {/* Right side. Charts*/}
@@ -289,7 +414,7 @@ const Dashboard: React.FC = () => {
             width: "50vw",
             display: "flex",
             flexDirection: "column",
-            gap: "1rem",
+            gap: "1rem"
           }}
         >
           <ProfileInfo
@@ -304,7 +429,7 @@ const Dashboard: React.FC = () => {
               flexDirection: "column",
               gap: "1rem",
               height: "35vh",
-              padding: "1rem",
+              padding: "1rem"
             }}
           >
             <Stack direction="row" justifyContent="space-between">
@@ -313,29 +438,33 @@ const Dashboard: React.FC = () => {
                 fontFamily="YekanBakh-Medium"
                 component="h2"
                 sx={{
-                  fontSize: "1.5rem",
+                  fontSize: "1.5rem"
                 }}
               >
                 سهم سرویس ها
               </Typography>
-              <Button
-                onClick={captureScreenshotTreeChart}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: ".3rem",
-                  background: "#0F6CBD",
-                  color: "#fff",
-                  fontFamily: "YekanBakh-Regular",
-                  borderRadius: ".5rem",
-                  ":hover": {
+              {isAllDataLoaded ? (
+                <Button
+                  onClick={captureScreenshotTreeChart}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: ".3rem",
                     background: "#0F6CBD",
                     color: "#fff",
-                  },
-                }}
-              >
-                دریافت خروجی
-              </Button>
+                    fontFamily: "YekanBakh-Regular",
+                    borderRadius: ".5rem",
+                    ":hover": {
+                      background: "#0F6CBD",
+                      color: "#fff"
+                    }
+                  }}
+                >
+                  دریافت خروجی
+                </Button>
+              ) : (
+                <CircularProgress />
+              )}
             </Stack>
 
             <Box
@@ -343,7 +472,7 @@ const Dashboard: React.FC = () => {
                 border: "1px solid #707070",
                 padding: ".2rem",
                 height: "100%",
-                position: "relative",
+                position: "relative"
               }}
             >
               <TreeMap
@@ -351,16 +480,23 @@ const Dashboard: React.FC = () => {
                 dataForTreeChart={
                   loadingData ? [{ name: "nothing", value: 100 }] : treeMapData
                 }
-                selectedServiceIndex={
+                selectedServiceIndexes={
                   searchInput === null
-                    ? selectedServiceIndex
-                    : domains?.findIndex(
-                        (domain) =>
-                          domain?.name ===
-                          filteredDomains[selectedServiceIndex!]?.name
-                      )
+                    ? selectedServiceIndexs
+                    : domains?.reduce((indexes: number[], domain, index) => {
+                        if (
+                          selectedServiceIndexs.some(
+                            (selectedIndex) =>
+                              filteredDomains[selectedIndex]?.name ===
+                              domain?.name
+                          )
+                        )
+                          indexes.push(index);
+
+                        return indexes;
+                      }, [])
                 }
-                setSelectedServiceIndex={setSelectedServiceIndex}
+                handleSelectedService={handleSelectedServiceIndex}
               />
               {loadingData && (
                 <CircularProgress
@@ -368,7 +504,7 @@ const Dashboard: React.FC = () => {
                     position: "absolute",
                     top: "40%",
                     left: "48%",
-                    transform: "translate(-50% -50%)",
+                    transform: "translate(-50% -50%)"
                   }}
                 />
               )}
@@ -377,10 +513,10 @@ const Dashboard: React.FC = () => {
           <Box
             sx={{
               position: "relative",
-              marginTop: "auto",
+              marginTop: "auto"
             }}
           >
-            <AreaChart selectedServiceIndex={selectedServiceIndex} />
+            <AreaChart isAllDataLoaded={isAllDataLoaded} />
           </Box>
         </Box>
 
@@ -390,85 +526,96 @@ const Dashboard: React.FC = () => {
             width: "50%",
             display: "flex",
             flexDirection: "column",
-            gap: "1rem",
+            gap: "1rem"
           }}
         >
           <Box
             sx={{
               height: "5dvh",
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "space-between"
             }}
           >
-            <Search
-              value={searchInput}
-              setSearchInput={setSearchInput}
-              handleSubmit={handleSubmit}
-            />
-
-            <Button
-              onClick={() => setOpenExportModal(true)}
-              sx={{
-                fontFamily: "YekanBakh-Bold",
-                color: "#fff",
-                paddingRight: ".5rem",
-                display: "flex",
-                background: "#0F6CBD",
-                alignItems: "center",
-                paddingX: "1rem",
-                paddingY: ".75rem",
-                gap: ".5rem",
-                borderRadius: ".5rem",
-                zIndex: "5",
-                height: "fit-content",
-                ":hover": {
-                  color: "#0F6CBD",
-                  background: "#0F6CBD33",
-                },
-              }}
-            >
-              دریافت خروجی
-            </Button>
+            <Search value={searchInput} setSearchInput={setSearchInput} />
+            {isAllDataLoaded ? (
+              <Button
+                onClick={() => setOpenExportModal(true)}
+                sx={{
+                  fontFamily: "YekanBakh-Bold",
+                  color: "#fff",
+                  paddingRight: ".5rem",
+                  display: "flex",
+                  background: "#0F6CBD",
+                  alignItems: "center",
+                  paddingX: "1rem",
+                  paddingY: ".75rem",
+                  gap: ".5rem",
+                  borderRadius: ".5rem",
+                  zIndex: "5",
+                  height: "fit-content",
+                  ":hover": {
+                    color: "#0F6CBD",
+                    background: "#0F6CBD33"
+                  }
+                }}
+              >
+                دریافت خروجی
+              </Button>
+            ) : (
+              <CircularProgress />
+            )}
           </Box>
           <Box
             sx={{
               display: "flex",
-              gap: "1rem",
+              gap: "1.8rem"
             }}
           >
             {/* Services Table*/}
             <ServicesTable
-              refetchDomains={reFetchDomains}
+              refetchDomains={refetchDomains}
               mapData={treeMapData}
               loadingMapData={loadingData}
               refetchIpAddresses={reFetchAddresses}
               loading={loadingDomains}
               domains={filteredDomains}
-              selectedServiceIndex={selectedServiceIndex}
-              setSelectedServiceIndex={setSelectedServiceIndex}
+              selectedServiceIndexs={selectedServiceIndexs}
+              handleSelectedServiceIndex={handleSelectedServiceIndex}
               setDomainsDownloadData={setDomainDownloadData}
             />
 
             <AddressesTable
               refetchIpAddresses={reFetchAddresses}
               domainName={
-                domains ? filteredDomains![selectedServiceIndex!]?.name : null
+                domains && selectedServiceIndexs.length === 1
+                  ? filteredDomains![selectedServiceIndexs[0]]?.name
+                  : null
               }
-              loading={loadingAddresses}
+              loading={loadingAllAddresses || loadingAddresses}
               addressesData={
-                selectedServiceIndex !== null
+                selectedServiceIndexs !== null
                   ? filteredIpAddresses
                   : !isNaN(parseInt(searchInput))
                   ? filteredIps
-                  : null
+                  : filteredIpAddresses
               }
               showData={
                 isNaN(parseInt(searchInput))
-                  ? selectedServiceIndex !== null
+                  ? selectedServiceIndexs.length > 0 ||
+                    (selectedFilter !== "All_IPs" &&
+                      !(
+                        selectedServiceIndexs.length === 0 ||
+                        (selectedFilter !== "CDN" && selectedFilter !== "Host")
+                      ))
                   : true
               }
+              isWithProvider={selectedFilter !== "All_IPs"}
+              ipsWithProvider={ipsWithProvider}
+              showAddButton={selectedServiceIndexs !== null}
               selectedAddress={selectedAddress}
               setSelectedAddress={setSelectedAddress}
+              selectedFilter={selectedFilter}
+              setSelectedFilter={setSelectedFilter}
             />
           </Box>
         </Box>

@@ -9,10 +9,16 @@ export interface MapData {
 }
 
 const useTreeMapData = () => {
-  const { domains, loadingDomains } = useDomains();
+  const { domains, loadingDomains, reFetchDomains } = useDomains();
   const [treeMapData, setTreeMapData] = useState<MapData[]>([]);
   const [totalIps, setTotalIps] = useState<string[]>([]);
   const [loadingData, setLoadingData] = useState<boolean>(true);
+  const [refetchData, setRefetchData] = useState<boolean>(false);
+
+  const refetch = () => {
+    reFetchDomains();
+    setRefetchData((prev) => !prev);
+  };
 
   useEffect(() => {
     if (loadingData) return;
@@ -27,19 +33,20 @@ const useTreeMapData = () => {
         api.domain.getIpAddressesForDomain(domain.name).then((res) => ({
           name: res.domain,
           value: res.ips.length,
-          ips: res.ips,
+          ips: res.ips
         }))
       )
     ).then((res) => {
       setTreeMapData(res);
       setLoadingData(false);
     });
-  }, [domains, loadingDomains]);
+  }, [domains, loadingDomains, refetchData]);
 
   return {
     loadingData,
     treeMapData,
     totalIps,
+    refetch
   };
 };
 

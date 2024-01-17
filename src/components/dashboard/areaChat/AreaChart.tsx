@@ -5,6 +5,7 @@ import {
   Select,
   Stack,
   Typography,
+  CircularProgress
 } from "@mui/material";
 import {
   ResponsiveContainer,
@@ -15,182 +16,155 @@ import {
   AreaChart as RechartAreaChart,
   CartesianGrid,
   ReferenceLine,
+  Brush
 } from "recharts";
 import { FC, useEffect, useRef, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import { BsCalendar2DateFill } from "react-icons/bs";
-import html2canvas from "html2canvas";
-import RangeDatePicker from "./DatePicker";
-import TitledValue from "./TitledValue";
+import RangeDatePicker from "../DatePicker";
+import TitledValue from "../TitledValue";
+import * as domtoimage from "dom-to-image";
+import api from "../../../services";
+import getFillColorForAreaChart from "../../../utils/getFillColorForAreaChart";
+import CustomTooltip from "./CustomTooltip";
+import convertDataForAreaChart from "../../../utils/convertDateForAreaChart";
 
 interface Props {
-  selectedServiceIndex: number | null;
+  isAllDataLoaded: boolean;
+}
+export interface ChartDataFormat {
+  receiveValue: number;
+  sendValue: number;
+  date: string;
+  time: string;
 }
 
-const initialSeasonDataForLineChart = [
-  {
-    name: "بهار",
-    value: 1,
-  },
-  {
-    name: "تابستان",
-    value: 1,
-  },
-  {
-    name: "پاییز",
-    value: 1,
-  },
-  {
-    name: "زمستان",
-    value: 1,
-  },
-];
-const initialMonthDataForLineChart = [
-  {
-    name: "مهر",
-    value: 1,
-  },
-  {
-    name: "آبان",
-    value: 1,
-  },
-  {
-    name: "آذر",
-    value: 1,
-  },
-  {
-    name: "دی",
-    value: 1,
-  },
-];
-
-const initialWeeklyDataForLineChart = [
-  {
-    name: "سه هفته پیش",
-    value: 1,
-  },
-  {
-    name: "دو هفته پیش",
-    value: 1,
-  },
-  {
-    name: "یک هفته قبل",
-    value: 1,
-  },
-  {
-    name: "الان",
-    value: 1,
-  },
-];
-
-const initialDayDataForLineChart = [
-  {
-    name: "سه روز پیش",
-    value: 1,
-  },
-  {
-    name: "دو روز پیش",
-    value: 1,
-  },
-  {
-    name: "دیروز",
-    value: 1,
-  },
-  {
-    name: "امروز",
-    value: 1,
-  },
-];
-
-const initialHourlyDataForLineChart = [
-  {
-    name: "سه ساعت پیش",
-    value: 1,
-  },
-  {
-    name: "دو ساعت پیش",
-    value: 1,
-  },
-  {
-    name: "یک ساعت قبل",
-    value: 1,
-  },
-  {
-    name: "الان",
-    value: 1,
-  },
-];
-
-const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
-  const [dataForAreaChart, setDataForAreaChart] = useState(
-    initialSeasonDataForLineChart
-  );
-
-  const max = Math.max(...dataForAreaChart.map((item) => item.value));
-  const min = Math.min(...dataForAreaChart.map((item) => item.value));
-  const avg =
-    dataForAreaChart.reduce((a, b) => a + b.value, 0) / dataForAreaChart.length;
-
+const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
   const [selectedTimeForAreaChart, setSelectedTimeForAreaChart] =
-    useState("yearly");
+    useState("Hour");
   const [selectedServerForAreaChart, setSelectedServerForAreaChart] =
-    useState("total");
-
-  useEffect(() => {
-    selectedTimeForAreaChart === "yearly"
-      ? setDataForAreaChart(initialSeasonDataForLineChart)
-      : selectedTimeForAreaChart === "monthly"
-      ? setDataForAreaChart(initialMonthDataForLineChart)
-      : selectedTimeForAreaChart === "weekly"
-      ? setDataForAreaChart(initialWeeklyDataForLineChart)
-      : selectedTimeForAreaChart === "daily"
-      ? setDataForAreaChart(initialDayDataForLineChart)
-      : setDataForAreaChart(initialHourlyDataForLineChart);
-
-    setDataForAreaChart((prevData: { name: string; value: number }[]) =>
-      prevData.map((data) => ({
-        ...data,
-        value:
-          selectedServerForAreaChart === "total"
-            ? Math.round(Math.random() * 24 + 12)
-            : Math.round(Math.random() * 8 + 1),
-      }))
-    );
-  }, [selectedServerForAreaChart, selectedTimeForAreaChart]);
+    useState("server1");
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [dataForChart, setDataForChart] = useState<ChartDataFormat[]>([
+    {
+      receiveValue: 0,
+      sendValue: 0,
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleDateString()
+    }
+  ]);
 
-  useEffect(() => {});
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    setShowDatePicker(false);
+    if (endDate) {
+      setSelectedTimeForAreaChart("custom");
+    }
+  }, [endDate]);
+
+  useEffect(() => {
+    setEndDate(null);
+    setStartDate(null);
+  }, [selectedTimeForAreaChart]);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      startDate && endDate
+        ? api.chart
+            .getReceiveDataForCustomDate(
+              startDate.getTime() / 1000,
+              endDate.getTime() / 1000,
+              selectedServerForAreaChart
+            )
+            .then((res) => res.data.result)
+        : api.chart
+            .getReceiveData(
+              selectedTimeForAreaChart,
+              selectedServerForAreaChart
+            )
+            .then((res) => res.data.result),
+      startDate && endDate
+        ? api.chart
+            .getSendDataForCustomDate(
+              startDate.getTime() / 1000,
+              endDate.getTime() / 1000,
+              selectedServerForAreaChart
+            )
+            .then((res) => res.data.result)
+        : api.chart
+            .getSendData(selectedTimeForAreaChart, selectedServerForAreaChart)
+            .then((res) => res.data.result)
+    ]).then((data) => {
+      setDataForChart(convertDataForAreaChart(data).reverse());
+      setLoading(false);
+    });
+  }, [
+    selectedServerForAreaChart,
+    selectedTimeForAreaChart,
+    startDate,
+    endDate
+  ]);
+
+  const [max, setMax] = useState(0);
+  const [min, setMin] = useState(0);
+  const [avg, setAvg] = useState(0);
+  useEffect(() => {
+    setMax(
+      +Math.max(
+        ...dataForChart.map((data) =>
+          Math.max(data.receiveValue, data.sendValue)
+        )
+      ).toFixed(2)
+    );
+    setMin(
+      +Math.min(
+        ...dataForChart.map((data) =>
+          Math.min(data.receiveValue, data.sendValue)
+        )
+      ).toFixed(2)
+    );
+
+    setAvg(
+      +(
+        dataForChart.reduce(
+          (sum, curr) => (sum += (curr.receiveValue + curr.sendValue) / 2),
+          0
+        ) / dataForChart.length
+      ).toFixed(2)
+    );
+  }, [dataForChart]);
 
   const chartRef = useRef(null);
-  const downloadImage = (blob: string, fileName: string) => {
-    const fakeLink = window.document.createElement("a");
-    fakeLink.href = blob;
-    fakeLink.download = fileName;
-
-    document.body.appendChild(fakeLink);
-    fakeLink.click();
-    document.body.removeChild(fakeLink);
-    fakeLink.remove();
-  };
-  // Function to capture screenshot
 
   const captureScreenshot = () => {
     const chartElement = chartRef.current;
     if (chartElement) {
-      html2canvas(chartElement).then((canvas) => {
-        const image = canvas.toDataURL("image/png", 5.0);
-
-        // Download the image
-        let link = document.createElement("a");
-        link.download = "chart-screenshot.png";
-        link.href = image;
-        link.click();
-      });
+      domtoimage
+        .toPng(chartElement, {
+          style: {
+            backgroundColor: "white"
+          }
+        })
+        .then((dataUrl: string) => {
+          const link = document.createElement("a");
+          link.download = "chart-screenshot.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error: any) => {
+          console.error(
+            "Something went wrong with capturing the screenshot",
+            error
+          );
+        });
     }
   };
+
   return (
     <Box position="relative" padding="1rem" ref={chartRef}>
       <Box
@@ -198,7 +172,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
           display: "flex",
           gap: "1rem",
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: "space-between"
         }}
       >
         <Stack direction="row" gap="1rem" alignItems="center">
@@ -206,7 +180,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
             fontFamily="YekanBakh-Medium"
             component="h3"
             sx={{
-              fontSize: "1.5rem",
+              fontSize: "1.5rem"
             }}
           >
             نمودار ترافیک
@@ -218,7 +192,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
               transformOrigin: "37% 50%",
               transition: "all .4s ease",
               right: "1rem",
-              zIndex: "35",
+              zIndex: "35"
             }}
           >
             <RangeDatePicker
@@ -230,7 +204,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
           </Box>
           <Box
             sx={{
-              position: "relative",
+              position: "relative"
             }}
           >
             <Select
@@ -247,32 +221,36 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
                 ".MuiSelect-icon": {
                   width: "20px",
                   height: "20px",
-                  marginTop: "-.25rem",
+                  marginTop: "-.25rem"
                 },
                 ".MuiOutlinedInput-notchedOutline": { border: 0 },
                 "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                   {
-                    border: 0,
-                  },
+                    border: 0
+                  }
               }}
             >
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="hourly">
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Hour">
                 ساعتی
               </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="daily">
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Day">
                 روزانه
               </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="weekly">
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Week">
                 هفته‌‌ای
               </MenuItem>
-              <MenuItem
-                sx={{ fontFamily: "YekanBakh-Regular" }}
-                value="monthly"
-              >
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Month">
                 ماهانه
               </MenuItem>
-              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="yearly">
+              <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="Year">
                 سالانه
+              </MenuItem>
+              <MenuItem
+                disabled
+                sx={{ fontFamily: "YekanBakh-Regular" }}
+                value="custom"
+              >
+                انتخابی
               </MenuItem>
             </Select>
             <BsCalendar2DateFill
@@ -287,7 +265,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
                 transform: "translateY(-50%)",
                 paddingLeft: ".5rem",
                 zIndex: "30",
-                cursor: "pointer",
+                cursor: "pointer"
               }}
             />
           </Box>
@@ -304,18 +282,15 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
               ".MuiSelect-icon": {
                 width: "20px",
                 height: "20px",
-                marginTop: "-.25rem",
+                marginTop: "-.25rem"
               },
               ".MuiOutlinedInput-notchedOutline": { border: 0 },
               "&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                 {
-                  border: 0,
-                },
+                  border: 0
+                }
             }}
           >
-            <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="total">
-              مجموع ترافیک
-            </MenuItem>
             <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server1">
               سرور یک
             </MenuItem>
@@ -334,26 +309,42 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
             <MenuItem sx={{ fontFamily: "YekanBakh-Regular" }} value="server6">
               سرور شش
             </MenuItem>
+            <MenuItem
+              sx={{ fontFamily: "YekanBakh-Regular" }}
+              value="switch_in"
+            >
+              TPM Switch In
+            </MenuItem>
+            <MenuItem
+              sx={{ fontFamily: "YekanBakh-Regular" }}
+              value="switch_out"
+            >
+              TPM Switch Out
+            </MenuItem>
           </Select>
         </Stack>
-        <Button
-          onClick={captureScreenshot}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: ".3rem",
-            background: "#0F6CBD",
-            color: "#fff",
-            fontFamily: "YekanBakh-Regular",
-            borderRadius: ".5rem",
-            ":hover": {
+        {isAllDataLoaded ? (
+          <Button
+            onClick={captureScreenshot}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: ".3rem",
               background: "#0F6CBD",
               color: "#fff",
-            },
-          }}
-        >
-          دریافت خروجی
-        </Button>
+              fontFamily: "YekanBakh-Regular",
+              borderRadius: ".5rem",
+              ":hover": {
+                background: "#0F6CBD",
+                color: "#fff"
+              }
+            }}
+          >
+            دریافت خروجی
+          </Button>
+        ) : (
+          <CircularProgress />
+        )}
       </Box>
       <Box
         width="100%"
@@ -361,22 +352,24 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
         sx={{
           direction: "ltr",
           height: "35vh",
-          position: "relative",
+          position: "relative"
         }}
       >
         <Stack
           direction="row"
           sx={{
+            opacity: showDatePicker ? "0" : "1",
+            transition: "opacity .3s ease",
             gap: "1rem",
             position: "absolute",
-            bottom: "2.5rem",
+            top: "1rem",
             left: "52%",
             transform: "translateX(-50%)",
             background: "#fff",
             zIndex: "40",
             padding: ".5rem",
             border: "1px solid #707070",
-            borderRadius: ".5rem",
+            borderRadius: ".5rem"
           }}
         >
           <TitledValue color="red" title="Min" value={min} />
@@ -388,31 +381,22 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
           height="100%"
           style={{ marginTop: "1rem" }}
         >
-          <RechartAreaChart
-            width={500}
-            data={dataForAreaChart}
-            margin={{
-              top: 10,
-              right: 30,
-              left: 0,
-              bottom: 0,
-            }}
-          >
-            <Tooltip content={<CustomTooltipForAreaChart />} />
-            <CartesianGrid strokeDasharray="3 3" />
+          <RechartAreaChart width={500} data={dataForChart}>
+            <Tooltip content={<CustomTooltip />} />
+            <CartesianGrid strokeDasharray="2 2" className="w-96" />
             <YAxis
-              domain={[1, 40]}
-              ticks={[1, 5, 10, 20, 40]}
+              domain={[1, 20]}
+              ticks={[1, 5, 10, 20]}
               scale="log"
               label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
               tickFormatter={(tick) => {
                 if (tick === 1) {
-                  return "0"; // Display '0' for the first tick
+                  return "10"; // Display '0' for the first tick
                 }
                 return tick; // For other ticks, display their actual value
               }}
             />
-            <XAxis padding={{ left: 50, right: 50 }} dataKey="name" />
+            <XAxis padding={{ left: 40, right: 60 }} dataKey="time" />
             <defs>
               <filter id="glow" x="-70%" y="-70%" width="200%" height="200%">
                 <feOffset result="offOut" in="SourceGraphic" dx="0" dy="0" />
@@ -422,10 +406,18 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
             </defs>
             <Area
               type="monotone"
-              dataKey="value"
-              stroke={selectedServiceIndex !== null ? "#7160B4" : "#608DB4"}
+              dataKey="receiveValue"
+              stroke={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
+              fill={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
               strokeWidth={3}
-              fill="transparent"
+              style={{ filter: "url(#glow)" }}
+            />
+            <Area
+              type="monotone"
+              dataKey="sendValue"
+              stroke={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
+              fill={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
+              strokeWidth={3}
               style={{ filter: "url(#glow)" }}
             />
             <ReferenceLine
@@ -434,7 +426,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
                 value: "Min",
                 position: "insideRight",
                 stroke: "red",
-                opacity: ".5",
+                opacity: ".5"
               }}
               stroke="red"
               strokeDasharray="5 5"
@@ -446,7 +438,7 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
                 value: "Max",
                 position: "insideRight",
                 stroke: "green",
-                opacity: ".5",
+                opacity: ".5"
               }}
               stroke="green"
               strokeDasharray="5 5"
@@ -458,61 +450,26 @@ const AreaChart: FC<Props> = ({ selectedServiceIndex }) => {
                 value: "Avg",
                 position: "insideRight",
                 stroke: "blue",
-                opacity: ".5",
+                opacity: ".5"
               }}
               stroke="blue"
               strokeDasharray="5 5"
               opacity=".5"
+            />
+            <Brush
+              style={{
+                borderRadius: ".5rem"
+              }}
+              height={30}
+              stroke="#0F6CBD"
+              fill="#5E819F88"
+              travellerWidth={15}
             />
           </RechartAreaChart>
         </ResponsiveContainer>
       </Box>
     </Box>
   );
-};
-
-interface CustomTooltipForAreaChartProps {
-  active?: boolean;
-  payload?: any;
-}
-
-const CustomTooltipForAreaChart: FC<CustomTooltipForAreaChartProps> = ({
-  active,
-  payload,
-}) => {
-  if (active && payload && payload.length) {
-    return (
-      <div
-        style={{
-          background: "#fff",
-          color: "#333",
-          boxShadow: "0 0 14px  rgb(0 0 0 / 40%)",
-          padding: "1px",
-          textAlign: "left",
-          borderRadius: "1rem",
-        }}
-      >
-        <div
-          style={{
-            margin: "13px 19px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            fontFamily: "YekanBakh-Regular",
-          }}
-        >
-          {/* <Typography>زمان: {payload[0].payload.name}</Typography> */}
-          <Typography>
-            {`${
-              payload[0].payload.value === 1 ? 0 : payload[0].payload.value
-            } Gbps`}
-          </Typography>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
 };
 
 export default AreaChart;

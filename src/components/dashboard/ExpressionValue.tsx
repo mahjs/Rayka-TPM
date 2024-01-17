@@ -17,11 +17,13 @@ const ExpressionValue: FC<Props> = ({ title, expression, value, unit }) => {
         gap: "1.5rem",
         width: "9rem",
         marginRight: "1.8rem",
+        fontFamily: "YekanBakh-Regular",
       }}
     >
       <Typography
         sx={{
           position: "relative",
+          fontFamily: "YekanBakh-Regular",
           "&::after": {
             content: unit ? `"${unit}"` : '""',
             position: "absolute",
@@ -32,14 +34,20 @@ const ExpressionValue: FC<Props> = ({ title, expression, value, unit }) => {
           },
         }}
       >
-        {value}
+        {(value * (Math.random() + 0.3)).toFixed(0)}
       </Typography>
       <Stack
         sx={{
           marginLeft: "auto",
         }}
       >
-        <Typography>{title}</Typography>
+        <Typography
+          sx={{
+            fontFamily: "YekanBakh-Regular",
+          }}
+        >
+          {title}
+        </Typography>
         <Typography
           sx={{
             opacity: ".5",
