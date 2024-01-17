@@ -3,6 +3,7 @@ import {
   PropsWithChildren,
   createContext,
   useContext,
+  useEffect,
   useState
 } from "react";
 import storage from "../services/storage";
@@ -27,6 +28,10 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     !!storage.get(config.tokenName)
   );
   const [isAdmin, setIsAdmin] = useState<boolean>(storage.get(config.isAdmin));
+
+  useEffect(() => {
+    setIsAdmin(storage.get(config.isAdmin));
+  }, [isLogin]);
 
   const sendLogoutLog = async (username: string) => {
     try {
@@ -56,10 +61,11 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   };
 
   const logout = async () => {
-    const username = storage.get(config.userName); // Get the username from storage
+    // Get the username from storage
+    const username = storage.get(config.userName) as string;
     if (username) {
-      //@ts-ignore
-      await sendLogoutLog(username); // Send logout log
+      // Send logout log
+      await sendLogoutLog(username);
     }
     storage.remove(config.tokenName);
     storage.remove(config.isAdmin);
