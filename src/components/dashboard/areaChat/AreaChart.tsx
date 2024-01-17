@@ -28,6 +28,7 @@ import api from "../../../services";
 import getFillColorForAreaChart from "../../../utils/getFillColorForAreaChart";
 import CustomTooltip from "./CustomTooltip";
 import convertDataForAreaChart from "../../../utils/convertDateForAreaChart";
+import AreaChart2 from "./AreaChart2";
 
 interface Props {
   isAllDataLoaded: boolean;
@@ -37,6 +38,13 @@ export interface ChartDataFormat {
   sendValue: number;
   date: string;
   time: string;
+}
+
+export interface ChartDataFormat2 {
+  date: string[];
+  time: string[];
+  send: number[];
+  receive: number[];
 }
 
 const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
@@ -56,6 +64,13 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
       time: new Date().toLocaleDateString()
     }
   ]);
+
+  const [dataForChart2, setDataForChart2] = useState<ChartDataFormat2>({
+    date: [],
+    time: [],
+    send: [],
+    receive: []
+  });
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -100,7 +115,10 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
             .getSendData(selectedTimeForAreaChart, selectedServerForAreaChart)
             .then((res) => res.data.result)
     ]).then((data) => {
-      setDataForChart(convertDataForAreaChart(data).reverse());
+      setDataForChart(convertDataForAreaChart(data)[0].reverse());
+
+      setDataForChart2(convertDataForAreaChart(data)[1]);
+
       setLoading(false);
     });
   }, [
@@ -355,28 +373,7 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
           position: "relative"
         }}
       >
-        <Stack
-          direction="row"
-          sx={{
-            opacity: showDatePicker ? "0" : "1",
-            transition: "opacity .3s ease",
-            gap: "1rem",
-            position: "absolute",
-            top: ".3rem",
-            right: "-6.2rem",
-            transform: "translateX(-50%)",
-            background: "#fff",
-            zIndex: "40",
-            padding: ".5rem",
-            border: "1px solid #707070",
-            borderRadius: ".5rem"
-          }}
-        >
-          <TitledValue color="red" title="Min" value={min} />
-          <TitledValue color="green" title="Max" value={max} />
-          <TitledValue color="blue" title="Avg" value={avg} />
-        </Stack>
-        <ResponsiveContainer
+        {/* <ResponsiveContainer
           width="100%"
           height="100%"
           style={{ marginTop: "1rem" }}
@@ -475,7 +472,22 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
               travellerWidth={15}
             />
           </RechartAreaChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer> */}
+
+        <AreaChart2
+          showDate={
+            selectedTimeForAreaChart === "Week" ||
+            selectedTimeForAreaChart === "Year" ||
+            selectedTimeForAreaChart === "Day" ||
+            selectedTimeForAreaChart === "Month"
+          }
+          data={dataForChart2}
+          min={min}
+          max={max}
+          avg={avg}
+          sendColor={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
+          receiveColor={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
+        />
       </Box>
     </Box>
   );
