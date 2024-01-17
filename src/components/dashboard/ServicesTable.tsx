@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { GoPlus } from "react-icons/go";
 import { useRef, useEffect, FC, useState } from "react";
-import { Blacklist, Domain } from "../../services/domain";
+import { Domain } from "../../services/domain";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import AddDomainModal from "./AddDomainModal";
 import api from "../../services";
