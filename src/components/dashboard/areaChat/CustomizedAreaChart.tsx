@@ -10,7 +10,8 @@ import {
   Legend,
   Filler,
   registerables,
-  Chart
+  Chart,
+  ChartOptions
 } from "chart.js";
 ChartJS.register(...registerables);
 
@@ -19,10 +20,9 @@ import "chartjs-adapter-moment";
 import zoom from "chartjs-plugin-zoom";
 
 import { FC, useRef } from "react";
-import { ChartDataFormat2 } from "./AreaChart";
 import { Box, Button, Stack } from "@mui/material";
 import TitledValue from "../TitledValue";
-import { sendCode } from "../../../services/auth";
+import { ChartDataFormat } from "./AreaChart";
 
 ChartJS.register(
   CategoryScale,
@@ -37,7 +37,7 @@ ChartJS.register(
 );
 
 interface Props {
-  data: ChartDataFormat2;
+  data: ChartDataFormat;
   showDate?: boolean;
   sendColor: string;
   receiveColor: string;
@@ -46,7 +46,7 @@ interface Props {
   avg: number;
 }
 
-const AreaChart2: FC<Props> = ({
+const CustomizedAreaChart: FC<Props> = ({
   data,
   showDate = false,
   min = 0,
@@ -55,7 +55,7 @@ const AreaChart2: FC<Props> = ({
   sendColor,
   receiveColor
 }) => {
-  const chartRef = useRef<Chart | null>(null);
+  const chartRef = useRef<ChartJS<"line", number[], unknown> | null>(null);
 
   const resetZoom = () => {
     const chart = chartRef.current;
@@ -64,18 +64,13 @@ const AreaChart2: FC<Props> = ({
     }
   };
 
-  const options = {
+  const options: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: true,
     aspectRatio: 2.2,
-    fill: true,
     plugins: {
       legend: {
         position: "top"
-      },
-      pan: {
-        enabled: true,
-        mode: "xy"
       },
       zoom: {
         zoom: {
@@ -141,7 +136,15 @@ const AreaChart2: FC<Props> = ({
         justifyContent: "space-between"
       }}
     >
-      <Line ref={chartRef} options={options} data={chartData} />
+      <Line
+        style={{
+          maxWidth: "650px",
+          maxHeight: "280px"
+        }}
+        ref={chartRef}
+        options={options}
+        data={chartData}
+      />
       <Box
         sx={{
           display: "flex",
@@ -171,4 +174,4 @@ const AreaChart2: FC<Props> = ({
   );
 };
 
-export default AreaChart2;
+export default CustomizedAreaChart;

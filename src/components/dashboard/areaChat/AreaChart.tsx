@@ -7,40 +7,20 @@ import {
   Typography,
   CircularProgress
 } from "@mui/material";
-import {
-  ResponsiveContainer,
-  Tooltip,
-  YAxis,
-  XAxis,
-  Area,
-  AreaChart as RechartAreaChart,
-  CartesianGrid,
-  ReferenceLine,
-  Brush
-} from "recharts";
 import { FC, useEffect, useRef, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import { BsCalendar2DateFill } from "react-icons/bs";
 import RangeDatePicker from "../DatePicker";
-import TitledValue from "../TitledValue";
 import * as domtoimage from "dom-to-image";
 import api from "../../../services";
 import getFillColorForAreaChart from "../../../utils/getFillColorForAreaChart";
-import CustomTooltip from "./CustomTooltip";
 import convertDataForAreaChart from "../../../utils/convertDateForAreaChart";
-import AreaChart2 from "./AreaChart2";
+import CustomizedAreaChart from "./CustomizedAreaChart";
 
 interface Props {
   isAllDataLoaded: boolean;
 }
 export interface ChartDataFormat {
-  receiveValue: number;
-  sendValue: number;
-  date: string;
-  time: string;
-}
-
-export interface ChartDataFormat2 {
   date: string[];
   time: string[];
   send: number[];
@@ -56,16 +36,8 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [dataForChart, setDataForChart] = useState<ChartDataFormat[]>([
-    {
-      receiveValue: 0,
-      sendValue: 0,
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleDateString()
-    }
-  ]);
 
-  const [dataForChart2, setDataForChart2] = useState<ChartDataFormat2>({
+  const [dataForChart, setDataForChart] = useState<ChartDataFormat>({
     date: [],
     time: [],
     send: [],
@@ -115,9 +87,7 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
             .getSendData(selectedTimeForAreaChart, selectedServerForAreaChart)
             .then((res) => res.data.result)
     ]).then((data) => {
-      setDataForChart(convertDataForAreaChart(data)[0].reverse());
-
-      setDataForChart2(convertDataForAreaChart(data)[1]);
+      setDataForChart(convertDataForAreaChart(data)[1]);
 
       setLoading(false);
     });
@@ -134,25 +104,28 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
   useEffect(() => {
     setMax(
       +Math.max(
-        ...dataForChart.map((data) =>
-          Math.max(data.receiveValue, data.sendValue)
+        Math.max(
+          Math.max(...dataForChart.receive),
+          Math.max(...dataForChart.send)
         )
       ).toFixed(2)
     );
     setMin(
       +Math.min(
-        ...dataForChart.map((data) =>
-          Math.min(data.receiveValue, data.sendValue)
+        Math.min(
+          Math.min(...dataForChart.receive),
+          Math.min(...dataForChart.send)
         )
       ).toFixed(2)
     );
 
     setAvg(
       +(
-        dataForChart.reduce(
-          (sum, curr) => (sum += (curr.receiveValue + curr.sendValue) / 2),
-          0
-        ) / dataForChart.length
+        (dataForChart.receive.reduce((sum, curr) => (sum += curr), 0) /
+          dataForChart.receive.length +
+          dataForChart.send.reduce((sum, curr) => (sum += curr), 0) /
+            dataForChart.send.length) /
+        2
       ).toFixed(2)
     );
   }, [dataForChart]);
@@ -373,115 +346,14 @@ const AreaChart: FC<Props> = ({ isAllDataLoaded }) => {
           position: "relative"
         }}
       >
-        {/* <ResponsiveContainer
-          width="100%"
-          height="100%"
-          style={{ marginTop: "1rem" }}
-        >
-          <RechartAreaChart width={500} data={dataForChart}>
-            <Tooltip content={<CustomTooltip />} />
-            <CartesianGrid strokeDasharray="2 2" className="w-96" />
-            <YAxis
-              domain={[1, 20]}
-              ticks={[1, 5, 10, 20]}
-              scale="log"
-              label={{ value: "Gbps", angle: -90, position: "insideLeft" }}
-              tickFormatter={(tick) => {
-                if (tick === 1) {
-                  return "10"; // Display '0' for the first tick
-                }
-                return tick; // For other ticks, display their actual value
-              }}
-            />
-            <XAxis
-              padding={{ left: 40, right: 60 }}
-              dataKey={
-                selectedTimeForAreaChart === "Week" ||
-                selectedTimeForAreaChart === "Year" ||
-                selectedTimeForAreaChart === "Month"
-                  ? "date"
-                  : "time"
-              }
-            />
-            <defs>
-              <filter id="glow" x="-70%" y="-70%" width="200%" height="200%">
-                <feOffset result="offOut" in="SourceGraphic" dx="0" dy="0" />
-                <feGaussianBlur result="blurOut" in="offOut" stdDeviation="5" />
-                <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
-              </filter>
-            </defs>
-            <Area
-              type="monotone"
-              dataKey="receiveValue"
-              stroke={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
-              fill={getFillColorForAreaChart(selectedServerForAreaChart)[0]}
-              strokeWidth={3}
-              style={{ filter: "url(#glow)" }}
-            />
-            <Area
-              type="monotone"
-              dataKey="sendValue"
-              stroke={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
-              fill={getFillColorForAreaChart(selectedServerForAreaChart)[1]}
-              strokeWidth={3}
-              style={{ filter: "url(#glow)" }}
-            />
-            <ReferenceLine
-              y={min}
-              label={{
-                value: "Min",
-                position: "insideRight",
-                stroke: "red",
-                opacity: ".5"
-              }}
-              stroke="red"
-              strokeDasharray="5 5"
-              opacity=".5"
-            />
-            <ReferenceLine
-              y={max}
-              label={{
-                value: "Max",
-                position: "insideRight",
-                stroke: "green",
-                opacity: ".5"
-              }}
-              stroke="green"
-              strokeDasharray="5 5"
-              opacity=".5"
-            />
-            <ReferenceLine
-              y={avg}
-              label={{
-                value: "Avg",
-                position: "insideRight",
-                stroke: "blue",
-                opacity: ".5"
-              }}
-              stroke="blue"
-              strokeDasharray="5 5"
-              opacity=".5"
-            />
-            <Brush
-              style={{
-                borderRadius: ".5rem"
-              }}
-              height={30}
-              stroke="#0F6CBD"
-              fill="#5E819F88"
-              travellerWidth={15}
-            />
-          </RechartAreaChart>
-        </ResponsiveContainer> */}
-
-        <AreaChart2
+        <CustomizedAreaChart
           showDate={
             selectedTimeForAreaChart === "Week" ||
             selectedTimeForAreaChart === "Year" ||
             selectedTimeForAreaChart === "Day" ||
             selectedTimeForAreaChart === "Month"
           }
-          data={dataForChart2}
+          data={dataForChart}
           min={min}
           max={max}
           avg={avg}
