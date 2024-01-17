@@ -85,7 +85,6 @@ const AddDomainModal: FC<Props> = ({
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [loading]);
-
   return (
     <Modal
       open={openModal}
