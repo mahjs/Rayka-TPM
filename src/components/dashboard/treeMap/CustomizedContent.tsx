@@ -19,11 +19,11 @@ const CustomizedContent = (props: any) => {
   ).toFixed(1);
 
   const fontSize = (percent: number) => {
-    if (percent < 2) return percent / 1.3 + "rem";
-    if (percent < 5) return percent / 2.2 + "rem";
+    if (percent < 2) return percent / 1.1 + "rem";
+    if (percent < 5) return percent / 2.5 + "rem";
     if (percent < 10) return percent / 4.5 + "rem";
-    if (percent < 20) return percent / 5.1 + "rem";
-    if (percent < 30) return percent / 5.8 + "rem";
+    if (percent < 20) return percent / 5.6 + "rem";
+    if (percent < 30) return percent / 6.0 + "rem";
     else return percent / 7.5 + "rem";
   };
 
@@ -64,7 +64,9 @@ const CustomizedContent = (props: any) => {
           y={y + height / 2}
           textAnchor="middle"
           dominantBaseline="middle"
-          transform={`rotate(70, ${x + width / 2}, ${y + height / 2})`}
+          transform={`rotate(${width > 3 * height ? 0 : 70}, ${
+            x + width / 2
+          }, ${y + height / 2})`}
         >
           {percent}%
         </text>
