@@ -364,7 +364,7 @@ const Dashboard: FC = () => {
           link.href = dataUrl;
           link.click();
         })
-        .catch(() => { });
+        .catch(() => {});
     }
   };
 
@@ -383,7 +383,7 @@ const Dashboard: FC = () => {
           link.href = dataUrl;
           link.click();
         })
-        .catch(() => { });
+        .catch(() => {});
     }
   };
   const [isAllDataLoaded, setIsAllDataLoaded] = useState<boolean>(false);
@@ -396,24 +396,6 @@ const Dashboard: FC = () => {
       setIsAllDataLoaded(true);
     }
   }, [loadingData, loadingDomains, loadingAllAddresses]);
-
-
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
-
-  const handleFileUpload = () => {
-    // Implement file upload logic here
-    // For example, send the file to a server or process it as needed
-  };
-
 
   return (
     <>
@@ -502,17 +484,17 @@ const Dashboard: FC = () => {
                   searchInput === null
                     ? selectedServiceIndexs
                     : domains?.reduce((indexes: number[], domain, index) => {
-                      if (
-                        selectedServiceIndexs.some(
-                          (selectedIndex) =>
-                            filteredDomains[selectedIndex]?.name ===
-                            domain?.name
+                        if (
+                          selectedServiceIndexs.some(
+                            (selectedIndex) =>
+                              filteredDomains[selectedIndex]?.name ===
+                              domain?.name
+                          )
                         )
-                      )
-                        indexes.push(index);
+                          indexes.push(index);
 
-                      return indexes;
-                    }, [])
+                        return indexes;
+                      }, [])
                 }
                 handleSelectedService={handleSelectedServiceIndex}
               />
@@ -555,55 +537,6 @@ const Dashboard: FC = () => {
             }}
           >
             <Search value={searchInput} setSearchInput={setSearchInput} />
-            {isAllDataLoaded ? (
-              <>
-                <input
-                  type="file"
-                  style={{ display: 'none' }}
-                  ref={fileInputRef}
-                  accept=".csv, .txt"
-                  onChange={handleFileSelect}
-                />
-                <Button
-                  onClick={() => fileInputRef.current?.click()}
-                  sx={{
-                    fontFamily: "YekanBakh-Bold",
-                    color: "#fff",
-                    display: "flex",
-                    background: "#0F6CBD",
-                    alignItems: "center",
-                    paddingX: "1.5em",
-                    paddingY: ".75rem",
-                    gap: ".5rem",
-                    borderRadius: ".5rem",
-                    zIndex: "5",
-                    height: "fit-content",
-                    ml: "1em",
-                    ":hover": {
-                      color: "#0F6CBD",
-                      background: "#0F6CBD33"
-                    }
-                  }}
-                >
-                  افزودن فایل
-                </Button>
-                {selectedFile && (
-                  <Typography
-                    sx={{
-                      fontFamily: "YekanBakh-Bold",
-                      color: "#333",
-                      display: "flex",
-                      alignItems: "center",
-                      marginLeft: "1em"
-                    }}
-                  >
-                    {selectedFile.name}
-                  </Typography>
-                )}
-              </>
-            ) : (
-              <CircularProgress />
-            )}
             {isAllDataLoaded ? (
               <Button
                 onClick={() => setOpenExportModal(true)}
@@ -663,17 +596,17 @@ const Dashboard: FC = () => {
                 selectedServiceIndexs !== null
                   ? filteredIpAddresses
                   : !isNaN(parseInt(searchInput))
-                    ? filteredIps
-                    : filteredIpAddresses
+                  ? filteredIps
+                  : filteredIpAddresses
               }
               showData={
                 isNaN(parseInt(searchInput))
                   ? selectedServiceIndexs.length > 0 ||
-                  (selectedFilter !== "All_IPs" &&
-                    !(
-                      selectedServiceIndexs.length === 0 ||
-                      (selectedFilter !== "CDN" && selectedFilter !== "Host")
-                    ))
+                    (selectedFilter !== "All_IPs" &&
+                      !(
+                        selectedServiceIndexs.length === 0 ||
+                        (selectedFilter !== "CDN" && selectedFilter !== "Host")
+                      ))
                   : true
               }
               isWithProvider={selectedFilter !== "All_IPs"}
