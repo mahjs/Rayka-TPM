@@ -18,6 +18,8 @@ const CustomizedContent = (props: any) => {
     100
   ).toFixed(1);
 
+  const name = data?.[index]?.name;
+
   const fontSize = (percent: number) => {
     if (percent < 2) return percent / 1.1 + "rem";
     if (percent < 5) return percent / 2.8 + "rem";
@@ -58,7 +60,7 @@ const CustomizedContent = (props: any) => {
       </rect>
       {percent > 0.3 && (
         <text
-          fontSize={fontSize(percent)}
+          fontSize={fontSize(percent/2.5)}
           opacity=".4"
           x={x + width / 2}
           y={y + height / 2}
@@ -68,7 +70,7 @@ const CustomizedContent = (props: any) => {
             x + width / 2
           }, ${y + height / 2})`}
         >
-          {percent}%
+          {name}
         </text>
       )}
     </g>
