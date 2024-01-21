@@ -40,7 +40,10 @@ const AddIpAddressesModal: FC<Props> = ({
 
   const handleSubmit = () => {
     // const parsedIps = bulkIpInput.split(/,|\n/).map((ip) => ip.trim());
-    const parsedIps = fileContent.split(/,|\n/).map((ip) => ip.trim()).filter(isValidIp);
+    const parsedIps = fileContent
+      .split(/,|\n/)
+      .map((ip) => ip.trim())
+      .filter(isValidIp);
 
     // Clear the input field
     setBulkIpInput("");
@@ -70,10 +73,12 @@ const AddIpAddressesModal: FC<Props> = ({
             setOpenModal(false);
             toast.success("IP address added successfully.");
             setAddLoading(false);
+            setFile(null);
           })
           .catch((error) => {
             toast.error(`Error adding IP address: ${error.message}`);
             setAddLoading(false);
+            setFile(null);
           });
       })
       .catch((error) => {
@@ -89,7 +94,7 @@ const AddIpAddressesModal: FC<Props> = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
-    if (file && (file.name.endsWith('.csv') || file.name.endsWith('.txt'))) {
+    if (file && (file.name.endsWith(".csv") || file.name.endsWith(".txt"))) {
       setFile(file);
       readFile(file);
     } else {
@@ -102,7 +107,7 @@ const AddIpAddressesModal: FC<Props> = ({
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result;
-      if (typeof content === 'string') {
+      if (typeof content === "string") {
         setFileContent(content);
       }
     };
