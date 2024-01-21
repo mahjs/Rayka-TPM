@@ -31,9 +31,9 @@ const CustomTooltip: FC<Props> = ({ active, payload, sumOfData = 1 }) => {
           }}
         >
           <Typography>نام: {payload[0].payload.name}</Typography>
-          <Typography>مقدار: {payload[0].payload.value}</Typography>
+          <Typography>تعداد آی پی: {payload[0].payload.value}</Typography>
           <Typography>
-            سهم: %{((payload[0].payload.value / sumOfData) * 100).toFixed(2)}
+            سهم از کل: %{((payload[0].payload.value / sumOfData) * 100).toFixed(2)}
           </Typography>
         </div>
       </div>
