@@ -7,7 +7,7 @@ import {
   TextField,
   CircularProgress
 } from "@mui/material";
-import { FC, useState } from "react";
+import React, { FC, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
 import api from "../../services";
 import axios from "axios";
@@ -39,7 +39,11 @@ const AddIpAddressesModal: FC<Props> = ({
   const [addLoading, setAddLoading] = useState<boolean>(false);
 
   const handleSubmit = () => {
-    const parsedIps = bulkIpInput.split(/,|\n/).map((ip) => ip.trim());
+    // const parsedIps = bulkIpInput.split(/,|\n/).map((ip) => ip.trim());
+    const parsedIps = fileContent
+      .split(/,|\n/)
+      .map((ip) => ip.trim())
+      .filter(isValidIp);
 
     // Clear the input field
     setBulkIpInput("");
@@ -69,10 +73,12 @@ const AddIpAddressesModal: FC<Props> = ({
             setOpenModal(false);
             toast.success("IP address added successfully.");
             setAddLoading(false);
+            setFile(null);
           })
           .catch((error) => {
             toast.error(`Error adding IP address: ${error.message}`);
             setAddLoading(false);
+            setFile(null);
           });
       })
       .catch((error) => {
@@ -83,6 +89,30 @@ const AddIpAddressesModal: FC<Props> = ({
       });
   };
 
+  const [file, setFile] = useState<File | null>(null);
+  const [fileContent, setFileContent] = useState("");
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file && (file.name.endsWith(".csv") || file.name.endsWith(".txt"))) {
+      setFile(file);
+      readFile(file);
+    } else {
+      toast.error("لطفاً یک فایل csv. یا .txt را انتخاب کنید.");
+      setFile(null);
+    }
+  };
+
+  const readFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result;
+      if (typeof content === "string") {
+        setFileContent(content);
+      }
+    };
+    reader.readAsText(file);
+  };
   return (
     <Modal
       open={openModal}
@@ -166,6 +196,27 @@ const AddIpAddressesModal: FC<Props> = ({
               placeholder="Enter IP addresses separated by commas or new lines"
               fullWidth
             />
+            <Button
+              component="label"
+              sx={{
+                background: "#0F6CBD",
+                color: "#fff",
+                borderRadius: ".5rem",
+                ":hover": {
+                  background: "#0F6CBD",
+                  color: "#fff"
+                }
+              }}
+            >
+              انتخاب فایل
+              <input
+                type="file"
+                accept=".csv, .txt"
+                onChange={handleFileChange}
+                hidden
+              />
+            </Button>
+            {file && <Typography>{file.name}</Typography>}
             <Button
               disabled={addLoading}
               type="submit"

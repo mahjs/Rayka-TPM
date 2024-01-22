@@ -15,43 +15,48 @@ const ExpressionValue: FC<Props> = ({ title, expression, value, unit }) => {
         display: "flex",
         justifyContent: "center",
         gap: "1.5rem",
-        width: "9rem",
+        width: "13rem",
         marginRight: "1.8rem",
-        fontFamily: "YekanBakh-Regular",
+        fontFamily: "YekanBakh-Regular"
       }}
     >
       <Typography
         sx={{
           position: "relative",
           fontFamily: "YekanBakh-Regular",
+          fontWeight: "700",
+          fontSize: "1.1rem",
           "&::after": {
             content: unit ? `"${unit}"` : '""',
             position: "absolute",
-            bottom: ".5rem",
+            bottom: "-0.1rem",
             right: "0",
-            fontSize: ".65rem",
-            opacity: ".5",
-          },
+            fontSize: ".9rem",
+            opacity: ".8"
+          }
         }}
       >
         {(value * (Math.random() + 0.3)).toFixed(0)}
       </Typography>
       <Stack
         sx={{
-          marginLeft: "auto",
+          marginLeft: "auto"
         }}
       >
         <Typography
           sx={{
             fontFamily: "YekanBakh-Regular",
+            fontSize: "1.1rem",
+            fontWeight: "800"
           }}
         >
           {title}
         </Typography>
         <Typography
           sx={{
-            opacity: ".5",
-            fontSize: ".6rem",
+            opacity: ".8",
+            fontSize: ".8rem",
+            fontWeight: "700"
           }}
         >
           {expression}
